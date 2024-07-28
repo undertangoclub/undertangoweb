@@ -28,30 +28,16 @@
         }
         #chart-container {
             position: relative;
-            height: 85vh;
-            min-height: 450px;
-            max-height: 800px;
+            height: 0;
+            width: 100%;
+            padding-bottom: 100%;
         }
         canvas {
-            max-width: 100%;
-            height: auto !important;
-        }
-        .legend {
-            text-align: left;
-            margin-top: 20px;
-            font-size: 0.9em;
-        }
-        .legend div {
-            display: flex;
-            align-items: center;
-            margin-bottom: 5px;
-        }
-        .legend div span {
-            display: inline-block;
-            width: 15px;
-            height: 15px;
-            margin-right: 5px;
-            flex-shrink: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
         }
         @media (max-width: 600px) {
             .container {
@@ -61,13 +47,6 @@
             }
             h1 {
                 font-size: 1.2em;
-            }
-            #chart-container {
-                height: 75vh;
-                min-height: 400px;
-            }
-            .legend {
-                font-size: 0.8em;
             }
         }
     </style>
@@ -80,13 +59,6 @@
         <div id="chart-container">
             <canvas id="incomeChart"></canvas>
         </div>
-        <div class="legend">
-            <div><span style="background-color: #FF6384;"></span>40% Caché de artistas</div>
-            <div><span style="background-color: #36A2EB;"></span>20% Gastos operativos</div>
-            <div><span style="background-color: #FFCE56;"></span>20% Gastos de producción</div>
-            <div><span style="background-color: #4BC0C0;"></span>15% Caja UnderTango</div>
-            <div><span style="background-color: #9966FF;"></span>10% Retribución a inversores de la FDI</div>
-        </div>
     </div>
     <script>
         const ctx = document.getElementById('incomeChart').getContext('2d');
@@ -98,7 +70,7 @@
                     '20% Gastos\noperativos', 
                     '20% Gastos\nde producción', 
                     '15% Caja\nUnderTango', 
-                    '10% Retribución\na inversores\nde la FDI'
+                    '10% FDI'
                 ],
                 datasets: [{
                     data: [40, 20, 20, 15, 10],
@@ -109,12 +81,7 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 layout: {
-                    padding: {
-                        top: 60,
-                        bottom: 60,
-                        left: 30,
-                        right: 30
-                    }
+                    padding: 20
                 },
                 plugins: {
                     legend: {
@@ -127,22 +94,21 @@
                         },
                         font: function(context) {
                             var width = context.chart.width;
-                            var size = Math.round(width / 55);
+                            var size = Math.round(width / 60);
                             return {
                                 weight: 'bold',
-                                size: Math.min(Math.max(size, 9), 12)
+                                size: Math.min(Math.max(size, 8), 12)
                             };
                         },
-                        align: function(context) {
-                            const index = context.dataIndex;
-                            const count = context.dataset.data.length;
-                            const halfCount = count / 2;
-                            return index < halfCount ? 'end' : 'start';
-                        },
-                        anchor: 'end',
-                        offset: 10,
                         textAlign: 'center',
-                        display: true
+                        display: true,
+                        anchor: 'center',
+                        align: 'center',
+                        offset: 0,
+                        rotation: function(ctx) {
+                            const angle = ctx.chart.getDatasetMeta(0).data[ctx.dataIndex].startAngle + (ctx.chart.getDatasetMeta(0).data[ctx.dataIndex].endAngle - ctx.chart.getDatasetMeta(0).data[ctx.dataIndex].startAngle) / 2;
+                            return angle > Math.PI / 2 && angle < Math.PI * 1.5 ? angle - Math.PI : angle;
+                        }
                     }
                 }
             },
@@ -153,10 +119,10 @@
         window.addEventListener('resize', function() {
             incomeChart.options.plugins.datalabels.font = function(context) {
                 var width = context.chart.width;
-                var size = Math.round(width / 55);
+                var size = Math.round(width / 60);
                 return {
                     weight: 'bold',
-                    size: Math.min(Math.max(size, 9), 12)
+                    size: Math.min(Math.max(size, 8), 12)
                 };
             };
             incomeChart.update();
