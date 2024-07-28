@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Distribución de Ingresos de UnderTango</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 95%;
+            max-width: 800px;
+            margin: 10px auto;
+            background-color: #fff;
+            padding: 15px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        h1 {
+            color: #333;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+        #chart-container {
+            position: relative;
+            height: 85vh;
+            min-height: 450px;
+            max-height: 800px;
+        }
+        canvas {
+            max-width: 100%;
+            height: auto !important;
+        }
+        .legend {
+            text-align: left;
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+        .legend div {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .legend div span {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            margin-right: 5px;
+            flex-shrink: 0;
+        }
+        @media (max-width: 600px) {
+            .container {
+                width: 100%;
+                padding: 10px;
+                margin: 0;
+            }
+            h1 {
+                font-size: 1.2em;
+            }
+            #chart-container {
+                height: 75vh;
+                min-height: 400px;
+            }
+            .legend {
+                font-size: 0.8em;
+            }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Distribución de Ingresos de UnderTango</h1>
+        <div id="chart-container">
+            <canvas id="incomeChart"></canvas>
+        </div>
+        <div class="legend">
+            <div><span style="background-color: #FF6384;"></span>40% Caché de artistas</div>
+            <div><span style="background-color: #36A2EB;"></span>20% Gastos operativos</div>
+            <div><span style="background-color: #FFCE56;"></span>20% Gastos de producción</div>
+            <div><span style="background-color: #4BC0C0;"></span>15% Caja UnderTango</div>
+            <div><span style="background-color: #9966FF;"></span>10% Retribución a inversores de la FDI</div>
+        </div>
+    </div>
+    <script>
+        const ctx = document.getElementById('incomeChart').getContext('2d');
+        const incomeChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: [
+                    '40% Caché\nde artistas', 
+                    '20% Gastos\noperativos', 
+                    '20% Gastos\nde producción', 
+                    '15% Caja\nUnderTango', 
+                    '10% Retribución\na inversores\nde la FDI'
+                ],
+                datasets: [{
+                    data: [40, 20, 20, 15, 10],
+                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        top: 60,
+                        bottom: 60,
+                        left: 30,
+                        right: 30
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    datalabels: {
+                        color: '#000',
+                        formatter: (value, ctx) => {
+                            return ctx.chart.data.labels[ctx.dataIndex].split('\n');
+                        },
+                        font: function(context) {
+                            var width = context.chart.width;
+                            var size = Math.round(width / 55);
+                            return {
+                                weight: 'bold',
+                                size: Math.min(Math.max(size, 9), 12)
+                            };
+                        },
+                        align: function(context) {
+                            const index = context.dataIndex;
+                            const count = context.dataset.data.length;
+                            const halfCount = count / 2;
+                            return index < halfCount ? 'end' : 'start';
+                        },
+                        anchor: 'end',
+                        offset: 10,
+                        textAlign: 'center',
+                        display: true
+                    }
+                }
+            },
+            plugins: [ChartDataLabels]
+        });
+
+        // Ajustar tamaño de fuente en resize
+        window.addEventListener('resize', function() {
+            incomeChart.options.plugins.datalabels.font = function(context) {
+                var width = context.chart.width;
+                var size = Math.round(width / 55);
+                return {
+                    weight: 'bold',
+                    size: Math.min(Math.max(size, 9), 12)
+                };
+            };
+            incomeChart.update();
+        });
+    </script>
+</body>
+</html>
