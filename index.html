@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Undertango Club</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #1a1a1a;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+        .container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+        }
+        .center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            background-color: #ff4136;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            text-align: center;
+        }
+        .circle {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background-color: #0074d9;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="center">Undertango Club</div>
+    </div>
+
+    <script>
+        const container = document.querySelector('.container');
+        const centerX = 150;
+        const centerY = 150;
+        const radius = 120;
+        const totalCircles = 6;
+
+        for (let i = 0; i < totalCircles; i++) {
+            const circle = document.createElement('div');
+            circle.classList.add('circle');
+            circle.textContent = i + 1;
+            container.appendChild(circle);
+        }
+
+        function animateCircles() {
+            const circles = document.querySelectorAll('.circle');
+            const angle = (Date.now() / 1000) % (2 * Math.PI);
+            
+            circles.forEach((circle, index) => {
+                const circleAngle = angle + (index * 2 * Math.PI / totalCircles);
+                const x = centerX + radius * Math.cos(circleAngle);
+                const y = centerY + radius * Math.sin(circleAngle);
+                circle.style.left = `${x - 25}px`;
+                circle.style.top = `${y - 25}px`;
+            });
+
+            requestAnimationFrame(animateCircles);
+        }
+
+        animateCircles();
+    </script>
+</body>
+</html>
