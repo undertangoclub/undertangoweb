@@ -73,7 +73,7 @@
 
         function animateCircles() {
             const circles = document.querySelectorAll('.circle');
-            const angle = (Date.now() / 1000) % (2 * Math.PI);
+            const angle = (Date.now() / 4000) % (2 * Math.PI);
             
             circles.forEach((circle, index) => {
                 const circleAngle = angle + (index * 2 * Math.PI / totalCircles);
