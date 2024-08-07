@@ -11,28 +11,29 @@
             color: #333;
             margin: 0;
             padding: 0;
+            font-size: 18px;
         }
         .container {
             width: 95%;
             max-width: 1080px;
             margin: auto;
             overflow: hidden;
-            padding: 10px;
+            padding: 5px;
         }
         header {
             background: #333;
             color: #fff;
-            padding: 20px 0;
+            padding: 10px 0;
             border-bottom: #77aaff 3px solid;
         }
         header h1 {
             text-align: center;
             text-transform: uppercase;
             margin: 0;
-            font-size: 1.2em;
+            font-size: 1.5em;
         }
         .main {
-            padding: 10px;
+            padding: 5px;
             background: #fff;
             margin: 10px 0;
             border-radius: 5px;
@@ -54,15 +55,16 @@
         }
         .info-box div h2 {
             margin: 5px 0;
-            font-size: 1em;
+            font-size: 1.2em;
         }
         .large-text {
-            font-size: 1.5em;
+            font-size: 1.8em;
             font-weight: bold;
         }
         .chart {
             margin: 20px 0;
             height: 400px;
+            position: relative;
         }
         .percentages, .holders {
             display: flex;
@@ -87,10 +89,10 @@
         }
         @media (max-width: 600px) {
             header h1 {
-                font-size: 1em;
+                font-size: 1.2em;
             }
             .large-text {
-                font-size: 1.2em;
+                font-size: 1.4em;
             }
             .info-box div, .percentages div, .holders div {
                 flex: 1 1 100%;
@@ -227,16 +229,27 @@
                         },
                         font: {
                             weight: 'bold',
-                            size: 12
+                            size: 14
                         },
                         color: 'black',
                         padding: {
                             top: 5,
                             bottom: 5
+                        },
+                        rotation: function(context) {
+                            const width = context.chart.width;
+                            return width < 600 ? 45 : 0; // Rotate labels on small screens
                         }
                     }
                 },
                 scales: {
+                    x: {
+                        ticks: {
+                            autoSkip: false, // Ensure labels are not skipped
+                            maxRotation: 45, // Rotate labels if necessary
+                            minRotation: 0
+                        }
+                    },
                     y: {
                         beginAtZero: true,
                         ticks: {
