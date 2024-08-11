@@ -5,21 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Undertango Club</title>
     <style>
-        body {
+        html, body {
             margin: 0;
             padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        body {
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
             background-color: #1a1a1a;
             font-family: Arial, sans-serif;
-            overflow: hidden;
         }
         .container {
             position: relative;
-            width: 400px;
-            height: 400px;
+            width: 100vmin;
+            height: 100vmin;
+            max-width: 100vw;
+            max-height: 100vh;
         }
         .center {
             position: absolute;
@@ -41,8 +46,8 @@
         }
         .circle {
             position: absolute;
-            width: 50px;
-            height: 50px;
+            width: 100px;  /* Aumentado de 50px a 100px */
+            height: 100px; /* Aumentado de 50px a 100px */
             border-radius: 50%;
             display: flex;
             justify-content: center;
@@ -65,17 +70,18 @@
 
     <script>
         const container = document.querySelector('.container');
-        const centerX = 200;
-        const centerY = 200;
-        const radius = 160;
+        const centerX = container.clientWidth / 2;
+        const centerY = container.clientHeight / 2;
+        const radius = Math.min(centerX, centerY) * 0.7; // Reducido ligeramente para dar más espacio
         const totalCircles = 6;
+        const circleSize = 100; // Nuevo tamaño de los círculos
         const logos = [
-            './img/logo1.gif',  // Reemplaza con la ruta del logo de la primera industria
-            './img/logo2.gif',  // Reemplaza con la ruta del logo de la segunda industria
-            './img/logo3.gif',  // Reemplaza con la ruta del logo de la tercera industria
-            './img/logo4.png',  // Reemplaza con la ruta del logo de la cuarta industria
-            './img/logo5.jpg',  // Reemplaza con la ruta del logo de la quinta industria
-            './img/logo6.png'   // Reemplaza con la ruta del logo de la sexta industria
+            './img/logo1.gif',
+            './img/logo2.gif',
+            './img/logo3.gif',
+            './img/logo4.png',
+            './img/logo5.jpg',
+            './img/logo6.png'
         ];
 
         for (let i = 0; i < totalCircles; i++) {
@@ -95,8 +101,8 @@
                 const circleAngle = angle + (index * 2 * Math.PI / totalCircles);
                 const x = centerX + radius * Math.cos(circleAngle);
                 const y = centerY + radius * Math.sin(circleAngle);
-                circle.style.left = `${x - 25}px`;
-                circle.style.top = `${y - 25}px`;
+                circle.style.left = `${x - circleSize/2}px`; // Ajustado para el nuevo tamaño
+                circle.style.top = `${y - circleSize/2}px`;  // Ajustado para el nuevo tamaño
             });
 
             requestAnimationFrame(animateCircles);
