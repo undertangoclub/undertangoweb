@@ -29,8 +29,8 @@
         }
         .center {
             position: absolute;
-            width: 30vmin; /* Cambiado a vmin para mantener proporción en pantallas */
-            height: 30vmin; /* Cambiado a vmin para mantener proporción en pantallas */
+            width: 30vmin;
+            height: 30vmin;
             background-color: transparent;
             display: flex;
             justify-content: center;
@@ -75,14 +75,33 @@
         const center = document.querySelector('.center');
         const totalCircles = 6;
 
+        let circleStates = [];
+        let isPaused = false;
+        let lastUpdateTime = Date.now();
+
         function updateLayout() {
             const radius = Math.min(container.clientWidth, container.clientHeight) * 0.35;
             const circleSize = Math.min(container.clientWidth, container.clientHeight) * 0.15;
 
             const circles = document.querySelectorAll('.circle');
-            circles.forEach(circle => {
+            circles.forEach((circle, index) => {
                 circle.style.width = `${circleSize}px`;
                 circle.style.height = `${circleSize}px`;
+                
+                if (!circleStates[index]) {
+                    circleStates[index] = {
+                        angle: (index * 2 * Math.PI / totalCircles)
+                    };
+                }
+
+                circle.addEventListener('mouseenter', () => {
+                    isPaused = true;
+                });
+
+                circle.addEventListener('mouseleave', () => {
+                    isPaused = false;
+                    lastUpdateTime = Date.now();
+                });
             });
 
             animateCircles(radius, circleSize);
@@ -90,12 +109,20 @@
 
         function animateCircles(radius, circleSize) {
             const circles = document.querySelectorAll('.circle');
-            const angle = (Date.now() / 4000) % (2 * Math.PI);
+            const currentTime = Date.now();
             
+            if (!isPaused) {
+                const elapsedTime = (currentTime - lastUpdateTime) / 1000; // Convert to seconds
+                circleStates.forEach(state => {
+                    state.angle += elapsedTime * 0.5; // Adjust speed here
+                });
+                lastUpdateTime = currentTime;
+            }
+
             circles.forEach((circle, index) => {
-                const circleAngle = angle + (index * 2 * Math.PI / totalCircles);
-                const x = radius * Math.cos(circleAngle);
-                const y = radius * Math.sin(circleAngle);
+                const state = circleStates[index];
+                const x = radius * Math.cos(state.angle);
+                const y = radius * Math.sin(state.angle);
                 circle.style.left = `${x + center.clientWidth / 2 - circleSize / 2}px`;
                 circle.style.top = `${y + center.clientHeight / 2 - circleSize / 2}px`;
             });
