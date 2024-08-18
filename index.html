@@ -61,78 +61,15 @@
     <div class="container">
         <div class="center">
             <img src="./img/underlogoredondo.png" alt="Undertango Club Logo">
-            <div class="circle"><img src="./img/logo1.gif" alt="Logo 1"></div>
-            <div class="circle"><img src="./img/logo2.gif" alt="Logo 2"></div>
-            <div class="circle"><img src="./img/logo3.gif" alt="Logo 3"></div>
-            <div class="circle"><img src="./img/logo4.png" alt="Logo 4"></div>
-            <div class="circle"><img src="./img/logo5.jpg" alt="Logo 5"></div>
-            <div class="circle"><img src="./img/logo6.png" alt="Logo 6"></div>
+            <div class="circle" data-name="Logo 1"><img src="./img/logo1.gif" alt="Logo 1"></div>
+            <div class="circle" data-name="Logo 2"><img src="./img/logo2.gif" alt="Logo 2"></div>
+            <div class="circle" data-name="Logo 3"><img src="./img/logo3.gif" alt="Logo 3"></div>
+            <div class="circle" data-name="Logo 4"><img src="./img/logo4.png" alt="Logo 4"></div>
+            <div class="circle" data-name="Logo 5"><img src="./img/logo5.jpg" alt="Logo 5"></div>
+            <div class="circle" data-name="Logo 6"><img src="./img/logo6.png" alt="Logo 6"></div>
         </div>
     </div>
 
-    <script>
-        const container = document.querySelector('.container');
-        const center = document.querySelector('.center');
-        const totalCircles = 6;
-
-        let circleStates = [];
-        let isPaused = false;
-        let lastUpdateTime = Date.now();
-
-        function updateLayout() {
-            const radius = Math.min(container.clientWidth, container.clientHeight) * 0.35;
-            const circleSize = Math.min(container.clientWidth, container.clientHeight) * 0.15;
-
-            const circles = document.querySelectorAll('.circle');
-            circles.forEach((circle, index) => {
-                circle.style.width = `${circleSize}px`;
-                circle.style.height = `${circleSize}px`;
-                
-                if (!circleStates[index]) {
-                    circleStates[index] = {
-                        angle: (index * 2 * Math.PI / totalCircles)
-                    };
-                }
-
-                circle.addEventListener('mouseenter', () => {
-                    isPaused = true;
-                });
-
-                circle.addEventListener('mouseleave', () => {
-                    isPaused = false;
-                    lastUpdateTime = Date.now();
-                });
-            });
-
-            animateCircles(radius, circleSize);
-        }
-
-        function animateCircles(radius, circleSize) {
-            const circles = document.querySelectorAll('.circle');
-            const currentTime = Date.now();
-            
-            if (!isPaused) {
-                const elapsedTime = (currentTime - lastUpdateTime) / 1000; // Convert to seconds
-                circleStates.forEach(state => {
-                    state.angle += elapsedTime * 0.5; // Adjust speed here
-                });
-                lastUpdateTime = currentTime;
-            }
-
-            circles.forEach((circle, index) => {
-                const state = circleStates[index];
-                const x = radius * Math.cos(state.angle);
-                const y = radius * Math.sin(state.angle);
-                circle.style.left = `${x + center.clientWidth / 2 - circleSize / 2}px`;
-                circle.style.top = `${y + center.clientHeight / 2 - circleSize / 2}px`;
-            });
-
-            requestAnimationFrame(() => animateCircles(radius, circleSize));
-        }
-
-        window.addEventListener('resize', updateLayout);
-
-        updateLayout(); // Inicializa el layout al cargar la página
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
