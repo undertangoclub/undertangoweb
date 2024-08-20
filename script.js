@@ -5,7 +5,7 @@ let circleStates = [];
 let lastUpdateTime = Date.now();
 let centeredCircle = null;
 let animationFrameId = null;
-let isAnimating = false;
+let isInitialized = false;
 
 function updateLayout() {
   const radius = Math.min(container.clientWidth, container.clientHeight) * 0.35;
@@ -24,75 +24,81 @@ function updateLayout() {
       };
     }
 
-    circle.addEventListener("click", () => {
-      if (!isAnimating) {
-        handleCircleClick(circle, radius, circleSize);
-      }
-    });
+    circle.addEventListener("click", () =>
+      handleCircleClick(circle, radius, circleSize)
+    );
   });
 
-  startAnimation(radius, circleSize);
+  if (!isInitialized) {
+    isInitialized = true;
+    initializeCirclePositions(radius);
+  }
 
-  // Iniciar el fade-in de los círculos
-  requestAnimationFrame(() => {
+  // Iniciar el fade-in de los círculos y la animación con un pequeño retraso
+  setTimeout(() => {
     circles.forEach((circle) => {
       circle.style.opacity = "1";
     });
+    startAnimation(radius, circleSize);
+  }, 100);
+}
+
+function initializeCirclePositions(radius) {
+  const circles = document.querySelectorAll(".circle");
+  circles.forEach((circle, index) => {
+    const state = circleStates[index];
+    const x = radius * Math.cos(state.angle);
+    const y = radius * Math.sin(state.angle);
+    circle.style.transform = `translate(${x}px, ${y}px) scale(1)`;
   });
 }
 
 function handleCircleClick(circle, radius, circleSize) {
-  isAnimating = true;
-  stopAnimation();
-
   if (centeredCircle === circle) {
-    // Fade out y reducción de escala del círculo central
-    centeredCircle.style.transition = "all 0.3s ease";
-    centeredCircle.style.transform = `scale(0.5)`;
-    centeredCircle.style.opacity = "0";
+    // Detener la animación temporalmente
+    stopAnimation();
 
-    // Fade out rápido de los otros círculos
+    // Fade out de todos los círculos
     const circles = document.querySelectorAll(".circle");
     circles.forEach((c) => {
-      c.style.transition = "opacity 0.3s ease";
+      c.style.transition = "opacity 0.3s ease, transform 0.3s ease";
       c.style.opacity = "0";
+      if (c === centeredCircle) {
+        c.style.transform = `scale(0.5)`;
+      }
     });
 
-    // Redistribuir círculos y reiniciar animación
+    // Esperar a que termine el fade out antes de redistribuir
     setTimeout(() => {
-      centeredCircle.style.transform = `scale(1)`; // Resetear el tamaño
+      centeredCircle.style.transform = `scale(1)`;
       centeredCircle = null;
       lastUpdateTime = Date.now();
 
-      redistributeCircles(radius, circleSize);
+      // Redistribuir círculos sin animación
+      redistributeCircles(radius, circleSize, false);
 
-      // Iniciar el fade in de todos los círculos y reiniciar la animación
+      // Iniciar el fade in y reiniciar la animación
       requestAnimationFrame(() => {
         circles.forEach((c) => {
-          c.style.transition = "opacity 0.3s ease, transform 0.3s ease";
           c.style.opacity = "1";
         });
         startAnimation(radius, circleSize);
-        isAnimating = false;
       });
     }, 300);
   } else {
     if (centeredCircle) {
-      centeredCircle.style.transition = "all 0.3s ease";
+      centeredCircle.style.transition = "transform 0.3s ease";
       centeredCircle.style.transform = `scale(1)`;
     }
     centeredCircle = circle;
-    centeredCircle.style.transition = "all 0.3s ease";
+    centeredCircle.style.transition = "transform 0.3s ease";
     centeredCircle.style.transform = `translate(0, 0) scale(1.5)`;
 
-    redistributeCircles(radius, circleSize);
-    setTimeout(() => {
-      isAnimating = false;
-    }, 300);
+    redistributeCircles(radius, circleSize, true);
   }
 }
 
-function redistributeCircles(radius, circleSize) {
+function redistributeCircles(radius, circleSize, animate = true) {
   const circles = Array.from(document.querySelectorAll(".circle"));
   const remainingCircles = circles.filter(
     (circle) => circle !== centeredCircle
@@ -106,25 +112,34 @@ function redistributeCircles(radius, circleSize) {
 
     circleStates[circles.indexOf(circle)].angle = angle;
 
-    circle.style.transition = "transform 0.3s ease";
+    if (animate) {
+      circle.style.transition = "transform 0.3s ease";
+    } else {
+      circle.style.transition = "none";
+    }
     circle.style.transform = `translate(${x}px, ${y}px) scale(1)`;
   });
 }
 
 function animateCircles(radius, circleSize) {
+  if (centeredCircle) {
+    animationFrameId = requestAnimationFrame(() =>
+      animateCircles(radius, circleSize)
+    );
+    return;
+  }
+
   const circles = document.querySelectorAll(".circle");
   const currentTime = Date.now();
   const elapsedTime = (currentTime - lastUpdateTime) / 1000;
   lastUpdateTime = currentTime;
 
-  if (!centeredCircle && !isAnimating) {
-    circleStates.forEach((state, index) => {
-      state.angle += elapsedTime * 0.5;
-      const x = radius * Math.cos(state.angle);
-      const y = radius * Math.sin(state.angle);
-      circles[index].style.transform = `translate(${x}px, ${y}px) scale(1)`;
-    });
-  }
+  circleStates.forEach((state, index) => {
+    state.angle += elapsedTime * 0.5;
+    const x = radius * Math.cos(state.angle);
+    const y = radius * Math.sin(state.angle);
+    circles[index].style.transform = `translate(${x}px, ${y}px) scale(1)`;
+  });
 
   animationFrameId = requestAnimationFrame(() =>
     animateCircles(radius, circleSize)
@@ -150,4 +165,5 @@ window.addEventListener("resize", () => {
   updateLayout();
 });
 
-updateLayout();
+// Inicializar el layout después de que todos los recursos se hayan cargado
+window.addEventListener("load", updateLayout);
