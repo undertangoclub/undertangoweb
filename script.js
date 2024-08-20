@@ -1,10 +1,11 @@
 const container = document.querySelector(".container");
-const center = document.querySelector(".center");
 const totalCircles = 6;
 
 let circleStates = [];
 let lastUpdateTime = Date.now();
 let centeredCircle = null;
+let animationFrameId = null;
+let isAnimating = false;
 
 function updateLayout() {
   const radius = Math.min(container.clientWidth, container.clientHeight) * 0.35;
@@ -24,29 +25,71 @@ function updateLayout() {
     }
 
     circle.addEventListener("click", () => {
-      if (centeredCircle === circle) {
-        // Si el círculo ya está en el centro, lo devolvemos a su posición original
-        centeredCircle.style.transition = "all 0.5s ease";
-        centeredCircle.style.transform = `scale(1)`;
-        centeredCircle = null;
-        lastUpdateTime = Date.now();
-        redistributeCircles(radius, circleSize); // Redistribuir equitativamente
-      } else {
-        if (centeredCircle) {
-          centeredCircle.style.transition = "all 0.5s ease";
-          centeredCircle.style.transform = `scale(1)`;
-        }
-        centeredCircle = circle;
-        centeredCircle.style.transition = "all 0.5s ease";
-        centeredCircle.style.transform = `translate(0, 0) scale(1.5)`;
-
-        // Redistribuir los otros círculos
-        redistributeCircles(radius, circleSize);
+      if (!isAnimating) {
+        handleCircleClick(circle, radius, circleSize);
       }
     });
   });
 
-  animateCircles(radius, circleSize);
+  startAnimation(radius, circleSize);
+
+  // Iniciar el fade-in de los círculos
+  requestAnimationFrame(() => {
+    circles.forEach((circle) => {
+      circle.style.opacity = "1";
+    });
+  });
+}
+
+function handleCircleClick(circle, radius, circleSize) {
+  isAnimating = true;
+  stopAnimation();
+
+  if (centeredCircle === circle) {
+    // Fade out y reducción de escala del círculo central
+    centeredCircle.style.transition = "all 0.3s ease";
+    centeredCircle.style.transform = `scale(0.5)`;
+    centeredCircle.style.opacity = "0";
+
+    // Fade out rápido de los otros círculos
+    const circles = document.querySelectorAll(".circle");
+    circles.forEach((c) => {
+      c.style.transition = "opacity 0.3s ease";
+      c.style.opacity = "0";
+    });
+
+    // Redistribuir círculos y reiniciar animación
+    setTimeout(() => {
+      centeredCircle.style.transform = `scale(1)`; // Resetear el tamaño
+      centeredCircle = null;
+      lastUpdateTime = Date.now();
+
+      redistributeCircles(radius, circleSize);
+
+      // Iniciar el fade in de todos los círculos y reiniciar la animación
+      requestAnimationFrame(() => {
+        circles.forEach((c) => {
+          c.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+          c.style.opacity = "1";
+        });
+        startAnimation(radius, circleSize);
+        isAnimating = false;
+      });
+    }, 300);
+  } else {
+    if (centeredCircle) {
+      centeredCircle.style.transition = "all 0.3s ease";
+      centeredCircle.style.transform = `scale(1)`;
+    }
+    centeredCircle = circle;
+    centeredCircle.style.transition = "all 0.3s ease";
+    centeredCircle.style.transform = `translate(0, 0) scale(1.5)`;
+
+    redistributeCircles(radius, circleSize);
+    setTimeout(() => {
+      isAnimating = false;
+    }, 300);
+  }
 }
 
 function redistributeCircles(radius, circleSize) {
@@ -57,54 +100,54 @@ function redistributeCircles(radius, circleSize) {
   const totalRemaining = remainingCircles.length;
 
   remainingCircles.forEach((circle, index) => {
-    const angle = (index * 2 * Math.PI) / totalRemaining; // Recalcula el ángulo basado en los círculos restantes
+    const angle = (index * 2 * Math.PI) / totalRemaining;
     const x = radius * Math.cos(angle);
     const y = radius * Math.sin(angle);
 
-    circleStates[circles.indexOf(circle)].angle = angle; // Actualiza el estado con el nuevo ángulo
+    circleStates[circles.indexOf(circle)].angle = angle;
 
-    circle.style.transition = "all 0.5s ease";
+    circle.style.transition = "transform 0.3s ease";
     circle.style.transform = `translate(${x}px, ${y}px) scale(1)`;
-  });
-}
-
-function updateCirclePositions(radius, circleSize) {
-  const circles = document.querySelectorAll(".circle");
-  circles.forEach((circle, index) => {
-    if (circle !== centeredCircle) {
-      const state = circleStates[index];
-      const x = radius * Math.cos(state.angle);
-      const y = radius * Math.sin(state.angle);
-      circle.style.transition = "all 0.5s ease";
-      circle.style.transform = `translate(${x}px, ${y}px) scale(1)`;
-    }
   });
 }
 
 function animateCircles(radius, circleSize) {
   const circles = document.querySelectorAll(".circle");
   const currentTime = Date.now();
+  const elapsedTime = (currentTime - lastUpdateTime) / 1000;
+  lastUpdateTime = currentTime;
 
-  if (!centeredCircle) {
-    const elapsedTime = (currentTime - lastUpdateTime) / 1000; // Convertir a segundos
-    circleStates.forEach((state) => {
-      state.angle += elapsedTime * 0.5; // Ajustar la velocidad aquí
-    });
-    lastUpdateTime = currentTime;
-  }
-
-  circles.forEach((circle, index) => {
-    if (circle !== centeredCircle) {
-      const state = circleStates[index];
+  if (!centeredCircle && !isAnimating) {
+    circleStates.forEach((state, index) => {
+      state.angle += elapsedTime * 0.5;
       const x = radius * Math.cos(state.angle);
       const y = radius * Math.sin(state.angle);
-      circle.style.transform = `translate(${x}px, ${y}px) scale(1)`;
-    }
-  });
+      circles[index].style.transform = `translate(${x}px, ${y}px) scale(1)`;
+    });
+  }
 
-  requestAnimationFrame(() => animateCircles(radius, circleSize));
+  animationFrameId = requestAnimationFrame(() =>
+    animateCircles(radius, circleSize)
+  );
 }
 
-window.addEventListener("resize", updateLayout);
+function startAnimation(radius, circleSize) {
+  if (!animationFrameId) {
+    lastUpdateTime = Date.now();
+    animateCircles(radius, circleSize);
+  }
+}
 
-updateLayout(); // Inicializa el layout al cargar la página
+function stopAnimation() {
+  if (animationFrameId) {
+    cancelAnimationFrame(animationFrameId);
+    animationFrameId = null;
+  }
+}
+
+window.addEventListener("resize", () => {
+  stopAnimation();
+  updateLayout();
+});
+
+updateLayout();
