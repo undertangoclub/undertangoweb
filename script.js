@@ -1,99 +1,110 @@
-const container = document.querySelector('.container');
-const center = document.querySelector('.center');
+const container = document.querySelector(".container");
+const center = document.querySelector(".center");
 const totalCircles = 6;
 
 let circleStates = [];
-let isPaused = false;
 let lastUpdateTime = Date.now();
 let centeredCircle = null;
 
 function updateLayout() {
-    const radius = Math.min(container.clientWidth, container.clientHeight) * 0.35;
-    const circleSize = Math.min(container.clientWidth, container.clientHeight) * 0.15;
+  const radius = Math.min(container.clientWidth, container.clientHeight) * 0.35;
+  const circleSize =
+    Math.min(container.clientWidth, container.clientHeight) * 0.15;
 
-    const circles = document.querySelectorAll('.circle');
-    circles.forEach((circle, index) => {
-        circle.style.width = `${circleSize}px`;
-        circle.style.height = `${circleSize}px`;
-        
-        if (!circleStates[index]) {
-            circleStates[index] = {
-                angle: (index * 2 * Math.PI / totalCircles),
-                originalSize: circleSize
-            };
+  const circles = document.querySelectorAll(".circle");
+  circles.forEach((circle, index) => {
+    circle.style.width = `${circleSize}px`;
+    circle.style.height = `${circleSize}px`;
+
+    if (!circleStates[index]) {
+      circleStates[index] = {
+        angle: (index * 2 * Math.PI) / totalCircles,
+        originalSize: circleSize,
+      };
+    }
+
+    circle.addEventListener("click", () => {
+      if (centeredCircle === circle) {
+        // Si el círculo ya está en el centro, lo devolvemos a su posición original
+        centeredCircle.style.transition = "all 0.5s ease";
+        centeredCircle.style.transform = `scale(1)`;
+        centeredCircle = null;
+        lastUpdateTime = Date.now();
+        redistributeCircles(radius, circleSize); // Redistribuir equitativamente
+      } else {
+        if (centeredCircle) {
+          centeredCircle.style.transition = "all 0.5s ease";
+          centeredCircle.style.transform = `scale(1)`;
         }
+        centeredCircle = circle;
+        centeredCircle.style.transition = "all 0.5s ease";
+        centeredCircle.style.transform = `translate(0, 0) scale(1.5)`;
 
-        circle.addEventListener('mouseenter', () => {
-            console.log(`Mouse entered: ${circle.dataset.name}`);
-            isPaused = true;
-        });
-
-        circle.addEventListener('mouseleave', () => {
-            console.log(`Mouse left: ${circle.dataset.name}`);
-            if (!centeredCircle) {
-                isPaused = false;
-                lastUpdateTime = Date.now();
-            }
-        });
-
-        circle.addEventListener('click', () => {
-            if (centeredCircle === circle) {
-                // Si el círculo ya está en el centro, lo devolvemos a su posición original
-                circle.style.transition = 'all 0.5s ease';
-                circle.style.width = `${circleStates[index].originalSize}px`;
-                circle.style.height = `${circleStates[index].originalSize}px`;
-                centeredCircle = null;
-                isPaused = false;
-                lastUpdateTime = Date.now();
-            } else {
-                // Si hay un círculo en el centro, lo devolvemos a su tamaño original
-                if (centeredCircle) {
-                    const centeredIndex = Array.from(circles).indexOf(centeredCircle);
-                    centeredCircle.style.transition = 'all 0.5s ease';
-                    centeredCircle.style.width = `${circleStates[centeredIndex].originalSize}px`;
-                    centeredCircle.style.height = `${circleStates[centeredIndex].originalSize}px`;
-                }
-                
-                // Centramos el círculo clickeado
-                circle.style.transition = 'all 0.5s ease';
-                circle.style.left = `${center.clientWidth / 2 - circleSize / 2}px`;
-                circle.style.top = `${center.clientHeight / 2 - circleSize / 2}px`;
-                circle.style.width = `${circleSize * 1.5}px`;  // Hacemos el círculo un 50% más grande
-                circle.style.height = `${circleSize * 1.5}px`;
-                centeredCircle = circle;
-                isPaused = true;
-            }
-        });
+        // Redistribuir los otros círculos
+        redistributeCircles(radius, circleSize);
+      }
     });
+  });
 
-    animateCircles(radius, circleSize);
+  animateCircles(radius, circleSize);
+}
+
+function redistributeCircles(radius, circleSize) {
+  const circles = Array.from(document.querySelectorAll(".circle"));
+  const remainingCircles = circles.filter(
+    (circle) => circle !== centeredCircle
+  );
+  const totalRemaining = remainingCircles.length;
+
+  remainingCircles.forEach((circle, index) => {
+    const angle = (index * 2 * Math.PI) / totalRemaining; // Recalcula el ángulo basado en los círculos restantes
+    const x = radius * Math.cos(angle);
+    const y = radius * Math.sin(angle);
+
+    circleStates[circles.indexOf(circle)].angle = angle; // Actualiza el estado con el nuevo ángulo
+
+    circle.style.transition = "all 0.5s ease";
+    circle.style.transform = `translate(${x}px, ${y}px) scale(1)`;
+  });
+}
+
+function updateCirclePositions(radius, circleSize) {
+  const circles = document.querySelectorAll(".circle");
+  circles.forEach((circle, index) => {
+    if (circle !== centeredCircle) {
+      const state = circleStates[index];
+      const x = radius * Math.cos(state.angle);
+      const y = radius * Math.sin(state.angle);
+      circle.style.transition = "all 0.5s ease";
+      circle.style.transform = `translate(${x}px, ${y}px) scale(1)`;
+    }
+  });
 }
 
 function animateCircles(radius, circleSize) {
-    const circles = document.querySelectorAll('.circle');
-    const currentTime = Date.now();
-    
-    if (!isPaused) {
-        const elapsedTime = (currentTime - lastUpdateTime) / 1000; // Convertir a segundos
-        circleStates.forEach(state => {
-            state.angle += elapsedTime * 0.5; // Ajustar la velocidad aquí
-        });
-        lastUpdateTime = currentTime;
-    }
+  const circles = document.querySelectorAll(".circle");
+  const currentTime = Date.now();
 
-    circles.forEach((circle, index) => {
-        if (circle !== centeredCircle) {
-            const state = circleStates[index];
-            const x = radius * Math.cos(state.angle);
-            const y = radius * Math.sin(state.angle);
-            circle.style.left = `${x + center.clientWidth / 2 - circleSize / 2}px`;
-            circle.style.top = `${y + center.clientHeight / 2 - circleSize / 2}px`;
-        }
+  if (!centeredCircle) {
+    const elapsedTime = (currentTime - lastUpdateTime) / 1000; // Convertir a segundos
+    circleStates.forEach((state) => {
+      state.angle += elapsedTime * 0.5; // Ajustar la velocidad aquí
     });
+    lastUpdateTime = currentTime;
+  }
 
-    requestAnimationFrame(() => animateCircles(radius, circleSize));
+  circles.forEach((circle, index) => {
+    if (circle !== centeredCircle) {
+      const state = circleStates[index];
+      const x = radius * Math.cos(state.angle);
+      const y = radius * Math.sin(state.angle);
+      circle.style.transform = `translate(${x}px, ${y}px) scale(1)`;
+    }
+  });
+
+  requestAnimationFrame(() => animateCircles(radius, circleSize));
 }
 
-window.addEventListener('resize', updateLayout);
+window.addEventListener("resize", updateLayout);
 
 updateLayout(); // Inicializa el layout al cargar la página
