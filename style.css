@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Poiret+One&display=swap"); /* Tipografía Art Deco */
+
 html,
 body {
   margin: 0;
@@ -12,7 +14,7 @@ body {
   justify-content: center;
   align-items: center;
   background-color: #1a1a1a;
-  font-family: Arial, sans-serif;
+  font-family: "Poiret One", cursive; /* Aplicar la tipografía Art Deco */
 }
 
 .container {
@@ -22,6 +24,30 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.welcome-text {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 6vmin; /* Tamaño más grande */
+  color: white;
+  opacity: 0;
+  transition: opacity 1s ease;
+  z-index: 10; /* Asegurar que esté sobre el resto del contenido */
+}
+
+.sub-text {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 4vmin; /* Tamaño más grande */
+  color: white;
+  opacity: 0;
+  transition: opacity 1s ease;
+  z-index: 10;
 }
 
 .center {
