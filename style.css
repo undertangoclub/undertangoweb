@@ -28,22 +28,22 @@ body {
 
 .welcome-text {
   position: absolute;
-  top: 30%;
+  top: 25%; /* Más arriba */
   left: 50%;
   transform: translateX(-50%);
-  font-size: 6vmin; /* Tamaño más grande */
+  font-size: 6vmin;
   color: white;
   opacity: 0;
   transition: opacity 1s ease;
-  z-index: 10; /* Asegurar que esté sobre el resto del contenido */
+  z-index: 10;
 }
 
 .sub-text {
   position: absolute;
-  top: 40%;
+  top: 65%; /* Debajo del logo */
   left: 50%;
   transform: translateX(-50%);
-  font-size: 4vmin; /* Tamaño más grande */
+  font-size: 4vmin;
   color: white;
   opacity: 0;
   transition: opacity 1s ease;
