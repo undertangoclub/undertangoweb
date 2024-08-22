@@ -165,21 +165,21 @@ document.addEventListener("DOMContentLoaded", () => {
   // Animación del texto de bienvenida
   welcomeText.style.opacity = "1";
 
-  // Después de 2 segundos, cambiar al segundo texto
+  // Después de 1.5 segundos, cambiar al segundo texto
   setTimeout(() => {
     welcomeText.style.opacity = "0";
     setTimeout(() => {
       subText.style.opacity = "1";
-    }, 1000); // 1 segundo de intervalo entre los textos
+    }, 200); // Intervalo más corto entre los textos
 
-    // Después de otros 2 segundos, empezar a desvanecer el segundo texto
+    // Después de otros 1.5 segundos, empezar a desvanecer el segundo texto
     setTimeout(() => {
       subText.style.opacity = "0";
-    }, 3000);
+    }, 1500);
 
     // Iniciar la animación principal después de que el segundo texto desaparezca
     setTimeout(() => {
       updateLayout();
-    }, 4000); // Inicia la animación de los círculos después de 4 segundos
-  }, 2000);
+    }, 2000); // Acortar el tiempo para empezar la animación de los círculos
+  }, 1500);
 });
