@@ -8,6 +8,8 @@ document.addEventListener("DOMContentLoaded", () => {
   let centeredCircle = null;
   let animationFrameId = null;
   let isInitialized = false;
+  let introSkipped = false;
+  let welcomeTextTimeout, subTextTimeout, layoutTimeout;
 
   // Configuraciones para cambiar imágenes y enlaces
   const relatedContent = {
@@ -39,6 +41,26 @@ document.addEventListener("DOMContentLoaded", () => {
       },
     ],
   };
+
+  function skipIntro() {
+    if (!introSkipped) {
+      introSkipped = true;
+      welcomeText.style.opacity = "0";
+      subText.style.opacity = "0";
+      clearTimeout(welcomeTextTimeout);
+      clearTimeout(subTextTimeout);
+      clearTimeout(layoutTimeout);
+      updateLayout();
+    }
+  }
+
+  // Agregar event listener para la barra espaciadora
+  document.addEventListener("keydown", (event) => {
+    if (event.code === "Space") {
+      event.preventDefault();
+      skipIntro();
+    }
+  });
 
   function updateLayout() {
     const radius =
@@ -274,9 +296,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   welcomeText.style.opacity = "1";
 
-  setTimeout(() => {
+  welcomeTextTimeout = setTimeout(() => {
     welcomeText.style.opacity = "0";
-    setTimeout(() => {
+    subTextTimeout = setTimeout(() => {
       subText.style.opacity = "1";
     }, 200);
 
@@ -284,7 +306,7 @@ document.addEventListener("DOMContentLoaded", () => {
       subText.style.opacity = "0";
     }, 1500);
 
-    setTimeout(() => {
+    layoutTimeout = setTimeout(() => {
       updateLayout();
     }, 2000);
   }, 1500);
