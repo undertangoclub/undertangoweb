@@ -177,7 +177,7 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         circle.style.transition = "none";
       }
-      circle.style.transform = `translate(${x}px, ${y}px) scale(1)`;
+      circle.style.transform = `translate(${x}px, ${y}px) scale(1.5)`;
     });
   }
 
