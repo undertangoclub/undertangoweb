@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Registro - UnderTango</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+      .container {
+        background-color: #ffffff;
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+      h2 {
+        color: #333;
+        margin-bottom: 20px;
+      }
+      #googleSignInBtn {
+        background-color: #4285f4;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 5px;
+      }
+      #googleSignInBtn:hover {
+        background-color: #357ae8;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Registro de UnderTango</h2>
+      <button id="googleSignInBtn">Registrarse con Google</button>
+    </div>
+
+    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+
+    <!-- Add Firebase products that you want to use -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+
+    <script>
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyDPOqsSow8M9KWohuZzH7N-tr_NF_2mLew",
+        authDomain: "ut-coin.firebaseapp.com",
+        projectId: "ut-coin",
+        storageBucket: "ut-coin.appspot.com",
+        messagingSenderId: "628936536007",
+        appId: "1:628936536007:web:88176e0bc957ac5f9e73e2",
+        measurementId: "G-DRPDJVSDZ6",
+      };
+
+      // Inicializar Firebase
+      firebase.initializeApp(firebaseConfig);
+
+      // Google Sign-In
+      const googleSignInBtn = document.getElementById("googleSignInBtn");
+      googleSignInBtn.addEventListener("click", () => {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        firebase
+          .auth()
+          .signInWithPopup(provider)
+          .then((result) => {
+            // This gives you a Google Access Token. You can use it to access the Google API.
+            const user = result.user;
+            console.log("Usuario registrado:", user);
+            alert("Registro exitoso! Bienvenido, " + user.displayName + "!");
+            // Redirigir al formulario después del registro
+            window.location.href = "/ut-coin/pages/formulario.html";
+          })
+          .catch((error) => {
+            // Handle Errors here.
+            const errorMessage = error.message;
+            console.error("Error en el registro:", errorMessage);
+            alert("Error en el registro: " + errorMessage);
+          });
+      });
+    </script>
+  </body>
+</html>

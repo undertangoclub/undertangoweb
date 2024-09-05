@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Introducción - UnderTango</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+      .container {
+        text-align: center;
+        background-color: #ffffff;
+        padding: 50px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        max-width: 600px;
+      }
+      #introText {
+        font-size: 18px;
+        line-height: 1.6;
+        margin-bottom: 20px;
+        cursor: pointer;
+      }
+      #registerBtn {
+        background-color: #4285f4;
+        color: #ffffff;
+        border: none;
+        padding: 15px 30px;
+        font-size: 18px;
+        cursor: pointer;
+        border-radius: 5px;
+        display: none;
+      }
+      #registerBtn:hover {
+        background-color: #357ae8;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <p id="introText">
+        Este juego funciona con UnderTango Tokens! las cuales serán repartidas
+        entre usted y todos los que se registren, habrá 1000 tokens en total ni
+        más ni menos
+      </p>
+      <button id="registerBtn" style="display: none">Registrarse</button>
+    </div>
+
+    <script>
+      const introText = document.getElementById("introText");
+      const registerBtn = document.getElementById("registerBtn");
+
+      introText.addEventListener("click", function () {
+        this.textContent =
+          "De aceptar el desafío, por favor, le pedimos gentilmente que complete un sencillo proceso de inscripción";
+        registerBtn.style.display = "inline-block";
+      });
+
+      registerBtn.addEventListener("click", function () {
+        if (confirm("Iniciando proceso de registro")) {
+          window.location.href = "/ut-coin/pages/registro.html";
+        }
+      });
+    </script>
+  </body>
+</html>
