@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Undertango Happening Coin</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+      .container {
+        text-align: center;
+        background-color: #ffffff;
+        padding: 50px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #333;
+      }
+      .adventure-btn {
+        background-color: #4285f4;
+        color: #ffffff;
+        border: none;
+        padding: 15px 30px;
+        font-size: 18px;
+        cursor: pointer;
+        border-radius: 5px;
+        margin-top: 20px;
+      }
+      .adventure-btn:hover {
+        background-color: #357ae8;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Bienvenido al juego de los UnderTango Coin, donde todos ganan</h1>
+      <button class="adventure-btn" onclick="comenzarAventura()">
+        Vamos con todo
+      </button>
+    </div>
+
+    <script>
+      function comenzarAventura() {
+        // Redirige a intro.html cuando se hace clic en el botón.
+        window.location.href = "/ut-coin/pages/intro.html";
+      }
+    </script>
+  </body>
+</html>

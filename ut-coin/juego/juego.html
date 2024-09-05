@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Juego - UnderTango</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        flex-direction: column;
+      }
+      .container {
+        background-color: #ffffff;
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        width: 80%;
+        max-width: 400px;
+      }
+      h2 {
+        color: #333;
+        margin-bottom: 20px;
+      }
+      button {
+        background-color: #4285f4;
+        color: white;
+        border: none;
+        padding: 10px;
+        margin: 10px 0;
+        width: 100%;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #357ae8;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Bienvenido al juego UnderTango</h2>
+      <h3>Donde la undertangueneidad se manifiesta</h3>
+      <button id="tutorialBtn">Tutorial</button>
+      <button id="adventureBtn">Modo Aventura</button>
+      <button id="tradeMarketBtn">Trade Market</button>
+    </div>
+
+    <script>
+      // Event listeners para los botones
+
+      document.getElementById("tutorialBtn").addEventListener("click", () => {
+        window.location.href = "/ut-coin/juego/tutorial.html"; // Nueva ruta
+      });
+
+      document.getElementById("adventureBtn").addEventListener("click", () => {
+        window.location.href = "/ut-coin/juego/aventura.html"; // Nueva ruta
+      });
+
+      document
+        .getElementById("tradeMarketBtn")
+        .addEventListener("click", () => {
+          window.location.href = "/ut-coin/juego/trade_market.html"; // Nueva ruta
+        });
+    </script>
+  </body>
+</html>
