@@ -31,18 +31,18 @@
   <body>
     <div class="container">
       <h2>Bienvenido a UnderTango</h2>
-      <p id="welcomeMessage"></p>
+      <p id="welcomeMessage">Cargando...</p>
     </div>
 
     <script type="module">
-      // Importar Firebase y Auth (si no lo tienes en la página anterior)
+      // Importar Firebase y Auth
       import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
       import {
         getAuth,
         onAuthStateChanged,
       } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
-      // Configuración de Firebase (si no lo tienes en la página anterior)
+      // Configuración de Firebase
       const firebaseConfig = {
         apiKey: "AIzaSyC05s84tQfQbiJua0G0LHnQsZP76HqxMk4",
         authDomain: "undertango.firebaseapp.com",
@@ -52,19 +52,22 @@
         appId: "1:21199358960:web:6b751db7c333403057ab35",
       };
 
+      // Inicializar Firebase
       const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
 
       const welcomeMessage = document.getElementById("welcomeMessage");
 
+      // Verificar el estado de autenticación del usuario
       onAuthStateChanged(auth, (user) => {
         if (user) {
           // Usuario autenticado, mostrar mensaje de bienvenida
-          welcomeMessage.textContent = `¡Bienvenido, ${user.displayName}!`;
+          const displayName = user.displayName ? user.displayName : "usuario";
+          welcomeMessage.textContent = `¡Bienvenido, ${displayName}!`;
         } else {
-          // Si no hay un usuario autenticado, redirigir al login
+          // Si no hay usuario autenticado, redirigir al registro
           alert("Error: No se pudo obtener información del usuario.");
-          window.location.replace("/ut-coin/pages/registro.html"); // Redirigir al registro si no hay autenticación
+          window.location.replace("/ut-coin/pages/registro.html");
         }
       });
     </script>
