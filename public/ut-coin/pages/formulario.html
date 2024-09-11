@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Formulario de Registro - UnderTango</title>
+    <title>Bienvenido a UnderTango</title>
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -21,156 +21,47 @@
         border-radius: 10px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         text-align: center;
-        width: 80%;
-        max-width: 400px;
       }
       h2 {
         color: #333;
         margin-bottom: 20px;
       }
-      input[type="text"],
-      input[type="file"],
-      button {
-        margin: 10px 0;
-        padding: 10px;
-        width: 100%;
-        border-radius: 5px;
-        border: 1px solid #ccc;
-      }
-      button {
-        background-color: #4285f4;
-        color: white;
-        border: none;
-        cursor: pointer;
-        font-size: 16px;
-      }
-      button:hover {
-        background-color: #357ae8;
-      }
     </style>
   </head>
   <body>
     <div class="container">
-      <h2>Completa tu Registro</h2>
-      <form id="registrationForm">
-        <input
-          type="text"
-          id="gameName"
-          placeholder="Nombre en el juego"
-          required
-        /><br />
-        <input
-          type="text"
-          id="organization"
-          placeholder="Organización que representas"
-          required
-        /><br />
-        <input type="file" id="profilePicture" accept="image/*" /><br />
-        <button type="submit">Guardar y Continuar</button>
-      </form>
+      <h2>Bienvenido a UnderTango</h2>
+      <p id="welcomeMessage"></p>
     </div>
 
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script type="module">
+      // Importar Firebase y Auth (si no lo tienes en la página anterior)
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+      import {
+        getAuth,
+        onAuthStateChanged,
+      } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
-    <script>
-      // Configuración de Firebase
+      // Configuración de Firebase (si no lo tienes en la página anterior)
       const firebaseConfig = {
-        apiKey: "AIzaSyDPOqsSow8M9KWohuZzH7N-tr_NF_2mLew",
-        authDomain: "ut-coin.firebaseapp.com",
-        projectId: "ut-coin",
-        storageBucket: "ut-coin.appspot.com",
-        messagingSenderId: "628936536007",
-        appId: "1:628936536007:web:88176e0bc957ac5f9e73e2",
-        measurementId: "G-DRPDJVSDZ6",
+        // ... (tu configuración de Firebase)
       };
 
-      // Inicializar Firebase
-      firebase.initializeApp(firebaseConfig);
-      const auth = firebase.auth();
-      const db = firebase.firestore();
-      const storage = firebase.storage();
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
 
-      // Manejar el envío del formulario
-      document
-        .getElementById("registrationForm")
-        .addEventListener("submit", (e) => {
-          e.preventDefault();
+      const welcomeMessage = document.getElementById("welcomeMessage");
 
-          const gameName = document.getElementById("gameName").value;
-          const organization = document.getElementById("organization").value;
-          const profilePicture =
-            document.getElementById("profilePicture").files[0];
-          const user = auth.currentUser;
-
-          if (user) {
-            const uid = user.uid;
-
-            // Código que maneja la subida de imagen y guardado de datos
-            let profilePictureUrl = ""; // Valor por defecto
-
-            if (profilePicture) {
-              const storageRef = storage.ref(
-                `profile_pictures/${uid}/${profilePicture.name}`
-              );
-              const uploadTask = storageRef.put(profilePicture);
-              uploadTask.on(
-                "state_changed",
-                (snapshot) => {},
-                (error) => {
-                  console.error("Error al subir la imagen:", error);
-                },
-                () => {
-                  uploadTask.snapshot.ref
-                    .getDownloadURL()
-                    .then((downloadURL) => {
-                      profilePictureUrl = downloadURL; // Actualizar la URL después de cargar
-                      guardarDatosEnFirestore(
-                        uid,
-                        gameName,
-                        organization,
-                        profilePictureUrl
-                      );
-                    });
-                }
-              );
-            } else {
-              guardarDatosEnFirestore(
-                uid,
-                gameName,
-                organization,
-                profilePictureUrl
-              );
-            }
-          } else {
-            alert("Error: No se pudo autenticar al usuario.");
-          }
-        });
-
-      function guardarDatosEnFirestore(
-        uid,
-        gameName,
-        organization,
-        profilePictureUrl
-      ) {
-        db.collection("usuarios")
-          .doc(uid)
-          .set({
-            gameName: gameName,
-            organization: organization,
-            profilePictureUrl: profilePictureUrl,
-          })
-          .then(() => {
-            alert("¡Datos guardados con éxito!");
-            window.location.href = "/ut-coin/juego/juego.html";
-          })
-          .catch((error) => {
-            console.error("Error al guardar los datos:", error);
-          });
-      }
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          // Usuario autenticado, mostrar mensaje de bienvenida
+          welcomeMessage.textContent = `¡Bienvenido, ${user.displayName}!`;
+        } else {
+          // Si no hay un usuario autenticado, redirigir al login
+          alert("Error: No se pudo obtener información del usuario.");
+          window.location.replace("/ut-coin/pages/registro.html"); // Redirigir al registro si no hay autenticación
+        }
+      });
     </script>
   </body>
 </html>
