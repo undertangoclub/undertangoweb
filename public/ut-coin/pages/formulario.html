@@ -61,8 +61,8 @@
       // Verificar el estado de autenticación del usuario
       onAuthStateChanged(auth, (user) => {
         if (user) {
-          // Usuario autenticado, mostrar mensaje de bienvenida
-          const displayName = user.displayName ? user.displayName : "usuario";
+          // Si displayName es null o vacío, usar el email como respaldo
+          const displayName = user.displayName || user.email || "usuario";
           welcomeMessage.textContent = `¡Bienvenido, ${displayName}!`;
         } else {
           // Si no hay usuario autenticado, redirigir al registro
