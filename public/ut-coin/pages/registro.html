@@ -26,7 +26,14 @@
         color: #333;
         margin-bottom: 20px;
       }
-      #googleSignInBtn {
+      input {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+      }
+      button {
         background-color: #4285f4;
         color: white;
         border: none;
@@ -35,7 +42,7 @@
         cursor: pointer;
         border-radius: 5px;
       }
-      #googleSignInBtn:hover {
+      button:hover {
         background-color: #357ae8;
       }
     </style>
@@ -43,17 +50,27 @@
   <body>
     <div class="container">
       <h2>Registro de UnderTango</h2>
-      <button id="googleSignInBtn">Registrarse con Google</button>
+      <form id="registrationForm">
+        <input type="text" id="name" placeholder="Nombre completo" required />
+        <input
+          type="email"
+          id="email"
+          placeholder="Correo electrónico"
+          required
+        />
+        <input
+          type="password"
+          id="password"
+          placeholder="Contraseña"
+          required
+        />
+        <button type="submit">Registrarse</button>
+      </form>
     </div>
 
-    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-
-    <!-- Add Firebase products that you want to use -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-
-    <script>
-      // Your web app's Firebase configuration
+    <script type="module">
+      // Conectar con Firebase (si es necesario)
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
       const firebaseConfig = {
         apiKey: "AIzaSyC05s84tQfQbiJua0G0LHnQsZP76HqxMk4",
         authDomain: "undertango.firebaseapp.com",
@@ -62,30 +79,42 @@
         messagingSenderId: "21199358960",
         appId: "1:21199358960:web:6b751db7c333403057ab35",
       };
+      const app = initializeApp(firebaseConfig);
 
-      // Inicializar Firebase
-      firebase.initializeApp(firebaseConfig);
+      const registrationForm = document.getElementById("registrationForm");
+      registrationForm.addEventListener("submit", (event) => {
+        event.preventDefault();
 
-      // Google Sign-In
-      const googleSignInBtn = document.getElementById("googleSignInBtn");
-      googleSignInBtn.addEventListener("click", () => {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        firebase
-          .auth()
-          .signInWithPopup(provider)
-          .then((result) => {
-            // This gives you a Google Access Token. You can use it to access the Google API.
-            const user = result.user;
-            console.log("Usuario registrado:", user);
-            alert("Registro exitoso! Bienvenido, " + user.displayName + "!");
-            // Redirigir al formulario después del registro
-            window.location.href = "/ut-coin/pages/formulario.html";
+        // Obtener los valores del formulario
+        const name = document.getElementById("name").value;
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+
+        // Validaciones simples
+        if (name === "" || email === "" || password === "") {
+          alert("Por favor, complete todos los campos");
+          return;
+        }
+
+        // Enviar datos a Google Sheets usando Web App Script
+        fetch(
+          "https://script.google.com/macros/s/AKfycbw0J9G5YVxZK3fhvDl9paU3jlWNRJfqlch3M5AmI/exec", // Tu URL de la Web App
+          {
+            method: "POST",
+            mode: "no-cors",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ name, email, password }),
+          }
+        )
+          .then((response) => {
+            alert("Registro exitoso! Redirigiendo...");
+            window.location.replace("/ut-coin/pages/interaccion.html"); // Redirigir a la página de interacción
           })
           .catch((error) => {
-            // Handle Errors here.
-            const errorMessage = error.message;
-            console.error("Error en el registro:", errorMessage);
-            alert("Error en el registro: " + errorMessage);
+            console.error("Error al registrar:", error);
+            alert("Error al registrar: " + error.message);
           });
       });
     </script>
