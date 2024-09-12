@@ -32,6 +32,26 @@
     <div class="container">
       <h2>Bienvenido a UnderTango</h2>
       <p id="welcomeMessage">Cargando...</p>
+
+      <!-- Formulario para agregar más información -->
+      <form id="userInfoForm">
+        <label for="gameName">Nombre en el juego:</label>
+        <input type="text" id="gameName" name="gameName" required /><br />
+
+        <label for="institution">Institución a la que representa:</label>
+        <input type="text" id="institution" name="institution" required /><br />
+
+        <label for="profilePhoto">Foto de perfil:</label>
+        <input
+          type="file"
+          id="profilePhoto"
+          name="profilePhoto"
+          accept="image/*"
+          required
+        /><br /><br />
+
+        <button type="submit">Guardar Información</button>
+      </form>
     </div>
 
     <script type="module">
@@ -41,6 +61,17 @@
         getAuth,
         onAuthStateChanged,
       } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+      import {
+        getFirestore,
+        doc,
+        setDoc,
+      } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+      import {
+        getStorage,
+        ref,
+        uploadBytes,
+        getDownloadURL,
+      } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js";
 
       // Configuración de Firebase
       const firebaseConfig = {
@@ -55,6 +86,8 @@
       // Inicializar Firebase
       const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
+      const db = getFirestore(app);
+      const storage = getStorage(app);
 
       const welcomeMessage = document.getElementById("welcomeMessage");
 
@@ -64,6 +97,42 @@
           // Si displayName es null o vacío, usar el email como respaldo
           const displayName = user.displayName || user.email || "usuario";
           welcomeMessage.textContent = `¡Bienvenido, ${displayName}!`;
+
+          // Manejar el envío del formulario
+          const userInfoForm = document.getElementById("userInfoForm");
+          userInfoForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            // Obtener datos del formulario
+            const gameName = document.getElementById("gameName").value;
+            const institution = document.getElementById("institution").value;
+            const profilePhoto =
+              document.getElementById("profilePhoto").files[0];
+
+            // Subir la foto a Firebase Storage
+            const storageRef = ref(storage, `profilePhotos/${user.uid}`);
+            await uploadBytes(storageRef, profilePhoto);
+
+            // Obtener la URL de la foto subida
+            const photoURL = await getDownloadURL(storageRef);
+
+            // Guardar la información del usuario en Firestore
+            const userDocRef = doc(db, "usuarios", user.uid);
+            await setDoc(userDocRef, {
+              gameName: gameName,
+              institution: institution,
+              photoURL: photoURL,
+              email: user.email, // Esto es opcional si quieres guardar el correo
+            });
+
+            // Guardar los datos en localStorage para pasarlos a la siguiente página
+            localStorage.setItem("gameName", gameName);
+            localStorage.setItem("institution", institution);
+            localStorage.setItem("photoURL", photoURL);
+
+            // Redirigir a juego.html
+            window.location.href = "/ut-coin/pages/juego.html";
+          });
         } else {
           // Si no hay usuario autenticado, redirigir al registro
           alert("Error: No se pudo obtener información del usuario.");
