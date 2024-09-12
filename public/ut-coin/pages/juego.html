@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UnderTango Juego</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 20px;
+        text-align: center;
+      }
+      .user-info {
+        margin-bottom: 20px;
+      }
+      .user-info img {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+      }
+      .buttons-container {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+      }
+      button {
+        padding: 15px;
+        font-size: 16px;
+        cursor: pointer;
+        border: none;
+        border-radius: 5px;
+        background-color: #333;
+        color: #fff;
+      }
+      button:hover {
+        background-color: #555;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="user-info">
+      <h2 id="gameName"></h2>
+      <p id="institution"></p>
+      <img id="profilePhoto" src="" alt="Foto de perfil" />
+    </div>
+
+    <div class="buttons-container">
+      <button id="adventureMode">Modo Aventura</button>
+      <button id="tradeMarket">TradeMarket</button>
+      <button id="livingRoom">Living Room</button>
+    </div>
+
+    <script>
+      // Obtener la información del localStorage
+      const gameName = localStorage.getItem("gameName");
+      const institution = localStorage.getItem("institution");
+      const photoURL = localStorage.getItem("photoURL");
+
+      // Mostrar la información en la página
+      document.getElementById("gameName").textContent = gameName;
+      document.getElementById("institution").textContent = institution;
+      document.getElementById("profilePhoto").src = photoURL;
+
+      // Agregar eventos a los botones (puedes modificar estos eventos según lo que necesites)
+      document.getElementById("adventureMode").addEventListener("click", () => {
+        alert("Modo Aventura seleccionado");
+      });
+
+      document.getElementById("tradeMarket").addEventListener("click", () => {
+        alert("TradeMarket seleccionado");
+      });
+
+      document.getElementById("livingRoom").addEventListener("click", () => {
+        alert("Living Room seleccionado");
+      });
+    </script>
+  </body>
+</html>
