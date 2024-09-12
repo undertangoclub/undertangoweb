@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Registro - UnderTango</title>
+    <title>Registro e Inicio de Sesión - UnderTango</title>
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -21,6 +21,7 @@
         border-radius: 10px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         text-align: center;
+        width: 300px;
       }
       h2 {
         color: #333;
@@ -41,24 +42,27 @@
         font-size: 16px;
         cursor: pointer;
         border-radius: 5px;
+        width: 100%;
       }
       button:hover {
         background-color: #357ae8;
       }
-      .link {
-        color: #4285f4;
-        cursor: pointer;
-        text-decoration: underline;
-        margin-top: 20px;
+      hr {
+        border: 0;
+        height: 1px;
+        background-color: #ddd;
+        margin: 30px 0;
       }
-      .link:hover {
-        color: #357ae8;
+      .error {
+        color: red;
+        margin-top: 10px;
       }
     </style>
   </head>
   <body>
     <div class="container">
-      <h2>Registro de UnderTango</h2>
+      <!-- Sección de Registro -->
+      <h2>¿Eres nuevo? ¡Regístrate!</h2>
       <form id="registrationForm">
         <input
           type="email"
@@ -75,11 +79,12 @@
         <button type="submit">Registrarse</button>
       </form>
 
-      <div class="link" id="loginLink">O ingresa si ya eres usuario</div>
+      <!-- Línea divisora -->
+      <hr />
 
-      <!-- Sección para iniciar sesión -->
-      <form id="loginForm" style="display: none">
-        <h2>Iniciar Sesión</h2>
+      <!-- Sección de Inicio de Sesión -->
+      <h2>Ya eres usuario, ¡ingresa! :D</h2>
+      <form id="loginForm">
         <input
           type="email"
           id="loginEmail"
@@ -94,6 +99,8 @@
         />
         <button type="submit">Iniciar Sesión</button>
       </form>
+
+      <p class="error" id="errorMessage"></p>
     </div>
 
     <script type="module">
@@ -106,6 +113,12 @@
         setPersistence,
         browserLocalPersistence,
       } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+      import {
+        getFirestore,
+        doc,
+        getDoc,
+        setDoc,
+      } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
       // Configuración de Firebase
       const firebaseConfig = {
@@ -117,91 +130,98 @@
         appId: "1:21199358960:web:6b751db7c333403057ab35",
       };
 
+      // Inicializar Firebase
       const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
+      const db = getFirestore(app);
 
-      // Establecer la persistencia de sesión a 'local'
+      // Establecer persistencia local
       setPersistence(auth, browserLocalPersistence)
         .then(() => {
           console.log("Persistencia de sesión establecida en local.");
         })
         .catch((error) => {
-          console.error(
-            "Error al establecer la persistencia de sesión:",
-            error
-          );
+          console.error("Error al establecer persistencia:", error);
         });
 
-      // Manejar el formulario de registro
       const registrationForm = document.getElementById("registrationForm");
-      registrationForm.addEventListener("submit", (event) => {
-        event.preventDefault();
+      const loginForm = document.getElementById("loginForm");
+      const errorMessage = document.getElementById("errorMessage");
 
-        // Obtener los valores del formulario
+      // Manejar el registro de usuario
+      registrationForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
         const email = document.getElementById("email").value;
         const password = document.getElementById("password").value;
 
-        // Validaciones simples
-        if (email === "" || password === "") {
-          alert("Por favor, complete todos los campos");
-          return;
-        }
+        try {
+          const userCredential = await createUserWithEmailAndPassword(
+            auth,
+            email,
+            password
+          );
+          const user = userCredential.user;
+          console.log("Usuario registrado:", user);
 
-        // Crear usuario con Firebase Auth usando email y contraseña
-        createUserWithEmailAndPassword(auth, email, password)
-          .then((userCredential) => {
-            const user = userCredential.user;
-            console.log("Usuario registrado:", user);
-            alert("Registro exitoso! Bienvenido, " + user.email + "!");
-            // Redirigir al formulario después del registro
-            window.location.replace("/ut-coin/pages/formulario.html");
-          })
-          .catch((error) => {
-            console.error("Error en el registro:", error);
-            alert("Error en el registro: " + error.message);
+          // Crear un documento en Firestore para el nuevo usuario
+          await setDoc(doc(db, "usuarios", user.uid), {
+            email: user.email,
+            gameName: null, // Estos campos se completarán después
+            institution: null,
+            photoURL: null,
           });
+
+          alert("Registro exitoso. Redirigiendo a formulario.");
+          window.location.replace("/ut-coin/pages/formulario.html");
+        } catch (error) {
+          errorMessage.textContent = "Error en el registro: " + error.message;
+        }
       });
 
-      // Mostrar el formulario de inicio de sesión cuando se haga clic en el enlace
-      const loginLink = document.getElementById("loginLink");
-      const loginForm = document.getElementById("loginForm");
-
-      loginLink.addEventListener("click", () => {
-        registrationForm.style.display = "none"; // Ocultar el formulario de registro
-        loginForm.style.display = "block"; // Mostrar el formulario de inicio de sesión
-      });
-
-      // Manejar el formulario de inicio de sesión
-      loginForm.addEventListener("submit", (event) => {
+      // Manejar el inicio de sesión de usuario
+      loginForm.addEventListener("submit", async (event) => {
         event.preventDefault();
-
-        // Obtener los valores del formulario de inicio de sesión
         const loginEmail = document.getElementById("loginEmail").value;
         const loginPassword = document.getElementById("loginPassword").value;
 
-        // Validaciones simples
-        if (loginEmail === "" || loginPassword === "") {
-          alert("Por favor, complete todos los campos");
-          return;
-        }
+        try {
+          const userCredential = await signInWithEmailAndPassword(
+            auth,
+            loginEmail,
+            loginPassword
+          );
+          const user = userCredential.user;
 
-        // Iniciar sesión con Firebase Auth
-        signInWithEmailAndPassword(auth, loginEmail, loginPassword)
-          .then((userCredential) => {
-            const user = userCredential.user;
-            console.log("Usuario autenticado:", user);
-            alert(
-              "Inicio de sesión exitoso! Bienvenido de nuevo, " +
-                user.email +
-                "!"
-            );
-            // Redirigir al formulario después del inicio de sesión
+          // Verificar si el usuario ya tiene los datos necesarios en Firestore
+          const userDocRef = doc(db, "usuarios", user.uid);
+          const userDoc = await getDoc(userDocRef);
+
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+
+            // Verificar si tiene los campos necesarios: gameName, institution, photoURL
+            if (
+              userData.gameName &&
+              userData.institution &&
+              userData.photoURL
+            ) {
+              // Redirigir a juego.html si ya tiene los datos completos
+              localStorage.setItem("gameName", userData.gameName);
+              localStorage.setItem("institution", userData.institution);
+              localStorage.setItem("photoURL", userData.photoURL);
+              window.location.replace("/ut-coin/pages/juego.html");
+            } else {
+              // Redirigir a formulario.html si faltan datos
+              window.location.replace("/ut-coin/pages/formulario.html");
+            }
+          } else {
+            // Si no existe el documento, redirigir a formulario.html
             window.location.replace("/ut-coin/pages/formulario.html");
-          })
-          .catch((error) => {
-            console.error("Error en el inicio de sesión:", error);
-            alert("Error en el inicio de sesión: " + error.message);
-          });
+          }
+        } catch (error) {
+          errorMessage.textContent =
+            "Error al iniciar sesión: " + error.message;
+        }
       });
     </script>
   </body>
