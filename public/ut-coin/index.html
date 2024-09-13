@@ -3,7 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Undertango Happening Coin</title>
+    <title>UnderTango Happening Coin</title>
+    <!-- Meta etiquetas para SEO y redes sociales -->
+    <meta name="description" content="Únete al juego de UnderTango Coin y descubre cómo todos pueden ganar." />
+    <meta name="keywords" content="UnderTango, Coin, Juego, Criptomoneda, Aventura" />
+    <meta property="og:title" content="UnderTango Happening Coin" />
+    <meta property="og:description" content="Bienvenido al juego de UnderTango Coin, donde todos ganan." />
+    <meta property="og:image" content="URL_de_la_imagen" />
+
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -13,7 +20,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 100vh;
+        min-height: 100vh; /* Usamos min-height para mejorar en dispositivos móviles */
       }
       .container {
         text-align: center;
@@ -42,8 +49,12 @@
   </head>
   <body>
     <div class="container">
-      <h1>Bienvenido al juego de los UnderTango Coin, donde todos ganan</h1>
-      <button class="adventure-btn" onclick="comenzarAventura()">
+      <h1>Bienvenido al juego de UnderTango Coin, ¡donde todos ganan!</h1>
+      <button
+        class="adventure-btn"
+        onclick="comenzarAventura()"
+        aria-label="Comenzar aventura"
+      >
         Vamos con todo
       </button>
     </div>
@@ -51,7 +62,7 @@
     <script>
       function comenzarAventura() {
         // Redirige a intro.html cuando se hace clic en el botón.
-        window.location.href = "/ut-coin/pages/intro.html";
+        window.location.href = "pages/intro.html"; // Usamos una ruta relativa
       }
     </script>
   </body>
