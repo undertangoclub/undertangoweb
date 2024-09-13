@@ -156,66 +156,58 @@
         const password = document.getElementById("password").value;
 
         try {
+          console.log("Iniciando proceso de registro...");
           const userCredential = await createUserWithEmailAndPassword(
             auth,
             email,
             password
           );
           const user = userCredential.user;
+          console.log("Usuario creado con UID:", user.uid);
 
-          // Iniciar una transacción para actualizar los contadores globales
+          const monedasIniciales = 10;
+
+          // Crear el perfil del usuario en Firestore
+          const userDocRef = doc(db, "usuarios", user.uid);
+          await setDoc(userDocRef, {
+            email: user.email,
+            undertangoCoins: monedasIniciales,
+            gameName: null,
+            institution: null,
+            photoURL: null,
+          });
+          console.log(
+            "Perfil de usuario creado con monedas iniciales:",
+            monedasIniciales
+          );
+
+          // Actualizar contadores globales
           const globalesRef = doc(db, "globales", "contadores");
-
           await runTransaction(db, async (transaction) => {
             const globalesDoc = await transaction.get(globalesRef);
             if (!globalesDoc.exists()) {
-              throw "El documento de contadores globales no existe.";
+              throw new Error("El documento de contadores globales no existe.");
             }
 
-            let totalUsuariosRegistrados =
-              globalesDoc.data().totalUsuariosRegistrados;
-            let totalCoinsDisponibles =
-              globalesDoc.data().totalCoinsDisponibles;
+            const data = globalesDoc.data();
+            const totalUsuariosRegistrados =
+              (data.totalUsuariosRegistrados || 0) + 1;
+            const totalCoinsDisponibles =
+              (data.totalCoinsDisponibles || 1000) - monedasIniciales;
 
-            // Incrementar el contador de usuarios
-            totalUsuariosRegistrados += 1;
-
-            // Aquí le damos 10 monedas por defecto a todos los usuarios
-            const recompensa = 10;
-
-            // Calcular la recompensa para los primeros 10 usuarios
-            let recompensa =
-              totalUsuariosRegistrados <= 10
-                ? 11 - totalUsuariosRegistrados
-                : 0;
-
-            // Verificar que hay suficientes monedas disponibles
-            if (totalCoinsDisponibles < recompensa) {
-              throw "No hay suficientes monedas disponibles para otorgar la recompensa.";
-            }
-
-            // Actualizar los contadores globales
             transaction.update(globalesRef, {
-              totalUsuariosRegistrados: totalUsuariosRegistrados,
-              totalCoinsDisponibles: totalCoinsDisponibles - recompensa,
+              totalUsuariosRegistrados,
+              totalCoinsDisponibles,
             });
-
-            // Crear el perfil del usuario en Firestore con el número de registro y recompensa
-            const userDocRef = doc(db, "usuarios", user.uid);
-            transaction.set(userDocRef, {
-              email: user.email,
-              numeroRegistro: totalUsuariosRegistrados,
-              undertangoCoins: recompensa, // Aquí se asignan las monedas correctamente
-              gameName: null,
-              institution: null,
-              photoURL: null,
-            });
+            console.log("Contadores globales actualizados.");
           });
 
+          console.log("Registro completado con éxito.");
           alert("Registro exitoso. Redirigiendo a formulario.");
           window.location.replace("/ut-coin/pages/formulario.html");
         } catch (error) {
-          errorMessage.textContent = "Error en el registro: " + error;
+          console.error("Error en el registro:", error);
+          errorMessage.textContent = "Error en el registro: " + error.message;
         }
       });
 
@@ -226,12 +218,14 @@
         const loginPassword = document.getElementById("loginPassword").value;
 
         try {
+          console.log("Iniciando proceso de inicio de sesión...");
           const userCredential = await signInWithEmailAndPassword(
             auth,
             loginEmail,
             loginPassword
           );
           const user = userCredential.user;
+          console.log("Usuario autenticado con UID:", user.uid);
 
           // Verificar si el usuario ya tiene los datos necesarios en Firestore
           const userDocRef = doc(db, "usuarios", user.uid);
@@ -239,6 +233,7 @@
 
           if (userDoc.exists()) {
             const userData = userDoc.data();
+            console.log("Datos del usuario recuperados:", userData);
 
             // Verificar si tiene los campos necesarios: gameName, institution, photoURL
             if (
@@ -246,20 +241,27 @@
               userData.institution &&
               userData.photoURL
             ) {
-              // Redirigir a juego.html si ya tiene los datos completos
+              console.log(
+                "Usuario tiene todos los datos necesarios. Redirigiendo a juego.html"
+              );
               localStorage.setItem("gameName", userData.gameName);
               localStorage.setItem("institution", userData.institution);
               localStorage.setItem("photoURL", userData.photoURL);
               window.location.replace("/ut-coin/pages/juego.html");
             } else {
-              // Redirigir a formulario.html si faltan datos
+              console.log(
+                "Faltan datos del usuario. Redirigiendo a formulario.html"
+              );
               window.location.replace("/ut-coin/pages/formulario.html");
             }
           } else {
-            // Si no existe el documento, redirigir a formulario.html
+            console.log(
+              "No se encontró el documento del usuario. Redirigiendo a formulario.html"
+            );
             window.location.replace("/ut-coin/pages/formulario.html");
           }
         } catch (error) {
+          console.error("Error al iniciar sesión:", error);
           errorMessage.textContent =
             "Error al iniciar sesión: " + error.message;
         }

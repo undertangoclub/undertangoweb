@@ -65,6 +65,7 @@
         getFirestore,
         doc,
         setDoc,
+        getDoc,
       } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
       import {
         getStorage,
@@ -92,7 +93,7 @@
       const welcomeMessage = document.getElementById("welcomeMessage");
 
       // Verificar el estado de autenticación del usuario
-      onAuthStateChanged(auth, (user) => {
+      onAuthStateChanged(auth, async (user) => {
         if (user) {
           // Si displayName es null o vacío, usar el email como respaldo
           const displayName = user.displayName || user.email || "usuario";
@@ -103,42 +104,61 @@
           userInfoForm.addEventListener("submit", async (e) => {
             e.preventDefault();
 
-            // Obtener datos del formulario
-            const gameName = document.getElementById("gameName").value;
-            const institution = document.getElementById("institution").value;
-            const profilePhoto =
-              document.getElementById("profilePhoto").files[0];
+            try {
+              // Obtener datos del formulario
+              const gameName = document.getElementById("gameName").value;
+              const institution = document.getElementById("institution").value;
+              const profilePhoto = document.getElementById("profilePhoto").files[0];
 
-            // Subir la foto a Firebase Storage
-            const storageRef = ref(storage, `profilePhotos/${user.uid}`);
-            await uploadBytes(storageRef, profilePhoto);
+              // Subir la foto a Firebase Storage
+              const storageRef = ref(storage, `profilePhotos/${user.uid}`);
+              await uploadBytes(storageRef, profilePhoto);
 
-            // Obtener la URL de la foto subida
-            const photoURL = await getDownloadURL(storageRef);
+              // Obtener la URL de la foto subida
+              const photoURL = await getDownloadURL(storageRef);
 
-            // Guardar la información del usuario en Firestore
-            const userDocRef = doc(db, "usuarios", user.uid);
-            await setDoc(userDocRef, {
-              gameName: gameName,
-              institution: institution,
-              photoURL: photoURL,
-              email: user.email, // Esto es opcional si quieres guardar el correo
-            });
+              // Obtener el documento existente del usuario para preservar undertangoCoins
+              const userDocRef = doc(db, "usuarios", user.uid);
+              const userDoc = await getDoc(userDocRef);
+              let undertangoCoins = 10; // Valor por defecto si no existe
 
-            // Guardar los datos en localStorage para pasarlos a la siguiente página
-            localStorage.setItem("gameName", gameName);
-            localStorage.setItem("institution", institution);
-            localStorage.setItem("photoURL", photoURL);
+              if (userDoc.exists()) {
+                const userData = userDoc.data();
+                undertangoCoins = userData.undertangoCoins || undertangoCoins;
+              }
 
-            // Redirigir a juego.html
-            window.location.href = "/ut-coin/pages/juego.html";
+              // Guardar la información actualizada del usuario en Firestore
+              await setDoc(userDocRef, {
+                gameName: gameName,
+                institution: institution,
+                photoURL: photoURL,
+                email: user.email,
+                undertangoCoins: undertangoCoins, // Mantener las monedas existentes
+              }, { merge: true });
+
+              console.log("Perfil de usuario actualizado con éxito. undertangoCoins:", undertangoCoins);
+
+              // Guardar los datos en localStorage para pasarlos a la siguiente página
+              localStorage.setItem("gameName", gameName);
+              localStorage.setItem("institution", institution);
+              localStorage.setItem("photoURL", photoURL);
+              localStorage.setItem("undertangoCoins", undertangoCoins.toString());
+
+              // Redirigir a juego.html
+              window.location.href = "/ut-coin/pages/juego.html";
+            } catch (error) {
+              console.error("Error al actualizar el perfil:", error);
+              alert("Hubo un error al actualizar tu perfil. Por favor, intenta de nuevo.");
+            }
           });
         } else {
           // Si no hay usuario autenticado, redirigir al registro
+          console.error("No se pudo obtener información del usuario.");
           alert("Error: No se pudo obtener información del usuario.");
           window.location.replace("/ut-coin/pages/registro.html");
         }
       });
     </script>
   </body>
+</html>
 </html>
