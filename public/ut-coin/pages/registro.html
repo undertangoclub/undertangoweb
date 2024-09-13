@@ -163,16 +163,57 @@
           const user = userCredential.user;
           console.log("Usuario registrado:", user);
 
-          // Crear un documento en Firestore para el nuevo usuario
-          await setDoc(doc(db, "usuarios", user.uid), {
-            email: user.email,
-            gameName: null, // Estos campos se completarán después
-            institution: null,
-            photoURL: null,
-          });
+          // Iniciar una transacción para actualizar los contadores globales
+          const globalesRef = doc(db, "globales", "contadores");
 
-          alert("Registro exitoso. Redirigiendo a formulario.");
-          window.location.replace("/ut-coin/pages/formulario.html");
+          await runTransaction(db, async (transaction) => {
+            const globalesDoc = await transaction.get(globalesRef);
+
+            if (!globalesDoc.exists()) {
+              throw "El documento de contadores globales no existe.";
+            }
+
+            let totalUsuariosRegistrados =
+              globalesDoc.data().totalUsuariosRegistrados;
+            let totalCoinsDisponibles =
+              globalesDoc.data().totalCoinsDisponibles;
+
+            // Incrementar el contador de usuarios
+            totalUsuariosRegistrados += 1;
+
+            // Calcular la recompensa:
+            let recompensa = 0;
+            if (totalUsuariosRegistrados <= 10) {
+              recompensa = 11 - totalUsuariosRegistrados; // Usuario 1 gana 10, Usuario 2 gana 9, ..., Usuario 10 gana 1
+            } else {
+              recompensa = 0; // Usuarios después del número 10 no reciben monedas, pero puedes cambiar esto
+            }
+
+            // Verificar que hay suficientes monedas disponibles
+            if (totalCoinsDisponibles < recompensa) {
+              throw "No hay suficientes monedas disponibles para otorgar la recompensa.";
+            }
+
+            // Actualizar los contadores globales
+            transaction.update(globalesRef, {
+              totalUsuariosRegistrados: totalUsuariosRegistrados,
+              totalCoinsDisponibles: totalCoinsDisponibles - recompensa,
+            });
+
+            // Crear el perfil del usuario en Firestore con el número de registro y recompensa
+            await setDoc(doc(db, "usuarios", user.uid), {
+              email: user.email,
+              numeroRegistro: totalUsuariosRegistrados,
+              undertangoCoins: recompensa,
+              gameName: null, // Estos campos se completarán después
+              institution: null,
+              photoURL: null,
+            });
+
+            // Redirigir al formulario
+            alert("Registro exitoso. Redirigiendo a formulario.");
+            window.location.replace("/ut-coin/pages/formulario.html");
+          });
         } catch (error) {
           errorMessage.textContent = "Error en el registro: " + error.message;
         }

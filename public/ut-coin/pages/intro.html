@@ -47,9 +47,8 @@
   <body>
     <div class="container">
       <p id="introText">
-        Este juego funciona con UnderTango Tokens! las cuales serán repartidas
-        entre usted y todos los que se registren, habrá 1000 tokens en total ni
-        más ni menos
+        Este juego funciona con UnderTango Tokens! Descubrelas y sé el primero
+        en el ranking!
       </p>
       <button id="registerBtn" style="display: none">Registrarse</button>
     </div>
@@ -59,8 +58,7 @@
       const registerBtn = document.getElementById("registerBtn");
 
       introText.addEventListener("click", function () {
-        this.textContent =
-          "De aceptar el desafío, por favor, le pedimos gentilmente que complete un sencillo proceso de inscripción";
+        this.textContent = "Está a un paso! Complete el proceso de inscripción";
         registerBtn.style.display = "inline-block";
       });
 
