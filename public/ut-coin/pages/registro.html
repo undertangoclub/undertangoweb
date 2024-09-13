@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Registro e Inicio de Sesión - UnderTango</title>
+    <title>Registro e Inicio de Sesión - UnderTangø9</title>
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -83,7 +83,7 @@
       <hr />
 
       <!-- Sección de Inicio de Sesión -->
-      <h2>Ya eres usuario, ¡ingresa! :D</h2>
+      <h2>Ya eres usuario, ¡ingresa! Ø :D</h2>
       <form id="loginForm">
         <input
           type="email"
@@ -162,14 +162,12 @@
             password
           );
           const user = userCredential.user;
-          console.log("Usuario registrado:", user);
 
           // Iniciar una transacción para actualizar los contadores globales
           const globalesRef = doc(db, "globales", "contadores");
 
           await runTransaction(db, async (transaction) => {
             const globalesDoc = await transaction.get(globalesRef);
-
             if (!globalesDoc.exists()) {
               throw "El documento de contadores globales no existe.";
             }
@@ -183,12 +181,10 @@
             totalUsuariosRegistrados += 1;
 
             // Calcular la recompensa para los primeros 10 usuarios
-            let recompensa = 0;
-            if (totalUsuariosRegistrados <= 10) {
-              recompensa = 11 - totalUsuariosRegistrados; // Usuario 1 gana 10, Usuario 2 gana 9, ..., Usuario 10 gana 1
-            } else {
-              recompensa = 0; // Usuarios después del número 10 no reciben monedas
-            }
+            let recompensa =
+              totalUsuariosRegistrados <= 10
+                ? 11 - totalUsuariosRegistrados
+                : 0;
 
             // Verificar que hay suficientes monedas disponibles
             if (totalCoinsDisponibles < recompensa) {
@@ -202,21 +198,21 @@
             });
 
             // Crear el perfil del usuario en Firestore con el número de registro y recompensa
-            await setDoc(doc(db, "usuarios", user.uid), {
+            const userDocRef = doc(db, "usuarios", user.uid);
+            transaction.set(userDocRef, {
               email: user.email,
               numeroRegistro: totalUsuariosRegistrados,
-              undertangoCoins: recompensa, // Agregar las monedas de recompensa
-              gameName: null, // Estos campos se completarán después
+              undertangoCoins: recompensa, // Aquí se asignan las monedas correctamente
+              gameName: null,
               institution: null,
               photoURL: null,
             });
-
-            // Redirigir al formulario
-            alert("Registro exitoso. Redirigiendo a formulario.");
-            window.location.replace("/ut-coin/pages/formulario.html");
           });
+
+          alert("Registro exitoso. Redirigiendo a formulario.");
+          window.location.replace("/ut-coin/pages/formulario.html");
         } catch (error) {
-          errorMessage.textContent = "Error en el registro: " + error.message;
+          errorMessage.textContent = "Error en el registro: " + error;
         }
       });
 
