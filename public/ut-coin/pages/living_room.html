@@ -72,7 +72,10 @@
     <!-- Scripts de Firebase -->
     <script type="module">
       // Importar Firebase
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+      import {
+        initializeApp,
+        getApps,
+      } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
       import {
         getAuth,
         onAuthStateChanged,
@@ -85,9 +88,11 @@
         orderBy,
         onSnapshot,
         serverTimestamp,
+        doc,
+        getDoc,
       } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
-      // Configuración de Firebase (usa tu propia configuración)
+      // Configuración de Firebase (reemplaza con tu propia configuración)
       const firebaseConfig = {
         apiKey: "AIzaSyC05s84tQfQbiJua0G0LHnQsZP76HqxMk4",
         authDomain: "undertango.firebaseapp.com",
@@ -97,16 +102,44 @@
         appId: "1:21199358960:web:6b751db7c333403057ab35",
       };
 
-      // Inicializar Firebase
-      const app = initializeApp(firebaseConfig);
+      // Inicializar Firebase solo si no está inicializado
+      let app;
+      if (!getApps().length) {
+        app = initializeApp(firebaseConfig);
+      } else {
+        app = getApps()[0];
+      }
+
       const auth = getAuth(app);
       const db = getFirestore(app);
 
       let currentUser;
+      let userGameName;
 
-      onAuthStateChanged(auth, (user) => {
+      onAuthStateChanged(auth, async (user) => {
         if (user) {
           currentUser = user;
+          console.log("Usuario autenticado:", currentUser.uid);
+
+          // Obtener el gameName desde Firestore
+          try {
+            const userDocRef = doc(db, "usuarios", user.uid);
+            const userDoc = await getDoc(userDocRef);
+            if (userDoc.exists()) {
+              const userData = userDoc.data();
+              userGameName = userData.gameName || user.email;
+              console.log("gameName del usuario:", userGameName);
+            } else {
+              console.error(
+                "No se encontró el documento del usuario en Firestore."
+              );
+              userGameName = user.email;
+            }
+          } catch (error) {
+            console.error("Error al obtener el gameName:", error);
+            userGameName = user.email;
+          }
+
           cargarMensajes();
         } else {
           alert("Debes iniciar sesión para acceder a esta página.");
@@ -124,7 +157,7 @@
         try {
           await addDoc(collection(db, "chatMessages"), {
             userId: currentUser.uid,
-            userName: currentUser.displayName || currentUser.email,
+            userName: userGameName,
             message: messageText,
             timestamp: serverTimestamp(),
           });
@@ -142,17 +175,23 @@
           orderBy("timestamp", "asc")
         );
 
-        onSnapshot(q, (querySnapshot) => {
-          chatMessagesDiv.innerHTML = "";
-          querySnapshot.forEach((doc) => {
-            const messageData = doc.data();
-            const messageDiv = document.createElement("div");
-            messageDiv.className = "message";
-            messageDiv.innerHTML = `<strong>${messageData.userName}:</strong> ${messageData.message}`;
-            chatMessagesDiv.appendChild(messageDiv);
-            chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
-          });
-        });
+        onSnapshot(
+          q,
+          (querySnapshot) => {
+            chatMessagesDiv.innerHTML = "";
+            querySnapshot.forEach((doc) => {
+              const messageData = doc.data();
+              const messageDiv = document.createElement("div");
+              messageDiv.className = "message";
+              messageDiv.innerHTML = `<strong>${messageData.userName}:</strong> ${messageData.message}`;
+              chatMessagesDiv.appendChild(messageDiv);
+              chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
+            });
+          },
+          (error) => {
+            console.error("Error en snapshot listener:", error);
+          }
+        );
       }
     </script>
   </body>
