@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>TradeMarket</title>
+    <style>
+      /* Estilos básicos */
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 20px;
+      }
+      .container {
+        max-width: 800px;
+        margin: auto;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 10px;
+      }
+      h2 {
+        text-align: center;
+      }
+      form {
+        margin-bottom: 30px;
+      }
+      label {
+        display: block;
+        margin: 10px 0 5px;
+      }
+      input[type="text"],
+      input[type="number"] {
+        width: 100%;
+        padding: 8px;
+        box-sizing: border-box;
+      }
+      button {
+        padding: 10px 15px;
+        background-color: #333;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #555;
+      }
+      .market-item {
+        border-bottom: 1px solid #ccc;
+        padding: 10px 0;
+      }
+      .message {
+        color: green;
+      }
+      .error {
+        color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>TradeMarket</h2>
+
+      <!-- Formulario para publicar un artículo -->
+      <form id="publishForm">
+        <h3>Publicar un Artículo</h3>
+        <label for="itemDescription">Descripción:</label>
+        <input type="text" id="itemDescription" required />
+        <label for="itemPrice">Precio en monedas:</label>
+        <input type="number" id="itemPrice" min="1" required />
+        <button type="submit">Publicar</button>
+        <p id="publishMessage" class="message"></p>
+      </form>
+
+      <h3>Artículos Disponibles</h3>
+      <div id="marketItems"></div>
+    </div>
+
+    <!-- Scripts de Firebase -->
+    <script type="module">
+      // Importar Firebase
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+      import {
+        getAuth,
+        onAuthStateChanged,
+      } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+      import {
+        getFirestore,
+        doc,
+        collection,
+        addDoc,
+        getDocs,
+        updateDoc,
+        increment,
+        deleteDoc,
+      } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+      // Configuración de Firebase (usa tu propia configuración)
+      const firebaseConfig = {
+        // ... tus credenciales de Firebase ...
+        apiKey: "TU_API_KEY",
+        authDomain: "TU_AUTH_DOMAIN",
+        projectId: "TU_PROJECT_ID",
+        storageBucket: "TU_STORAGE_BUCKET",
+        messagingSenderId: "TU_MESSAGING_SENDER_ID",
+        appId: "TU_APP_ID",
+      };
+
+      // Inicializar Firebase
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+
+      let currentUser;
+
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          currentUser = user;
+          cargarArticulos();
+        } else {
+          alert("Debes iniciar sesión para acceder a esta página.");
+          window.location.href = "/ut-coin/pages/registro.html";
+        }
+      });
+
+      // Publicar un artículo
+      const publishForm = document.getElementById("publishForm");
+      publishForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const itemDescription =
+          document.getElementById("itemDescription").value;
+        const itemPrice = parseInt(document.getElementById("itemPrice").value);
+        const publishMessage = document.getElementById("publishMessage");
+
+        try {
+          await addDoc(collection(db, "marketItems"), {
+            description: itemDescription,
+            price: itemPrice,
+            sellerId: currentUser.uid,
+            sellerName: currentUser.displayName || currentUser.email,
+            timestamp: Date.now(),
+          });
+          publishMessage.textContent = "¡Artículo publicado con éxito!";
+          cargarArticulos();
+        } catch (error) {
+          console.error("Error al publicar el artículo:", error);
+          publishMessage.textContent = "Error al publicar el artículo.";
+          publishMessage.className = "error";
+        }
+      });
+
+      // Cargar artículos disponibles
+      async function cargarArticulos() {
+        const marketItemsDiv = document.getElementById("marketItems");
+        marketItemsDiv.innerHTML = "";
+        try {
+          const querySnapshot = await getDocs(collection(db, "marketItems"));
+          querySnapshot.forEach((doc) => {
+            const item = doc.data();
+            const itemDiv = document.createElement("div");
+            itemDiv.className = "market-item";
+            itemDiv.innerHTML = `
+            <p><strong>${item.description}</strong></p>
+            <p>Precio: ${item.price} monedas</p>
+            <p>Vendedor: ${item.sellerName}</p>
+            ${
+              item.sellerId !== currentUser.uid
+                ? `<button data-id="${doc.id}" data-price="${item.price}">Comprar</button>`
+                : ""
+            }
+          `;
+            marketItemsDiv.appendChild(itemDiv);
+          });
+
+          // Agregar eventos de compra
+          const buyButtons = document.querySelectorAll("button[data-id]");
+          buyButtons.forEach((button) => {
+            button.addEventListener("click", comprarArticulo);
+          });
+        } catch (error) {
+          console.error("Error al cargar los artículos:", error);
+        }
+      }
+
+      // Comprar un artículo
+      async function comprarArticulo(e) {
+        const itemId = e.target.getAttribute("data-id");
+        const itemPrice = parseInt(e.target.getAttribute("data-price"));
+        const confirmPurchase = confirm(
+          `¿Estás seguro de comprar este artículo por ${itemPrice} monedas?`
+        );
+
+        if (confirmPurchase) {
+          try {
+            // Verificar si el usuario tiene suficientes monedas
+            const userRef = doc(db, "usuarios", currentUser.uid);
+            const userSnap = await getDoc(userRef);
+            if (userSnap.exists()) {
+              const userData = userSnap.data();
+              if (userData.undertangoCoins >= itemPrice) {
+                // Restar monedas al comprador
+                await updateDoc(userRef, {
+                  undertangoCoins: increment(-itemPrice),
+                });
+
+                // Eliminar el artículo del mercado
+                await deleteDoc(doc(db, "marketItems", itemId));
+
+                alert("¡Compra realizada con éxito!");
+                cargarArticulos();
+              } else {
+                alert("No tienes suficientes monedas para esta compra.");
+              }
+            } else {
+              console.error("No se encontró el documento del usuario.");
+            }
+          } catch (error) {
+            console.error("Error al realizar la compra:", error);
+          }
+        }
+      }
+    </script>
+  </body>
+</html>

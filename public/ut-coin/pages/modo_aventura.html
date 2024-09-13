@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Modo Aventura</title>
+    <style>
+      /* Estilos básicos */
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 20px;
+      }
+      .container {
+        max-width: 600px;
+        margin: auto;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 10px;
+      }
+      h2 {
+        text-align: center;
+      }
+      form {
+        margin-bottom: 30px;
+      }
+      label {
+        display: block;
+        margin: 10px 0 5px;
+      }
+      input[type="text"],
+      input[type="email"],
+      input[type="file"] {
+        width: 100%;
+        padding: 8px;
+        box-sizing: border-box;
+      }
+      button {
+        padding: 10px 15px;
+        background-color: #333;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #555;
+      }
+      .message {
+        color: green;
+      }
+      .error {
+        color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Modo Aventura</h2>
+
+      <!-- Formulario para enviar una moneda -->
+      <form id="sendCoinForm">
+        <h3>Enviar una Moneda</h3>
+        <label for="recipientEmail">Email del destinatario:</label>
+        <input type="email" id="recipientEmail" required />
+        <button type="submit">Enviar Moneda</button>
+        <p id="coinMessage" class="message"></p>
+      </form>
+
+      <!-- Formulario para subir una imagen -->
+      <form id="uploadArtForm">
+        <h3>Subir una Obra de Arte</h3>
+        <label for="artTitle">Título de la obra:</label>
+        <input type="text" id="artTitle" required />
+        <label for="artImage">Seleccionar imagen:</label>
+        <input type="file" id="artImage" accept="image/*" required />
+        <button type="submit">Subir Obra</button>
+        <p id="artMessage" class="message"></p>
+      </form>
+    </div>
+
+    <!-- Scripts de Firebase -->
+    <script type="module">
+      // Importar Firebase
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+      import {
+        getAuth,
+        onAuthStateChanged,
+      } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+      import {
+        getFirestore,
+        doc,
+        getDoc,
+        setDoc,
+        updateDoc,
+        increment,
+      } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+      import {
+        getStorage,
+        ref,
+        uploadBytes,
+        getDownloadURL,
+      } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js";
+
+      // Configuración de Firebase (usa tu propia configuración)
+      const firebaseConfig = {
+        apiKey: "AIzaSyC05s84tQfQbiJua0G0LHnQsZP76HqxMk4",
+        authDomain: "undertango.firebaseapp.com",
+        projectId: "undertango",
+        storageBucket: "undertango.appspot.com",
+        messagingSenderId: "21199358960",
+        appId: "1:21199358960:web:6b751db7c333403057ab35",
+      };
+
+      // Inicializar Firebase
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+      const storage = getStorage(app);
+
+      let currentUser;
+
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          currentUser = user;
+        } else {
+          alert("Debes iniciar sesión para acceder a esta página.");
+          window.location.href = "/ut-coin/pages/registro.html";
+        }
+      });
+
+      // Funcionalidad para enviar una moneda
+      const sendCoinForm = document.getElementById("sendCoinForm");
+      sendCoinForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const recipientEmail = document.getElementById("recipientEmail").value;
+        const coinMessage = document.getElementById("coinMessage");
+
+        try {
+          // Obtener el UID del destinatario a través de su email
+          const usersRef = doc(db, "emailsToUIDs", recipientEmail);
+          const userSnap = await getDoc(usersRef);
+
+          if (userSnap.exists()) {
+            const recipientUID = userSnap.data().uid;
+
+            // Actualizar las monedas del destinatario
+            const recipientRef = doc(db, "usuarios", recipientUID);
+            await updateDoc(recipientRef, {
+              undertangoCoins: increment(1),
+            });
+
+            // Restar una moneda al usuario actual
+            const currentUserRef = doc(db, "usuarios", currentUser.uid);
+            await updateDoc(currentUserRef, {
+              undertangoCoins: increment(-1),
+            });
+
+            coinMessage.textContent = "¡Moneda enviada con éxito!";
+          } else {
+            coinMessage.textContent = "El usuario no existe.";
+            coinMessage.className = "error";
+          }
+        } catch (error) {
+          console.error("Error al enviar la moneda:", error);
+          coinMessage.textContent = "Error al enviar la moneda.";
+          coinMessage.className = "error";
+        }
+      });
+
+      // Funcionalidad para subir una obra de arte
+      const uploadArtForm = document.getElementById("uploadArtForm");
+      uploadArtForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const artTitle = document.getElementById("artTitle").value;
+        const artImage = document.getElementById("artImage").files[0];
+        const artMessage = document.getElementById("artMessage");
+
+        try {
+          // Subir la imagen al Storage
+          const artRef = ref(
+            storage,
+            `artworks/${currentUser.uid}/${artImage.name}`
+          );
+          await uploadBytes(artRef, artImage);
+          const artURL = await getDownloadURL(artRef);
+
+          // Guardar la información en Firestore
+          const artDocRef = doc(
+            db,
+            "artworks",
+            `${currentUser.uid}_${Date.now()}`
+          );
+          await setDoc(artDocRef, {
+            title: artTitle,
+            imageUrl: artURL,
+            userId: currentUser.uid,
+            timestamp: Date.now(),
+          });
+
+          artMessage.textContent = "¡Obra de arte subida con éxito!";
+        } catch (error) {
+          console.error("Error al subir la obra de arte:", error);
+          artMessage.textContent = "Error al subir la obra de arte.";
+          artMessage.className = "error";
+        }
+      });
+    </script>
+  </body>
+</html>

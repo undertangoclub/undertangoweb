@@ -203,13 +203,43 @@
           });
 
           console.log("Registro completado con éxito.");
-          alert("Registro exitoso. Redirigiendo a formulario.");
-          window.location.replace("/ut-coin/pages/formulario.html");
+
+          // Verificar si el usuario ya tiene los datos necesarios en Firestore
+          const userDoc = await getDoc(userDocRef);
+
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+
+            if (
+              userData.gameName &&
+              userData.institution &&
+              userData.photoURL
+            ) {
+              console.log(
+                "Usuario tiene todos los datos necesarios. Redirigiendo a juego.html"
+              );
+              localStorage.setItem("gameName", userData.gameName);
+              localStorage.setItem("institution", userData.institution);
+              localStorage.setItem("photoURL", userData.photoURL);
+              window.location.replace("/ut-coin/pages/juego.html");
+            } else {
+              console.log(
+                "Faltan datos del usuario. Redirigiendo a formulario.html"
+              );
+              window.location.replace("/ut-coin/pages/formulario.html");
+            }
+          } else {
+            console.log(
+              "No se encontró el documento del usuario. Redirigiendo a formulario.html"
+            );
+            window.location.replace("/ut-coin/pages/formulario.html");
+          }
         } catch (error) {
           console.error("Error en el registro:", error);
           errorMessage.textContent = "Error en el registro: " + error.message;
         }
       });
+
 
       // Manejar el inicio de sesión de usuario
       loginForm.addEventListener("submit", async (event) => {
