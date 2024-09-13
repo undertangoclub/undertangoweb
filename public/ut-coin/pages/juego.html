@@ -55,7 +55,6 @@
       <button id="livingRoom">Living Room</button>
     </div>
 
-    <!-- Importar Firebase y módulos de manera dinámica -->
     <script type="module">
       // Importar Firebase
       import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
@@ -71,7 +70,7 @@
 
       // Configuración de Firebase
       const firebaseConfig = {
-        apiKey: "AIzaSyC05s84tQFQbiJua0G0LHnQsZP76HqxMk4",
+        apiKey: "AIzaSyC05s84tQfQbiJua0G0LHnQsZP76HqxMk4",
         authDomain: "undertango.firebaseapp.com",
         projectId: "undertango",
         storageBucket: "undertango.appspot.com",
@@ -98,7 +97,6 @@
 
       // Función para obtener monedas del usuario y globales
       function obtenerDatosUsuarioYGlobales() {
-        // Verificar si el usuario está autenticado
         onAuthStateChanged(auth, (user) => {
           if (user) {
             const userId = user.uid;
@@ -141,8 +139,7 @@
               });
           } else {
             console.error("No hay un usuario autenticado.");
-            // Redirigir al usuario al registro si no está autenticado
-            window.location.href = "/ut-coin/pages/registro.html";
+            window.location.href = "registro.html";
           }
         });
       }
@@ -150,17 +147,28 @@
       // Llamar a la función para obtener datos de usuario y globales
       obtenerDatosUsuarioYGlobales();
 
-      // Agregar escuchadores de eventos a los botones
+      // Función para manejar la navegación con autenticación
+      function navegarConAutenticacion(pagina) {
+        const user = auth.currentUser;
+        if (user) {
+          window.location.href = pagina;
+        } else {
+          console.error("Debes iniciar sesión para acceder a esta página.");
+          window.location.href = "registro.html";
+        }
+      }
+
+      // Agregar event listeners a los botones
       document.getElementById("adventureMode").addEventListener("click", () => {
-        window.location.href = "/ut-coin/pages/modo_aventura.html";
+        window.location.href = "modo_aventura.html";
       });
 
       document.getElementById("tradeMarket").addEventListener("click", () => {
-        window.location.href = "/ut-coin/pages/trademarket.html";
+        navegarConAutenticacion("trademarket.html");
       });
 
       document.getElementById("livingRoom").addEventListener("click", () => {
-        window.location.href = "/ut-coin/pages/living_room.html";
+        navegarConAutenticacion("living_room.html");
       });
     </script>
   </body>
