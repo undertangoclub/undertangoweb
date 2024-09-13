@@ -57,14 +57,21 @@
       // Obtener la información del localStorage
       const gameName = localStorage.getItem("gameName");
       const institution = localStorage.getItem("institution");
-      const photoURL = localStorage.getItem("photoURL");
+
+      // URL predeterminada de la imagen en Firebase Storage si no está en localStorage
+      let photoURL = localStorage.getItem("photoURL");
+
+      // Si la URL no está almacenada en localStorage, establecerla manualmente
+      if (!photoURL) {
+        photoURL = "https://firebasestorage.googleapis.com/v0/b/undertango.appspot.com/o/profilePhotos%2Fkro0KZm1wASJSA7orHAWgWgAra93?alt=media&token=36bea0a2-f0b1-433b-930b-92e5b577ee06";
+      }
 
       // Mostrar la información en la página
-      document.getElementById("gameName").textContent = gameName;
-      document.getElementById("institution").textContent = institution;
+      document.getElementById("gameName").textContent = gameName ? gameName : "Capo1"; // Texto predeterminado si no hay valor
+      document.getElementById("institution").textContent = institution ? institution : "Capo2"; // Texto predeterminado si no hay valor
       document.getElementById("profilePhoto").src = photoURL;
 
-      // Agregar eventos a los botones (puedes modificar estos eventos según lo que necesites)
+      // Agregar eventos a los botones
       document.getElementById("adventureMode").addEventListener("click", () => {
         alert("Modo Aventura seleccionado");
       });
