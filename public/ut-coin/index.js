@@ -1,3 +1,7 @@
+/**
+ * The above JavaScript code initializes Firebase, prompts the user to start an adventure, and
+ * redirects to an intro page upon confirmation.
+ */
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";

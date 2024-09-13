@@ -118,6 +118,7 @@
         doc,
         getDoc,
         setDoc,
+        runTransaction,
       } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
       // Configuración de Firebase
@@ -181,12 +182,12 @@
             // Incrementar el contador de usuarios
             totalUsuariosRegistrados += 1;
 
-            // Calcular la recompensa:
+            // Calcular la recompensa para los primeros 10 usuarios
             let recompensa = 0;
             if (totalUsuariosRegistrados <= 10) {
               recompensa = 11 - totalUsuariosRegistrados; // Usuario 1 gana 10, Usuario 2 gana 9, ..., Usuario 10 gana 1
             } else {
-              recompensa = 0; // Usuarios después del número 10 no reciben monedas, pero puedes cambiar esto
+              recompensa = 0; // Usuarios después del número 10 no reciben monedas
             }
 
             // Verificar que hay suficientes monedas disponibles
@@ -204,7 +205,7 @@
             await setDoc(doc(db, "usuarios", user.uid), {
               email: user.email,
               numeroRegistro: totalUsuariosRegistrados,
-              undertangoCoins: recompensa,
+              undertangoCoins: recompensa, // Agregar las monedas de recompensa
               gameName: null, // Estos campos se completarán después
               institution: null,
               photoURL: null,

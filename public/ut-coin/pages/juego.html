@@ -45,6 +45,8 @@
       <h2 id="gameName"></h2>
       <p id="institution"></p>
       <img id="profilePhoto" src="" alt="Foto de perfil" />
+      <p id="userCoins">Monedas de usuario: Cargando...</p>
+      <p id="globalCoins">Monedas disponibles globalmente: Cargando...</p>
     </div>
 
     <div class="buttons-container">
@@ -53,36 +55,98 @@
       <button id="livingRoom">Living Room</button>
     </div>
 
-    <script>
+    <!-- Importar Firebase y módulos de manera dinámica -->
+    <script type="module">
+      // Importar Firebase
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+      import {
+        getFirestore,
+        doc,
+        getDoc,
+      } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+      import {
+        getAuth,
+        onAuthStateChanged,
+      } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+
+      // Configuración de Firebase
+      const firebaseConfig = {
+        apiKey: "AIzaSyC05s84tQfQbiJua0G0LHnQsZP76HqxMk4",
+        authDomain: "undertango.firebaseapp.com",
+        projectId: "undertango",
+        storageBucket: "undertango.appspot.com",
+        messagingSenderId: "21199358960",
+        appId: "1:21199358960:web:6b751db7c333403057ab35",
+      };
+
+      // Inicializar Firebase
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      const auth = getAuth(app);
+
       // Obtener la información del localStorage
       const gameName = localStorage.getItem("gameName");
       const institution = localStorage.getItem("institution");
-
-      // URL predeterminada de la imagen en Firebase Storage si no está en localStorage
-      let photoURL = localStorage.getItem("photoURL");
-
-      // Si la URL no está almacenada en localStorage, establecerla manualmente
-      if (!photoURL) {
-        photoURL = "https://firebasestorage.googleapis.com/v0/b/undertango.appspot.com/o/profilePhotos%2Fkro0KZm1wASJSA7orHAWgWgAra93?alt=media&token=36bea0a2-f0b1-433b-930b-92e5b577ee06";
-      }
+      const photoURL = localStorage.getItem("photoURL");
 
       // Mostrar la información en la página
-      document.getElementById("gameName").textContent = gameName ? gameName : "Capo1"; // Texto predeterminado si no hay valor
-      document.getElementById("institution").textContent = institution ? institution : "Capo2"; // Texto predeterminado si no hay valor
-      document.getElementById("profilePhoto").src = photoURL;
+      document.getElementById("gameName").textContent = gameName || "Capo1";
+      document.getElementById("institution").textContent =
+        institution || "Capo2";
+      document.getElementById("profilePhoto").src =
+        photoURL || "ruta_default.jpg";
 
-      // Agregar eventos a los botones
-      document.getElementById("adventureMode").addEventListener("click", () => {
-        alert("Modo Aventura seleccionado");
-      });
+      // Función para obtener monedas del usuario y globales
+      function obtenerDatosUsuarioYGlobales() {
+        // Verificar si el usuario está autenticado
+        onAuthStateChanged(auth, (user) => {
+          if (user) {
+            const userId = user.uid;
 
-      document.getElementById("tradeMarket").addEventListener("click", () => {
-        alert("TradeMarket seleccionado");
-      });
+            // Obtener los datos del usuario (monedas personales)
+            const userRef = doc(db, "usuarios", userId);
+            getDoc(userRef)
+              .then((doc) => {
+                if (doc.exists()) {
+                  const datosUsuario = doc.data();
+                  document.getElementById(
+                    "userCoins"
+                  ).textContent = `Monedas de usuario: ${datosUsuario.undertangoCoins}`;
+                } else {
+                  console.error("No se encontró el documento del usuario.");
+                }
+              })
+              .catch((error) => {
+                console.error(
+                  "Error al obtener los datos del usuario: ",
+                  error
+                );
+              });
 
-      document.getElementById("livingRoom").addEventListener("click", () => {
-        alert("Living Room seleccionado");
-      });
+            // Obtener los datos globales (monedas disponibles globalmente)
+            const globalesRef = doc(db, "globales", "contadores");
+            getDoc(globalesRef)
+              .then((doc) => {
+                if (doc.exists()) {
+                  const datosGlobales = doc.data();
+                  document.getElementById(
+                    "globalCoins"
+                  ).textContent = `Monedas disponibles globalmente: ${datosGlobales.totalcoinsdisponibles}`;
+                } else {
+                  console.error("No se encontró el documento global.");
+                }
+              })
+              .catch((error) => {
+                console.error("Error al obtener los datos globales: ", error);
+              });
+          } else {
+            console.error("No hay un usuario autenticado.");
+          }
+        });
+      }
+
+      // Llamar a la función para obtener datos de usuario y globales
+      obtenerDatosUsuarioYGlobales();
     </script>
   </body>
 </html>
