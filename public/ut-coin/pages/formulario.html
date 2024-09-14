@@ -26,6 +26,13 @@
         color: #333;
         margin-bottom: 20px;
       }
+      img {
+        margin-top: 20px;
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+      }
     </style>
   </head>
   <body>
@@ -47,11 +54,13 @@
           id="profilePhoto"
           name="profilePhoto"
           accept="image/*"
-          required
         /><br /><br />
 
         <button type="submit">Guardar Información</button>
       </form>
+
+      <!-- Imagen de perfil actual (opcional) -->
+      <div id="currentPhotoContainer"></div>
     </div>
 
     <script type="module">
@@ -74,7 +83,7 @@
         getDownloadURL,
       } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js";
 
-      // Configuración de Firebase
+      // Configuración de Firebase (reemplaza con tu propia configuración)
       const firebaseConfig = {
         apiKey: "AIzaSyC05s84tQfQbiJua0G0LHnQsZP76HqxMk4",
         authDomain: "undertango.firebaseapp.com",
@@ -91,6 +100,13 @@
       const storage = getStorage(app);
 
       const welcomeMessage = document.getElementById("welcomeMessage");
+      const userInfoForm = document.getElementById("userInfoForm");
+      const currentPhotoContainer = document.getElementById(
+        "currentPhotoContainer"
+      );
+
+      // Variable para almacenar la URL de la foto de perfil actual
+      let currentPhotoURL = "";
 
       // Verificar el estado de autenticación del usuario
       onAuthStateChanged(auth, async (user) => {
@@ -99,26 +115,75 @@
           const displayName = user.displayName || user.email || "usuario";
           welcomeMessage.textContent = `¡Bienvenido, ${displayName}!`;
 
+          try {
+            const userId = user.uid;
+
+            // Referencias a documentos
+            const userDocRef = doc(db, "usuarios", userId);
+            const publicDataRef = doc(
+              db,
+              `usuarios/${userId}/publicData/perfilPublico`
+            );
+
+            // Obtener datos privados del usuario
+            const userDoc = await getDoc(userDocRef);
+            // Obtener datos públicos del usuario
+            const publicDataDoc = await getDoc(publicDataRef);
+
+            // Rellenar el formulario con los datos actuales
+            if (publicDataDoc.exists()) {
+              const publicData = publicDataDoc.data();
+              document.getElementById("gameName").value =
+                publicData.gameName || "";
+              currentPhotoURL = publicData.photoURL || "";
+
+              // Mostrar la foto de perfil actual (opcional)
+              if (currentPhotoURL) {
+                const img = document.createElement("img");
+                img.src = currentPhotoURL;
+                img.alt = "Foto de perfil actual";
+                currentPhotoContainer.appendChild(img);
+              }
+            }
+
+            if (userDoc.exists()) {
+              const userData = userDoc.data();
+              document.getElementById("institution").value =
+                userData.institution || "";
+            }
+          } catch (error) {
+            console.error("Error al obtener datos del usuario:", error);
+            alert(
+              "Hubo un error al cargar tus datos. Por favor, intenta de nuevo."
+            );
+          }
+
           // Manejar el envío del formulario
-          const userInfoForm = document.getElementById("userInfoForm");
           userInfoForm.addEventListener("submit", async (e) => {
             e.preventDefault();
 
             try {
+              const userId = user.uid;
+
               // Obtener datos del formulario
               const gameName = document.getElementById("gameName").value;
               const institution = document.getElementById("institution").value;
-              const profilePhoto = document.getElementById("profilePhoto").files[0];
+              const profilePhotoInput = document.getElementById("profilePhoto");
+              const profilePhoto = profilePhotoInput.files[0];
 
-              // Subir la foto a Firebase Storage
-              const storageRef = ref(storage, `profilePhotos/${user.uid}`);
-              await uploadBytes(storageRef, profilePhoto);
+              let photoURL = currentPhotoURL;
 
-              // Obtener la URL de la foto subida
-              const photoURL = await getDownloadURL(storageRef);
+              if (profilePhoto) {
+                // Subir la nueva foto a Firebase Storage
+                const storageRef = ref(storage, `profilePhotos/${userId}`);
+                await uploadBytes(storageRef, profilePhoto);
+
+                // Obtener la URL de la foto subida
+                photoURL = await getDownloadURL(storageRef);
+              }
 
               // Obtener el documento existente del usuario para preservar undertangoCoins
-              const userDocRef = doc(db, "usuarios", user.uid);
+              const userDocRef = doc(db, "usuarios", userId);
               const userDoc = await getDoc(userDocRef);
               let undertangoCoins = 10; // Valor por defecto si no existe
 
@@ -127,28 +192,53 @@
                 undertangoCoins = userData.undertangoCoins || undertangoCoins;
               }
 
-              // Guardar la información actualizada del usuario en Firestore
-              await setDoc(userDocRef, {
-                gameName: gameName,
-                institution: institution,
-                photoURL: photoURL,
-                email: user.email,
-                undertangoCoins: undertangoCoins, // Mantener las monedas existentes
-              }, { merge: true });
+              // Actualizar datos privados del usuario
+              await setDoc(
+                userDocRef,
+                {
+                  institution: institution,
+                  email: user.email,
+                  undertangoCoins: undertangoCoins, // Mantener las monedas existentes
+                },
+                { merge: true }
+              );
 
-              console.log("Perfil de usuario actualizado con éxito. undertangoCoins:", undertangoCoins);
+              // Actualizar datos públicos del usuario
+              const publicDataRef = doc(
+                db,
+                `usuarios/${userId}/publicData/perfilPublico`
+              );
+              await setDoc(
+                publicDataRef,
+                {
+                  gameName: gameName,
+                  photoURL: photoURL,
+                  undertangoCoins: undertangoCoins, // Asegurarse de mantener actualizado
+                },
+                { merge: true }
+              );
+
+              console.log(
+                "Perfil de usuario actualizado con éxito. undertangoCoins:",
+                undertangoCoins
+              );
 
               // Guardar los datos en localStorage para pasarlos a la siguiente página
               localStorage.setItem("gameName", gameName);
               localStorage.setItem("institution", institution);
               localStorage.setItem("photoURL", photoURL);
-              localStorage.setItem("undertangoCoins", undertangoCoins.toString());
+              localStorage.setItem(
+                "undertangoCoins",
+                undertangoCoins.toString()
+              );
 
               // Redirigir a juego.html
               window.location.href = "/ut-coin/pages/juego.html";
             } catch (error) {
               console.error("Error al actualizar el perfil:", error);
-              alert("Hubo un error al actualizar tu perfil. Por favor, intenta de nuevo.");
+              alert(
+                "Hubo un error al actualizar tu perfil. Por favor, intenta de nuevo."
+              );
             }
           });
         } else {
@@ -160,5 +250,4 @@
       });
     </script>
   </body>
-</html>
 </html>

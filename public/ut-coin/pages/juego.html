@@ -9,50 +9,111 @@
         font-family: Arial, sans-serif;
         background-color: #f4f4f4;
         margin: 0;
+        display: flex;
+      }
+      /* Estilos para las barras laterales */
+      .sidebar {
+        width: 200px;
+        background-color: #333;
+        color: #fff;
         padding: 20px;
+        box-sizing: border-box;
+      }
+      .sidebar a {
+        color: #fff;
+        text-decoration: none;
+        display: block;
+        margin-bottom: 10px;
+      }
+      .sidebar a:hover {
+        text-decoration: underline;
+      }
+      /* Contenido principal */
+      .main-content {
+        flex: 1;
+        padding: 20px;
+        box-sizing: border-box;
         text-align: center;
       }
-      .user-info {
-        margin-bottom: 20px;
+      /* Estilos para el ranking */
+      .ranking {
+        list-style: none;
+        padding: 0;
+        margin: 0;
       }
-      .user-info img {
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
-        object-fit: cover;
+      .ranking li {
+        background-color: #fff;
+        margin-bottom: 5px;
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
       }
+      /* Ajustes para la barra derecha */
+      .sidebar-right {
+        width: 250px;
+        background-color: #f9f9f9;
+        color: #333;
+        padding: 20px;
+        box-sizing: border-box;
+        overflow-y: auto;
+      }
+      /* Estilos para los botones */
       .buttons-container {
-        display: flex;
-        justify-content: center;
-        gap: 20px;
+        margin-top: 20px;
       }
-      button {
+      .buttons-container button {
         padding: 15px;
         font-size: 16px;
         cursor: pointer;
         border: none;
         border-radius: 5px;
-        background-color: #333;
+        background-color: #4285f4;
         color: #fff;
+        margin: 5px;
       }
-      button:hover {
-        background-color: #555;
+      .buttons-container button:hover {
+        background-color: #357ae8;
+      }
+      /* Estilos para la información del usuario */
+      .user-info img {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 10px;
       }
     </style>
   </head>
   <body>
-    <div class="user-info">
-      <h2 id="gameName"></h2>
-      <p id="institution"></p>
-      <img id="profilePhoto" src="" alt="Foto de perfil" />
-      <p id="userCoins">Monedas de usuario: Cargando...</p>
-      <p id="globalCoins">Monedas disponibles globalmente: Cargando...</p>
+    <!-- Barra lateral izquierda -->
+    <div class="sidebar">
+      <h3>Menú</h3>
+      <a href="#" id="editProfileLink">Editar Perfil</a>
+      <!-- Puedes agregar más opciones aquí -->
     </div>
 
-    <div class="buttons-container">
-      <button id="adventureMode">Modø Aventura</button>
-      <button id="tradeMarket">TradeMarket</button>
-      <button id="livingRoom">Living Room</button>
+    <!-- Contenido principal -->
+    <div class="main-content">
+      <div class="user-info">
+        <h2 id="gameName"></h2>
+        <p id="institution"></p>
+        <img id="profilePhoto" src="" alt="Foto de perfil" />
+        <p id="userCoins">Monedas de usuario: Cargando...</p>
+        <p id="globalCoins">Monedas disponibles globalmente: Cargando...</p>
+      </div>
+
+      <div class="buttons-container">
+        <button id="adventureMode">Modo Aventura</button>
+        <button id="tradeMarket">TradeMarket</button>
+        <button id="livingRoom">Living Room</button>
+      </div>
+    </div>
+
+    <!-- Barra lateral derecha -->
+    <div class="sidebar-right">
+      <h3>Ranking de Jugadores</h3>
+      <ul id="rankingList" class="ranking">
+        <!-- Aquí se cargará el ranking -->
+      </ul>
     </div>
 
     <script type="module">
@@ -62,13 +123,18 @@
         getFirestore,
         doc,
         getDoc,
+        collectionGroup,
+        query,
+        orderBy,
+        limit,
+        getDocs,
       } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
       import {
         getAuth,
         onAuthStateChanged,
       } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
-      // Configuración de Firebase
+      // Configuración de Firebase (reemplaza con tu propia configuración)
       const firebaseConfig = {
         apiKey: "AIzaSyC05s84tQfQbiJua0G0LHnQsZP76HqxMk4",
         authDomain: "undertango.firebaseapp.com",
@@ -83,65 +149,108 @@
       const db = getFirestore(app);
       const auth = getAuth(app);
 
-      // Obtener la información del localStorage
-      const gameName = localStorage.getItem("gameName");
-      const institution = localStorage.getItem("institution");
-      const photoURL = localStorage.getItem("photoURL");
-
       // Mostrar la información en la página
-      document.getElementById("gameName").textContent = gameName || "Capo1";
-      document.getElementById("institution").textContent =
-        institution || "Capo2";
-      document.getElementById("profilePhoto").src =
-        photoURL || "ruta_default.jpg";
+      function mostrarInformacionUsuario(gameName, institution, photoURL) {
+        document.getElementById("gameName").textContent = gameName || "Usuario";
+        document.getElementById("institution").textContent =
+          institution || "Institución";
+        document.getElementById("profilePhoto").src =
+          photoURL || "ruta_default.jpg";
+      }
 
       // Función para obtener monedas del usuario y globales
       function obtenerDatosUsuarioYGlobales() {
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
           if (user) {
             const userId = user.uid;
 
-            // Obtener los datos del usuario (monedas personales)
-            const userRef = doc(db, "usuarios", userId);
-            getDoc(userRef)
-              .then((doc) => {
-                if (doc.exists()) {
-                  const datosUsuario = doc.data();
-                  document.getElementById(
-                    "userCoins"
-                  ).textContent = `Monedas de usuario: ${datosUsuario.undertangoCoins}`;
-                } else {
-                  console.error("No se encontró el documento del usuario.");
-                }
-              })
-              .catch((error) => {
-                console.error(
-                  "Error al obtener los datos del usuario: ",
-                  error
-                );
-              });
+            // Referencias a documentos
+            const userDocRef = doc(db, "usuarios", userId);
+            const publicDataRef = doc(
+              db,
+              `usuarios/${userId}/publicData/perfilPublico`
+            );
 
-            // Obtener los datos globales (monedas disponibles globalmente)
-            const globalesRef = doc(db, "globales", "contadores");
-            getDoc(globalesRef)
-              .then((doc) => {
-                if (doc.exists()) {
-                  const datosGlobales = doc.data();
-                  document.getElementById(
-                    "globalCoins"
-                  ).textContent = `Monedas disponibles globalmente: ${datosGlobales.totalCoinsDisponibles}`;
-                } else {
-                  console.error("No se encontró el documento global.");
-                }
-              })
-              .catch((error) => {
-                console.error("Error al obtener los datos globales: ", error);
-              });
+            try {
+              // Obtener datos privados del usuario (monedas personales y institution)
+              const userDoc = await getDoc(userDocRef);
+              if (userDoc.exists()) {
+                const userData = userDoc.data();
+                document.getElementById(
+                  "userCoins"
+                ).textContent = `Monedas de usuario: ${
+                  userData.undertangoCoins || 0
+                }`;
+                const institution = userData.institution || "Institución";
+                // Almacenar institution en una variable para mostrarla después
+                mostrarInformacionUsuario(null, institution, null);
+              } else {
+                console.error("No se encontró el documento del usuario.");
+              }
+
+              // Obtener datos públicos del usuario (gameName, photoURL)
+              const publicDataDoc = await getDoc(publicDataRef);
+              if (publicDataDoc.exists()) {
+                const publicData = publicDataDoc.data();
+                const gameName = publicData.gameName || "Usuario";
+                const photoURL = publicData.photoURL || "ruta_default.jpg";
+                mostrarInformacionUsuario(gameName, null, photoURL);
+              } else {
+                console.error(
+                  "No se encontró el documento de datos públicos del usuario."
+                );
+              }
+
+              // Obtener los datos globales (monedas disponibles globalmente)
+              const globalesRef = doc(db, "globales", "contadores");
+              const globalesDoc = await getDoc(globalesRef);
+              if (globalesDoc.exists()) {
+                const datosGlobales = globalesDoc.data();
+                document.getElementById(
+                  "globalCoins"
+                ).textContent = `Monedas disponibles globalmente: ${
+                  datosGlobales.totalCoinsDisponibles || 0
+                }`;
+              } else {
+                console.error("No se encontró el documento global.");
+              }
+
+              // Obtener el ranking de jugadores
+              obtenerRanking();
+            } catch (error) {
+              console.error("Error al obtener los datos: ", error);
+            }
           } else {
             console.error("No hay un usuario autenticado.");
             window.location.href = "registro.html";
           }
         });
+      }
+
+      // Función para obtener el ranking de jugadores
+      async function obtenerRanking() {
+        try {
+          const usuariosPublicDataRef = collectionGroup(db, "publicData");
+          const q = query(
+            usuariosPublicDataRef,
+            orderBy("undertangoCoins", "desc"),
+            limit(10)
+          );
+          const querySnapshot = await getDocs(q);
+          const rankingList = document.getElementById("rankingList");
+          rankingList.innerHTML = "";
+
+          querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            const li = document.createElement("li");
+            li.textContent = `${data.gameName || "Usuario Anónimo"} - ${
+              data.undertangoCoins || 0
+            } monedas`;
+            rankingList.appendChild(li);
+          });
+        } catch (error) {
+          console.error("Error al obtener el ranking: ", error);
+        }
       }
 
       // Llamar a la función para obtener datos de usuario y globales
@@ -170,6 +279,13 @@
       document.getElementById("livingRoom").addEventListener("click", () => {
         navegarConAutenticacion("living_room.html");
       });
+
+      // Evento para el enlace "Editar Perfil"
+      document
+        .getElementById("editProfileLink")
+        .addEventListener("click", () => {
+          navegarConAutenticacion("formulario.html");
+        });
     </script>
   </body>
 </html>

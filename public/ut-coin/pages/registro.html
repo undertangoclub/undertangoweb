@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Registro e Inicio de Sesión - UnderTangø9</title>
+    <title>Registro e Inicio de Sesión - UnderTango</title>
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -121,7 +121,7 @@
         runTransaction,
       } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
-      // Configuración de Firebase
+      // Configuración de Firebase (reemplaza con tu propia configuración)
       const firebaseConfig = {
         apiKey: "AIzaSyC05s84tQfQbiJua0G0LHnQsZP76HqxMk4",
         authDomain: "undertango.firebaseapp.com",
@@ -157,41 +157,63 @@
 
         try {
           console.log("Iniciando proceso de registro...");
-          const userCredential = await createUserWithEmailAndPassword(
-            auth,
-            email,
-            password
-          );
-          const user = userCredential.user;
-          console.log("Usuario creado con UID:", user.uid);
 
-          const monedasIniciales = 10;
-
-          // Crear el perfil del usuario en Firestore
-          const userDocRef = doc(db, "usuarios", user.uid);
-          await setDoc(userDocRef, {
-            email: user.email,
-            undertangoCoins: monedasIniciales,
-            gameName: null,
-            institution: null,
-            photoURL: null,
-          });
-          console.log(
-            "Perfil de usuario creado con monedas iniciales:",
-            monedasIniciales
-          );
-
-          // Actualizar contadores globales
+          // Obtener totalUsuariosRegistrados desde Firestore
           const globalesRef = doc(db, "globales", "contadores");
           await runTransaction(db, async (transaction) => {
             const globalesDoc = await transaction.get(globalesRef);
+
             if (!globalesDoc.exists()) {
               throw new Error("El documento de contadores globales no existe.");
             }
 
-            const data = globalesDoc.data();
-            const totalUsuariosRegistrados =
-              (data.totalUsuariosRegistrados || 0) + 1;
+            let data = globalesDoc.data();
+            let totalUsuariosRegistrados = data.totalUsuariosRegistrados || 0;
+
+            // Calculamos monedasIniciales según totalUsuariosRegistrados
+            let monedasIniciales;
+            let mensajeRegistro = "";
+
+            if (totalUsuariosRegistrados === 0) {
+              // Primer usuario
+              monedasIniciales = 20; // 10 monedas + 10 extra
+              mensajeRegistro =
+                "¡Ey! Eres la primera persona en registrarte, normalmente corresponden 10 monedas, pero tú tienes 10 más";
+            } else if (totalUsuariosRegistrados < 10) {
+              monedasIniciales = 10 - totalUsuariosRegistrados;
+              mensajeRegistro = `¡Ey! Eres la persona número ${
+                totalUsuariosRegistrados + 1
+              } en registrarte, recibes ${monedasIniciales} monedas`;
+            } else {
+              monedasIniciales = 1; // A partir del usuario 10, se asigna 1 moneda
+              mensajeRegistro = "¡Bienvenido! Recibes 1 moneda por registrarte";
+            }
+
+            // Crear el usuario en Auth
+            const userCredential = await createUserWithEmailAndPassword(
+              auth,
+              email,
+              password
+            );
+            const user = userCredential.user;
+            console.log("Usuario creado con UID:", user.uid);
+
+            // Crear el perfil del usuario en Firestore
+            const userDocRef = doc(db, "usuarios", user.uid);
+            await setDoc(userDocRef, {
+              email: user.email,
+              undertangoCoins: monedasIniciales,
+              gameName: null,
+              institution: null,
+              photoURL: null,
+            });
+            console.log(
+              "Perfil de usuario creado con monedas iniciales:",
+              monedasIniciales
+            );
+
+            // Actualizar contadores globales
+            totalUsuariosRegistrados += 1;
             const totalCoinsDisponibles =
               (data.totalCoinsDisponibles || 1000) - monedasIniciales;
 
@@ -200,46 +222,46 @@
               totalCoinsDisponibles,
             });
             console.log("Contadores globales actualizados.");
-          });
 
-          console.log("Registro completado con éxito.");
+            // Mostrar mensaje de registro
+            alert(mensajeRegistro);
 
-          // Verificar si el usuario ya tiene los datos necesarios en Firestore
-          const userDoc = await getDoc(userDocRef);
+            // Verificar si el usuario ya tiene los datos necesarios en Firestore
+            const userDoc = await getDoc(userDocRef);
 
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
+            if (userDoc.exists()) {
+              const userData = userDoc.data();
 
-            if (
-              userData.gameName &&
-              userData.institution &&
-              userData.photoURL
-            ) {
-              console.log(
-                "Usuario tiene todos los datos necesarios. Redirigiendo a juego.html"
-              );
-              localStorage.setItem("gameName", userData.gameName);
-              localStorage.setItem("institution", userData.institution);
-              localStorage.setItem("photoURL", userData.photoURL);
-              window.location.replace("/ut-coin/pages/juego.html");
+              if (userData.gameName && userData.institution) {
+                console.log(
+                  "Usuario tiene todos los datos necesarios. Redirigiendo a juego.html"
+                );
+                localStorage.setItem("gameName", userData.gameName);
+                localStorage.setItem("institution", userData.institution);
+                if (userData.photoURL) {
+                  localStorage.setItem("photoURL", userData.photoURL);
+                } else {
+                  localStorage.removeItem("photoURL");
+                }
+                window.location.replace("/ut-coin/pages/juego.html");
+              } else {
+                console.log(
+                  "Faltan datos del usuario. Redirigiendo a formulario.html"
+                );
+                window.location.replace("/ut-coin/pages/formulario.html");
+              }
             } else {
               console.log(
-                "Faltan datos del usuario. Redirigiendo a formulario.html"
+                "No se encontró el documento del usuario. Redirigiendo a formulario.html"
               );
               window.location.replace("/ut-coin/pages/formulario.html");
             }
-          } else {
-            console.log(
-              "No se encontró el documento del usuario. Redirigiendo a formulario.html"
-            );
-            window.location.replace("/ut-coin/pages/formulario.html");
-          }
+          });
         } catch (error) {
           console.error("Error en el registro:", error);
           errorMessage.textContent = "Error en el registro: " + error.message;
         }
       });
-
 
       // Manejar el inicio de sesión de usuario
       loginForm.addEventListener("submit", async (event) => {
@@ -265,30 +287,38 @@
             const userData = userDoc.data();
             console.log("Datos del usuario recuperados:", userData);
 
-            // Verificar si tiene los campos necesarios: gameName, institution, photoURL
-            if (
-              userData.gameName &&
-              userData.institution &&
-              userData.photoURL
-            ) {
+            // Verificar si tiene los campos necesarios: gameName e institution
+            if (userData.gameName && userData.institution) {
               console.log(
-                "Usuario tiene todos los datos necesarios. Redirigiendo a juego.html"
+                "Usuario tiene nombre de usuario e institución. Preparando redirección a juego.html"
               );
               localStorage.setItem("gameName", userData.gameName);
               localStorage.setItem("institution", userData.institution);
-              localStorage.setItem("photoURL", userData.photoURL);
-              window.location.replace("/ut-coin/pages/juego.html");
+              if (userData.photoURL) {
+                localStorage.setItem("photoURL", userData.photoURL);
+              } else {
+                localStorage.removeItem("photoURL");
+              }
+
+              // Usar setTimeout para asegurar que todas las operaciones asíncronas se completen
+              setTimeout(() => {
+                window.location.href = "/ut-coin/pages/juego.html";
+              }, 0);
             } else {
               console.log(
-                "Faltan datos del usuario. Redirigiendo a formulario.html"
+                "Faltan datos del usuario (nombre de usuario o institución). Preparando redirección a formulario.html"
               );
-              window.location.replace("/ut-coin/pages/formulario.html");
+              setTimeout(() => {
+                window.location.href = "/ut-coin/pages/formulario.html";
+              }, 0);
             }
           } else {
             console.log(
-              "No se encontró el documento del usuario. Redirigiendo a formulario.html"
+              "No se encontró el documento del usuario. Preparando redirección a formulario.html"
             );
-            window.location.replace("/ut-coin/pages/formulario.html");
+            setTimeout(() => {
+              window.location.href = "/ut-coin/pages/formulario.html";
+            }, 0);
           }
         } catch (error) {
           console.error("Error al iniciar sesión:", error);
