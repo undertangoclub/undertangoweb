@@ -149,6 +149,35 @@
       const loginForm = document.getElementById("loginForm");
       const errorMessage = document.getElementById("errorMessage");
 
+      // Función para manejar la redirección basada en los datos del usuario
+      function handleUserRedirect(userData, userId) {
+        localStorage.setItem("userId", userId);
+        localStorage.setItem("userEmail", userData.email);
+        localStorage.setItem("undertangoCoins", userData.undertangoCoins);
+
+        if (userData.gameName) {
+          localStorage.setItem("gameName", userData.gameName);
+        }
+        if (userData.institution) {
+          localStorage.setItem("institution", userData.institution);
+        }
+        if (userData.photoURL) {
+          localStorage.setItem("photoURL", userData.photoURL);
+        }
+
+        if (userData.gameName && userData.institution) {
+          console.log(
+            "Usuario tiene todos los datos. Redirigiendo a juego.html"
+          );
+          window.location.href = "/ut-coin/pages/juego.html";
+        } else {
+          console.log(
+            "Faltan datos del usuario. Redirigiendo a formulario.html"
+          );
+          window.location.href = "/ut-coin/pages/formulario.html";
+        }
+      }
+
       // Manejar el registro de usuario
       registrationForm.addEventListener("submit", async (event) => {
         event.preventDefault();
@@ -175,8 +204,7 @@
             let mensajeRegistro = "";
 
             if (totalUsuariosRegistrados === 0) {
-              // Primer usuario
-              monedasIniciales = 20; // 10 monedas + 10 extra
+              monedasIniciales = 20;
               mensajeRegistro =
                 "¡Ey! Eres la primera persona en registrarte, normalmente corresponden 10 monedas, pero tú tienes 10 más";
             } else if (totalUsuariosRegistrados < 10) {
@@ -185,7 +213,7 @@
                 totalUsuariosRegistrados + 1
               } en registrarte, recibes ${monedasIniciales} monedas`;
             } else {
-              monedasIniciales = 1; // A partir del usuario 10, se asigna 1 moneda
+              monedasIniciales = 1;
               mensajeRegistro = "¡Bienvenido! Recibes 1 moneda por registrarte";
             }
 
@@ -200,13 +228,14 @@
 
             // Crear el perfil del usuario en Firestore
             const userDocRef = doc(db, "usuarios", user.uid);
-            await setDoc(userDocRef, {
+            const userData = {
               email: user.email,
               undertangoCoins: monedasIniciales,
               gameName: null,
               institution: null,
               photoURL: null,
-            });
+            };
+            await setDoc(userDocRef, userData);
             console.log(
               "Perfil de usuario creado con monedas iniciales:",
               monedasIniciales
@@ -226,36 +255,8 @@
             // Mostrar mensaje de registro
             alert(mensajeRegistro);
 
-            // Verificar si el usuario ya tiene los datos necesarios en Firestore
-            const userDoc = await getDoc(userDocRef);
-
-            if (userDoc.exists()) {
-              const userData = userDoc.data();
-
-              if (userData.gameName && userData.institution) {
-                console.log(
-                  "Usuario tiene todos los datos necesarios. Redirigiendo a juego.html"
-                );
-                localStorage.setItem("gameName", userData.gameName);
-                localStorage.setItem("institution", userData.institution);
-                if (userData.photoURL) {
-                  localStorage.setItem("photoURL", userData.photoURL);
-                } else {
-                  localStorage.removeItem("photoURL");
-                }
-                window.location.replace("/ut-coin/pages/juego.html");
-              } else {
-                console.log(
-                  "Faltan datos del usuario. Redirigiendo a formulario.html"
-                );
-                window.location.replace("/ut-coin/pages/formulario.html");
-              }
-            } else {
-              console.log(
-                "No se encontró el documento del usuario. Redirigiendo a formulario.html"
-              );
-              window.location.replace("/ut-coin/pages/formulario.html");
-            }
+            // Manejar la redirección
+            handleUserRedirect(userData, user.uid);
           });
         } catch (error) {
           console.error("Error en el registro:", error);
@@ -286,39 +287,12 @@
           if (userDoc.exists()) {
             const userData = userDoc.data();
             console.log("Datos del usuario recuperados:", userData);
-
-            // Verificar si tiene los campos necesarios: gameName e institution
-            if (userData.gameName && userData.institution) {
-              console.log(
-                "Usuario tiene nombre de usuario e institución. Preparando redirección a juego.html"
-              );
-              localStorage.setItem("gameName", userData.gameName);
-              localStorage.setItem("institution", userData.institution);
-              if (userData.photoURL) {
-                localStorage.setItem("photoURL", userData.photoURL);
-              } else {
-                localStorage.removeItem("photoURL");
-              }
-
-              // Usar setTimeout para asegurar que todas las operaciones asíncronas se completen
-              setTimeout(() => {
-                window.location.href = "/ut-coin/pages/juego.html";
-              }, 0);
-            } else {
-              console.log(
-                "Faltan datos del usuario (nombre de usuario o institución). Preparando redirección a formulario.html"
-              );
-              setTimeout(() => {
-                window.location.href = "/ut-coin/pages/formulario.html";
-              }, 0);
-            }
+            handleUserRedirect(userData, user.uid);
           } else {
             console.log(
-              "No se encontró el documento del usuario. Preparando redirección a formulario.html"
+              "No se encontró el documento del usuario. Redirigiendo a formulario.html"
             );
-            setTimeout(() => {
-              window.location.href = "/ut-coin/pages/formulario.html";
-            }, 0);
+            handleUserRedirect({ email: user.email }, user.uid);
           }
         } catch (error) {
           console.error("Error al iniciar sesión:", error);
