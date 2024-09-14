@@ -172,18 +172,15 @@
             );
 
             try {
-              // Obtener datos privados del usuario (monedas personales y institution)
+              // Inicializar variables para almacenar datos del usuario
+              let gameName, institution, photoURL, undertangoCoins;
+
+              // Obtener datos privados del usuario (monedas personales e institución)
               const userDoc = await getDoc(userDocRef);
               if (userDoc.exists()) {
                 const userData = userDoc.data();
-                document.getElementById(
-                  "userCoins"
-                ).textContent = `Monedas de usuario: ${
-                  userData.undertangoCoins || 0
-                }`;
-                const institution = userData.institution || "Institución";
-                // Almacenar institution en una variable para mostrarla después
-                mostrarInformacionUsuario(null, institution, null);
+                undertangoCoins = userData.undertangoCoins || 0;
+                institution = userData.institution || "Institución";
               } else {
                 console.error("No se encontró el documento del usuario.");
               }
@@ -192,14 +189,21 @@
               const publicDataDoc = await getDoc(publicDataRef);
               if (publicDataDoc.exists()) {
                 const publicData = publicDataDoc.data();
-                const gameName = publicData.gameName || "Usuario";
-                const photoURL = publicData.photoURL || "ruta_default.jpg";
-                mostrarInformacionUsuario(gameName, null, photoURL);
+                gameName = publicData.gameName || "Usuario";
+                photoURL = publicData.photoURL || "ruta_default.jpg";
               } else {
                 console.error(
                   "No se encontró el documento de datos públicos del usuario."
                 );
               }
+
+              // Llamar a mostrarInformacionUsuario con todos los datos disponibles
+              mostrarInformacionUsuario(gameName, institution, photoURL);
+
+              // Mostrar monedas del usuario
+              document.getElementById(
+                "userCoins"
+              ).textContent = `Monedas de usuario: ${undertangoCoins}`;
 
               // Obtener los datos globales (monedas disponibles globalmente)
               const globalesRef = doc(db, "globales", "contadores");
