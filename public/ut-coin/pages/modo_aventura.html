@@ -9,74 +9,106 @@
         font-family: Arial, sans-serif;
         background-color: #f4f4f4;
         margin: 0;
+        display: flex;
+        height: 100vh;
+      }
+      .panel {
         padding: 20px;
-      }
-      .container {
-        max-width: 600px;
-        margin: auto;
-        background-color: #fff;
-        padding: 20px;
-        border-radius: 10px;
-      }
-      h2 {
-        text-align: center;
-      }
-      form {
-        margin-bottom: 30px;
-      }
-      label {
-        display: block;
-        margin: 10px 0 5px;
-      }
-      input[type="text"],
-      input[type="email"],
-      input[type="file"] {
-        width: 100%;
-        padding: 8px;
         box-sizing: border-box;
+        overflow-y: auto;
+      }
+      .left-panel,
+      .right-panel {
+        width: 25%;
+        background-color: #f0f0f0;
+      }
+      .center-panel {
+        width: 50%;
+        background-color: #ffffff;
+      }
+      .user-profile {
+        margin-bottom: 20px;
+      }
+      .user-profile img {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 10px;
+      }
+      .user-list,
+      .challenge-list {
+        list-style-type: none;
+        padding: 0;
+      }
+      .user-list li,
+      .challenge-list li {
+        margin-bottom: 10px;
+        padding: 10px;
+        background-color: #ffffff;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      .user-list li:hover,
+      .challenge-list li:hover {
+        background-color: #e0e0e0;
       }
       button {
         padding: 10px 15px;
-        background-color: #333;
+        background-color: #4caf50;
         color: #fff;
         border: none;
         border-radius: 5px;
         cursor: pointer;
+        margin-top: 10px;
       }
       button:hover {
-        background-color: #555;
+        background-color: #45a049;
       }
-      .message {
-        color: green;
-      }
-      .error {
-        color: red;
+      .section {
+        margin-top: 20px;
+        border-top: 1px solid #ddd;
+        padding-top: 20px;
       }
     </style>
   </head>
   <body>
-    <div class="container">
-      <h2>Modo Aventura</h2>
+    <!-- Panel izquierdo -->
+    <div class="panel left-panel">
+      <div class="user-profile">
+        <h3>Datos del Usuario</h3>
+        <img
+          id="userPhoto"
+          src="https://via.placeholder.com/50"
+          alt="Foto de perfil"
+        />
+        <p id="userName">Usuario: Cargando...</p>
+        <p id="userCoins">Monedas: Cargando...</p>
+        <div id="completedChallenges">
+          <h4>Desafíos Completados:</h4>
+          <ul id="completedChallengesList"></ul>
+        </div>
+      </div>
+      <button id="backToMainButton">Volver al menú principal</button>
+    </div>
 
-      <!-- Formulario para enviar una moneda -->
-      <form id="sendCoinForm">
-        <h3>Enviar una Moneda</h3>
-        <label for="recipientEmail">Email del destinatario:</label>
-        <input type="email" id="recipientEmail" required />
-        <button type="submit">Enviar Moneda</button>
-        <p id="coinMessage" class="message"></p>
-      </form>
+    <!-- Panel central -->
+    <div class="panel center-panel">
+      <h2>Desafíos</h2>
+      <ul class="challenge-list">
+        <li id="challenge1">Desafío 1: Mandar una moneda a otro usuario</li>
+        <li id="challenge2">Desafío 2: Under Construction - Not Ready Yet</li>
+      </ul>
+      <div id="userListContainer" style="display: none">
+        <h3>Selecciona un usuario para enviar una moneda</h3>
+        <ul id="userList" class="user-list"></ul>
+      </div>
+    </div>
 
-      <!-- Formulario para subir una imagen -->
-      <form id="uploadArtForm">
-        <h3>Subir una Obra de Arte</h3>
-        <label for="artTitle">Título de la obra:</label>
-        <input type="text" id="artTitle" required />
-        <label for="artImage">Seleccionar imagen:</label>
-        <input type="file" id="artImage" accept="image/*" required />
-        <button type="submit">Subir Obra</button>
-        <p id="artMessage" class="message"></p>
-      </form>
+    <!-- Panel derecho -->
+    <div class="panel right-panel">
+      <h3>Ranking de Jugadores</h3>
+      <ul id="rankingList" class="user-list"></ul>
     </div>
 
     <!-- Scripts de Firebase -->
@@ -89,20 +121,15 @@
       } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
       import {
         getFirestore,
+        collection,
+        getDocs,
         doc,
-        getDoc,
-        setDoc,
         updateDoc,
         increment,
+        getDoc,
       } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-      import {
-        getStorage,
-        ref,
-        uploadBytes,
-        getDownloadURL,
-      } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js";
 
-      // Configuración de Firebase (usa tu propia configuración)
+      // Configuración de Firebase
       const firebaseConfig = {
         apiKey: "AIzaSyC05s84tQfQbiJua0G0LHnQsZP76HqxMk4",
         authDomain: "undertango.firebaseapp.com",
@@ -116,95 +143,154 @@
       const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
       const db = getFirestore(app);
-      const storage = getStorage(app);
 
       let currentUser;
 
-      onAuthStateChanged(auth, (user) => {
+      onAuthStateChanged(auth, async (user) => {
         if (user) {
           currentUser = user;
+          await loadUserProfile(user.uid);
+          loadRanking();
         } else {
           alert("Debes iniciar sesión para acceder a esta página.");
-          window.location.href = "/ut-coin/pages/registro.html";
+          window.location.href = "registro.html";
         }
       });
 
-      // Funcionalidad para enviar una moneda
-      const sendCoinForm = document.getElementById("sendCoinForm");
-      sendCoinForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const recipientEmail = document.getElementById("recipientEmail").value;
-        const coinMessage = document.getElementById("coinMessage");
-
+      // Cargar datos del usuario
+      async function loadUserProfile(userId) {
         try {
-          // Obtener el UID del destinatario a través de su email
-          const usersRef = doc(db, "emailsToUIDs", recipientEmail);
-          const userSnap = await getDoc(usersRef);
+          const userDocRef = doc(db, "usuarios", userId);
+          const publicDataRef = doc(
+            db,
+            `usuarios/${userId}/publicData/perfilPublico`
+          );
+          const [userDoc, publicDataDoc] = await Promise.all([
+            getDoc(userDocRef),
+            getDoc(publicDataRef),
+          ]);
 
-          if (userSnap.exists()) {
-            const recipientUID = userSnap.data().uid;
+          if (userDoc.exists() && publicDataDoc.exists()) {
+            const userData = userDoc.data();
+            const publicData = publicDataDoc.data();
 
-            // Actualizar las monedas del destinatario
-            const recipientRef = doc(db, "usuarios", recipientUID);
-            await updateDoc(recipientRef, {
-              undertangoCoins: increment(1),
-            });
-
-            // Restar una moneda al usuario actual
-            const currentUserRef = doc(db, "usuarios", currentUser.uid);
-            await updateDoc(currentUserRef, {
-              undertangoCoins: increment(-1),
-            });
-
-            coinMessage.textContent = "¡Moneda enviada con éxito!";
-          } else {
-            coinMessage.textContent = "El usuario no existe.";
-            coinMessage.className = "error";
+            document.getElementById("userName").textContent = `Usuario: ${
+              publicData.gameName || "Usuario Anónimo"
+            }`;
+            document.getElementById("userCoins").textContent = `Monedas: ${
+              userData.undertangoCoins || 0
+            }`;
+            document.getElementById("userPhoto").src =
+              publicData.photoURL || "https://via.placeholder.com/50";
           }
         } catch (error) {
-          console.error("Error al enviar la moneda:", error);
-          coinMessage.textContent = "Error al enviar la moneda.";
-          coinMessage.className = "error";
+          console.error("Error al cargar los datos del perfil:", error);
         }
-      });
+      }
 
-      // Funcionalidad para subir una obra de arte
-      const uploadArtForm = document.getElementById("uploadArtForm");
-      uploadArtForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const artTitle = document.getElementById("artTitle").value;
-        const artImage = document.getElementById("artImage").files[0];
-        const artMessage = document.getElementById("artMessage");
+      // Cargar ranking de jugadores
+      async function loadRanking() {
+        const rankingList = document.getElementById("rankingList");
+        rankingList.innerHTML = "";
 
         try {
-          // Subir la imagen al Storage
-          const artRef = ref(
-            storage,
-            `artworks/${currentUser.uid}/${artImage.name}`
-          );
-          await uploadBytes(artRef, artImage);
-          const artURL = await getDownloadURL(artRef);
+          const querySnapshot = await getDocs(collection(db, "usuarios"));
+          for (const userDoc of querySnapshot.docs) {
+            // Cambié 'doc' a 'userDoc'
+            const userData = userDoc.data();
 
-          // Guardar la información en Firestore
-          const artDocRef = doc(
-            db,
-            "artworks",
-            `${currentUser.uid}_${Date.now()}`
-          );
-          await setDoc(artDocRef, {
-            title: artTitle,
-            imageUrl: artURL,
-            userId: currentUser.uid,
-            timestamp: Date.now(),
+            // Obtener datos públicos
+            const publicDataDoc = await getDoc(
+              doc(db, `usuarios/${userDoc.id}/publicData/perfilPublico`)
+            );
+            const publicData = publicDataDoc.exists()
+              ? publicDataDoc.data()
+              : {};
+
+            const li = document.createElement("li");
+            li.textContent = `${publicData.gameName || "Usuario Anónimo"} - ${
+              userData.undertangoCoins || 0
+            } monedas`;
+            rankingList.appendChild(li);
+          }
+        } catch (error) {
+          console.error("Error al cargar el ranking:", error);
+        }
+      }
+
+      // Evento para Desafío 1
+      document
+        .getElementById("challenge1")
+        .addEventListener("click", async () => {
+          document.getElementById("userListContainer").style.display = "block";
+          const userList = document.getElementById("userList");
+          userList.innerHTML = ""; // Limpiar la lista antes de agregar usuarios
+
+          try {
+            const querySnapshot = await getDocs(collection(db, "usuarios"));
+            for (const userDoc of querySnapshot.docs) {
+              // Cambié 'doc' a 'userDoc'
+              const userData = userDoc.data();
+
+              // Obtener datos públicos
+              const publicDataDoc = await getDoc(
+                doc(db, `usuarios/${userDoc.id}/publicData/perfilPublico`)
+              );
+              const publicData = publicDataDoc.exists()
+                ? publicDataDoc.data()
+                : {};
+
+              if (userDoc.id !== currentUser.uid) {
+                // Evitar mostrar al usuario actual en la lista
+                const li = document.createElement("li");
+                li.textContent = publicData.gameName || "Usuario Anónimo";
+                li.addEventListener("click", () => sendCoin(userDoc.id));
+                userList.appendChild(li);
+              }
+            }
+          } catch (error) {
+            console.error("Error al cargar la lista de usuarios:", error);
+          }
+        });
+
+      // Enviar moneda a otro usuario
+      async function sendCoin(recipientId) {
+        try {
+          // Restar una moneda al usuario actual
+          await updateDoc(doc(db, "usuarios", currentUser.uid), {
+            undertangoCoins: increment(-1),
           });
 
-          artMessage.textContent = "¡Obra de arte subida con éxito!";
+          // Sumar una moneda al destinatario
+          await updateDoc(doc(db, "usuarios", recipientId), {
+            undertangoCoins: increment(1),
+          });
+
+          alert("¡Moneda enviada con éxito!");
+          await loadUserProfile(currentUser.uid);
+
+          // Marcar el desafío como completado
+          const completedChallengesList = document.getElementById(
+            "completedChallengesList"
+          );
+          const li = document.createElement("li");
+          li.textContent =
+            "Desafío 1: Mandar una moneda a otro usuario - Completado";
+          completedChallengesList.appendChild(li);
+
+          // Ocultar la lista de usuarios
+          document.getElementById("userListContainer").style.display = "none";
         } catch (error) {
-          console.error("Error al subir la obra de arte:", error);
-          artMessage.textContent = "Error al subir la obra de arte.";
-          artMessage.className = "error";
+          console.error("Error al enviar la moneda:", error);
         }
-      });
+      }
+
+      // Botón "Volver al menú principal"
+      document
+        .getElementById("backToMainButton")
+        .addEventListener("click", () => {
+          window.location.href = "juego.html";
+        });
     </script>
   </body>
 </html>
