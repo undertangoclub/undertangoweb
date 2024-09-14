@@ -33,6 +33,32 @@
         border-radius: 50%;
         object-fit: cover;
       }
+      form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      label, input {
+        margin-bottom: 10px;
+      }
+      input[type="text"], input[type="file"] {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+      button {
+        background-color: #4285f4;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 5px;
+      }
+      button:hover {
+        background-color: #357ae8;
+      }
     </style>
   </head>
   <body>
@@ -101,9 +127,9 @@
 
       const welcomeMessage = document.getElementById("welcomeMessage");
       const userInfoForm = document.getElementById("userInfoForm");
-      const currentPhotoContainer = document.getElementById(
-        "currentPhotoContainer"
-      );
+      const currentPhotoContainer = document.getElementById("currentPhotoContainer");
+      const gameNameInput = document.getElementById("gameName");
+      const institutionInput = document.getElementById("institution");
 
       // Variable para almacenar la URL de la foto de perfil actual
       let currentPhotoURL = "";
@@ -120,10 +146,7 @@
 
             // Referencias a documentos
             const userDocRef = doc(db, "usuarios", userId);
-            const publicDataRef = doc(
-              db,
-              `usuarios/${userId}/publicData/perfilPublico`
-            );
+            const publicDataRef = doc(db, `usuarios/${userId}/publicData/perfilPublico`);
 
             // Obtener datos privados del usuario
             const userDoc = await getDoc(userDocRef);
@@ -133,8 +156,7 @@
             // Rellenar el formulario con los datos actuales
             if (publicDataDoc.exists()) {
               const publicData = publicDataDoc.data();
-              document.getElementById("gameName").value =
-                publicData.gameName || "";
+              gameNameInput.value = publicData.gameName || "";
               currentPhotoURL = publicData.photoURL || "";
 
               // Mostrar la foto de perfil actual (opcional)
@@ -148,14 +170,19 @@
 
             if (userDoc.exists()) {
               const userData = userDoc.data();
-              document.getElementById("institution").value =
-                userData.institution || "";
+              institutionInput.value = userData.institution || "";
+            }
+
+            // Verificar si ambos campos tienen datos
+            if (gameNameInput.value && institutionInput.value) {
+              // Mostrar popup
+              alert("¡Ya estás inscripto, genial!");
+              // Redirigir a juego.html
+              window.location.href = "/ut-coin/pages/juego.html";
             }
           } catch (error) {
             console.error("Error al obtener datos del usuario:", error);
-            alert(
-              "Hubo un error al cargar tus datos. Por favor, intenta de nuevo."
-            );
+            alert("Hubo un error al cargar tus datos. Por favor, intenta de nuevo.");
           }
 
           // Manejar el envío del formulario
@@ -166,8 +193,8 @@
               const userId = user.uid;
 
               // Obtener datos del formulario
-              const gameName = document.getElementById("gameName").value;
-              const institution = document.getElementById("institution").value;
+              const gameName = gameNameInput.value;
+              const institution = institutionInput.value;
               const profilePhotoInput = document.getElementById("profilePhoto");
               const profilePhoto = profilePhotoInput.files[0];
 
@@ -193,52 +220,33 @@
               }
 
               // Actualizar datos privados del usuario
-              await setDoc(
-                userDocRef,
-                {
-                  institution: institution,
-                  email: user.email,
-                  undertangoCoins: undertangoCoins, // Mantener las monedas existentes
-                },
-                { merge: true }
-              );
+              await setDoc(userDocRef, {
+                institution: institution,
+                email: user.email,
+                undertangoCoins: undertangoCoins, // Mantener las monedas existentes
+              }, { merge: true });
 
               // Actualizar datos públicos del usuario
-              const publicDataRef = doc(
-                db,
-                `usuarios/${userId}/publicData/perfilPublico`
-              );
-              await setDoc(
-                publicDataRef,
-                {
-                  gameName: gameName,
-                  photoURL: photoURL,
-                  undertangoCoins: undertangoCoins, // Asegurarse de mantener actualizado
-                },
-                { merge: true }
-              );
+              const publicDataRef = doc(db, `usuarios/${userId}/publicData/perfilPublico`);
+              await setDoc(publicDataRef, {
+                gameName: gameName,
+                photoURL: photoURL,
+                undertangoCoins: undertangoCoins, // Asegurarse de mantener actualizado
+              }, { merge: true });
 
-              console.log(
-                "Perfil de usuario actualizado con éxito. undertangoCoins:",
-                undertangoCoins
-              );
+              console.log("Perfil de usuario actualizado con éxito. undertangoCoins:", undertangoCoins);
 
               // Guardar los datos en localStorage para pasarlos a la siguiente página
               localStorage.setItem("gameName", gameName);
               localStorage.setItem("institution", institution);
               localStorage.setItem("photoURL", photoURL);
-              localStorage.setItem(
-                "undertangoCoins",
-                undertangoCoins.toString()
-              );
+              localStorage.setItem("undertangoCoins", undertangoCoins.toString());
 
               // Redirigir a juego.html
               window.location.href = "/ut-coin/pages/juego.html";
             } catch (error) {
               console.error("Error al actualizar el perfil:", error);
-              alert(
-                "Hubo un error al actualizar tu perfil. Por favor, intenta de nuevo."
-              );
+              alert("Hubo un error al actualizar tu perfil. Por favor, intenta de nuevo.");
             }
           });
         } else {

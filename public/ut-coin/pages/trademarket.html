@@ -2,83 +2,138 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <title>TradeMarket</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TradeMarket - UnderTango</title>
     <style>
-      /* Estilos básicos */
       body {
         font-family: Arial, sans-serif;
-        background-color: #f4f4f4;
         margin: 0;
+        padding: 0;
+        display: flex;
+        height: 100vh;
+      }
+      .panel {
         padding: 20px;
-      }
-      .container {
-        max-width: 800px;
-        margin: auto;
-        background-color: #fff;
-        padding: 20px;
-        border-radius: 10px;
-      }
-      h2 {
-        text-align: center;
-      }
-      form {
-        margin-bottom: 30px;
-      }
-      label {
-        display: block;
-        margin: 10px 0 5px;
-      }
-      input[type="text"],
-      input[type="number"] {
-        width: 100%;
-        padding: 8px;
         box-sizing: border-box;
+        overflow-y: auto;
+      }
+      .left-panel,
+      .right-panel {
+        width: 25%;
+        background-color: #f0f0f0;
+      }
+      .center-panel {
+        width: 50%;
+        background-color: #ffffff;
+      }
+      .user-profile {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      .user-profile img {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        margin-right: 10px;
+      }
+      .user-details {
+        display: flex;
+        flex-direction: column;
+      }
+      .user-list,
+      .market-list {
+        list-style-type: none;
+        padding: 0;
+      }
+      .user-list li,
+      .market-list li {
+        margin-bottom: 10px;
+        padding: 10px;
+        background-color: #ffffff;
+        border-radius: 5px;
       }
       button {
+        background-color: #4caf50;
+        color: white;
         padding: 10px 15px;
-        background-color: #333;
-        color: #fff;
         border: none;
-        border-radius: 5px;
+        border-radius: 4px;
         cursor: pointer;
+        margin-bottom: 10px;
       }
       button:hover {
-        background-color: #555;
+        background-color: #45a049;
+      }
+      #backToMainButton {
+        background-color: #007bff;
+      }
+      #backToMainButton:hover {
+        background-color: #0056b3;
       }
       .market-item {
-        border-bottom: 1px solid #ccc;
-        padding: 10px 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        padding: 10px;
+        background-color: #f0f0f0;
+        border-radius: 5px;
       }
-      .message {
-        color: green;
+      .user-info {
+        display: flex;
+        align-items: center;
       }
-      .error {
-        color: red;
+      .user-info img {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        margin-right: 10px;
+      }
+      .accept-offer-btn {
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 3px;
+        cursor: pointer;
+      }
+      .accept-offer-btn:hover {
+        background-color: #45a049;
       }
     </style>
   </head>
   <body>
-    <div class="container">
-      <h2>TradeMarket</h2>
-
-      <!-- Formulario para publicar un artículo -->
-      <form id="publishForm">
-        <h3>Publicar un Artículo</h3>
-        <label for="itemDescription">Descripción:</label>
-        <input type="text" id="itemDescription" required />
-        <label for="itemPrice">Precio en monedas:</label>
-        <input type="number" id="itemPrice" min="1" required />
-        <button type="submit">Publicar</button>
-        <p id="publishMessage" class="message"></p>
-      </form>
-
-      <h3>Artículos Disponibles</h3>
-      <div id="marketItems"></div>
+    <div class="panel left-panel">
+      <div class="user-profile">
+        <img
+          id="profilePhoto"
+          src="https://via.placeholder.com/50"
+          alt="Foto de perfil"
+        />
+        <div class="user-details">
+          <span id="gameName">Usuario</span>
+          <span id="institution">Institución</span>
+        </div>
+      </div>
+      <h2>Mis Acciones</h2>
+      <button id="sellButton">Vender algo</button>
+      <button id="buyButton">Comprar algo</button>
+      <button id="backToMainButton">Volver al menú principal</button>
+      <div id="actionForm"></div>
     </div>
 
-    <!-- Scripts de Firebase -->
+    <div class="panel center-panel">
+      <h2>Mercado</h2>
+      <ul id="marketList" class="market-list"></ul>
+    </div>
+
+    <div class="panel right-panel">
+      <h2>Ranking de Jugadores</h2>
+      <ul id="rankingList" class="user-list"></ul>
+    </div>
+
     <script type="module">
-      // Importar Firebase
       import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
       import {
         getAuth,
@@ -86,16 +141,21 @@
       } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
       import {
         getFirestore,
-        doc,
         collection,
         addDoc,
         getDocs,
+        getDoc,
+        doc,
         updateDoc,
-        increment,
         deleteDoc,
+        query,
+        orderBy,
+        limit,
+        collectionGroup,
+        increment,
+        runTransaction,
       } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
-      // Configuración de Firebase (usa tu propia configuración)
       const firebaseConfig = {
         apiKey: "AIzaSyC05s84tQfQbiJua0G0LHnQsZP76HqxMk4",
         authDomain: "undertango.firebaseapp.com",
@@ -105,119 +165,348 @@
         appId: "1:21199358960:web:6b751db7c333403057ab35",
       };
 
-      // Inicializar Firebase
       const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
       const db = getFirestore(app);
 
-      let currentUser;
-
       onAuthStateChanged(auth, (user) => {
         if (user) {
-          currentUser = user;
-          cargarArticulos();
+          loadUserProfile(user.uid);
+          loadUsers();
+          loadMarketItems();
+          obtenerRanking();
         } else {
-          alert("Debes iniciar sesión para acceder a esta página.");
-          window.location.href = "/ut-coin/pages/registro.html";
+          window.location.href = "registro.html";
         }
       });
 
-      // Publicar un artículo
-      const publishForm = document.getElementById("publishForm");
-      publishForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const itemDescription =
-          document.getElementById("itemDescription").value;
-        const itemPrice = parseInt(document.getElementById("itemPrice").value);
-        const publishMessage = document.getElementById("publishMessage");
-
+      async function loadUserProfile(userId) {
         try {
-          await addDoc(collection(db, "marketItems"), {
-            description: itemDescription,
-            price: itemPrice,
-            sellerId: currentUser.uid,
-            sellerName: currentUser.displayName || currentUser.email,
-            timestamp: Date.now(),
-          });
-          publishMessage.textContent = "¡Artículo publicado con éxito!";
-          cargarArticulos();
-        } catch (error) {
-          console.error("Error al publicar el artículo:", error);
-          publishMessage.textContent = "Error al publicar el artículo.";
-          publishMessage.className = "error";
-        }
-      });
+          const userDoc = await getDoc(doc(db, "usuarios", userId));
+          const publicDataDoc = await getDoc(
+            doc(db, `usuarios/${userId}/publicData/perfilPublico`)
+          );
 
-      // Cargar artículos disponibles
-      async function cargarArticulos() {
-        const marketItemsDiv = document.getElementById("marketItems");
-        marketItemsDiv.innerHTML = "";
-        try {
-          const querySnapshot = await getDocs(collection(db, "marketItems"));
-          querySnapshot.forEach((doc) => {
-            const item = doc.data();
-            const itemDiv = document.createElement("div");
-            itemDiv.className = "market-item";
-            itemDiv.innerHTML = `
-            <p><strong>${item.description}</strong></p>
-            <p>Precio: ${item.price} monedas</p>
-            <p>Vendedor: ${item.sellerName}</p>
-            ${
-              item.sellerId !== currentUser.uid
-                ? `<button data-id="${doc.id}" data-price="${item.price}">Comprar</button>`
-                : ""
-            }
-          `;
-            marketItemsDiv.appendChild(itemDiv);
-          });
+          if (userDoc.exists() && publicDataDoc.exists()) {
+            const userData = userDoc.data();
+            const publicData = publicDataDoc.data();
 
-          // Agregar eventos de compra
-          const buyButtons = document.querySelectorAll("button[data-id]");
-          buyButtons.forEach((button) => {
-            button.addEventListener("click", comprarArticulo);
-          });
-        } catch (error) {
-          console.error("Error al cargar los artículos:", error);
-        }
-      }
-
-      // Comprar un artículo
-      async function comprarArticulo(e) {
-        const itemId = e.target.getAttribute("data-id");
-        const itemPrice = parseInt(e.target.getAttribute("data-price"));
-        const confirmPurchase = confirm(
-          `¿Estás seguro de comprar este artículo por ${itemPrice} monedas?`
-        );
-
-        if (confirmPurchase) {
-          try {
-            // Verificar si el usuario tiene suficientes monedas
-            const userRef = doc(db, "usuarios", currentUser.uid);
-            const userSnap = await getDoc(userRef);
-            if (userSnap.exists()) {
-              const userData = userSnap.data();
-              if (userData.undertangoCoins >= itemPrice) {
-                // Restar monedas al comprador
-                await updateDoc(userRef, {
-                  undertangoCoins: increment(-itemPrice),
-                });
-
-                // Eliminar el artículo del mercado
-                await deleteDoc(doc(db, "marketItems", itemId));
-
-                alert("¡Compra realizada con éxito!");
-                cargarArticulos();
-              } else {
-                alert("No tienes suficientes monedas para esta compra.");
-              }
-            } else {
-              console.error("No se encontró el documento del usuario.");
-            }
-          } catch (error) {
-            console.error("Error al realizar la compra:", error);
+            document.getElementById("gameName").textContent =
+              publicData.gameName || "Usuario";
+            document.getElementById("institution").textContent =
+              userData.institution || "Institución";
+            document.getElementById("profilePhoto").src =
+              publicData.photoURL || "https://via.placeholder.com/50";
           }
+        } catch (error) {
+          console.error("Error loading user profile:", error);
         }
       }
+
+      async function loadUsers() {
+        const userList = document.getElementById("rankingList");
+        if (!userList) {
+          console.error("Element with id 'rankingList' not found");
+          return;
+        }
+        userList.innerHTML = "";
+        try {
+          const usersSnapshot = await getDocs(collection(db, "usuarios"));
+          usersSnapshot.forEach((doc) => {
+            const userData = doc.data();
+            const li = document.createElement("li");
+            li.textContent = `${userData.gameName || "Usuario"} - ${
+              userData.undertangoCoins || 0
+            } monedas`;
+            li.onclick = () => showSendMoneyForm(doc.id, userData.gameName);
+            userList.appendChild(li);
+          });
+        } catch (error) {
+          console.error("Error loading users:", error);
+        }
+      }
+
+      async function loadMarketItems() {
+        const marketList = document.getElementById("marketList");
+        if (!marketList) {
+          console.error("Element with id 'marketList' not found");
+          return;
+        }
+        marketList.innerHTML = "";
+        try {
+          const itemsSnapshot = await getDocs(collection(db, "marketItems"));
+          for (const itemDoc of itemsSnapshot.docs) {
+            const itemData = itemDoc.data();
+            const publicDataDoc = await getDoc(
+              doc(db, `usuarios/${itemData.userId}/publicData/perfilPublico`)
+            );
+            const publicData = publicDataDoc.exists()
+              ? publicDataDoc.data()
+              : {};
+
+            const li = document.createElement("li");
+            li.className = "market-item";
+            li.innerHTML = `
+              <div class="user-info">
+                <img src="${
+                  publicData.photoURL || "https://via.placeholder.com/30"
+                }" alt="User Photo">
+                <span>${publicData.gameName || "Usuario Anónimo"}</span>
+              </div>
+              <span>${itemData.type === "sell" ? "Vende" : "Compra"}: ${
+              itemData.description
+            } - ${itemData.price} monedas</span>
+              <button class="accept-offer-btn" onclick="acceptOffer('${
+                itemDoc.id
+              }', '${itemData.type}')">
+                ${itemData.type === "sell" ? "Comprar" : "Vender"}
+              </button>
+            `;
+            marketList.appendChild(li);
+          }
+        } catch (error) {
+          console.error("Error loading market items:", error);
+        }
+      }
+
+      async function obtenerRanking() {
+        try {
+          const usuariosPublicDataRef = collectionGroup(db, "publicData");
+          const q = query(
+            usuariosPublicDataRef,
+            orderBy("undertangoCoins", "desc"),
+            limit(10)
+          );
+          const querySnapshot = await getDocs(q);
+          const rankingList = document.getElementById("rankingList");
+          if (!rankingList) {
+            console.error("Element with id 'rankingList' not found");
+            return;
+          }
+          rankingList.innerHTML = "";
+
+          querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            const li = document.createElement("li");
+            li.textContent = `${data.gameName || "Usuario Anónimo"} - ${
+              data.undertangoCoins || 0
+            } monedas`;
+            rankingList.appendChild(li);
+          });
+        } catch (error) {
+          console.error("Error al obtener el ranking: ", error);
+        }
+      }
+
+      function showSendMoneyForm(userId, userName) {
+        const actionForm = document.getElementById("actionForm");
+        if (!actionForm) {
+          console.error("Element with id 'actionForm' not found");
+          return;
+        }
+        actionForm.innerHTML = `
+              <h3>Enviar monedas a ${userName}</h3>
+              <input type="number" id="amount" placeholder="Cantidad">
+              <input type="text" id="message" placeholder="Mensaje">
+              <button onclick="sendMoney('${userId}')">Enviar</button>
+          `;
+      }
+
+      window.sendMoney = async function (recipientId) {
+        const amount = document.getElementById("amount").value;
+        const message = document.getElementById("message").value;
+        const senderId = auth.currentUser.uid;
+
+        try {
+          await addDoc(collection(db, "transactions"), {
+            sender: senderId,
+            recipient: recipientId,
+            amount: Number(amount),
+            message: message,
+            timestamp: new Date(),
+          });
+
+          const senderDoc = doc(db, "usuarios", senderId);
+          const recipientDoc = doc(db, "usuarios", recipientId);
+          await updateDoc(senderDoc, {
+            undertangoCoins: increment(-Number(amount)),
+          });
+          await updateDoc(recipientDoc, {
+            undertangoCoins: increment(Number(amount)),
+          });
+
+          alert("Transacción completada");
+          loadUsers();
+          obtenerRanking();
+        } catch (error) {
+          console.error("Error en la transacción:", error);
+          alert("Error en la transacción: " + error.message);
+        }
+      };
+
+      document.getElementById("sellButton").onclick = showSellForm;
+      document.getElementById("buyButton").onclick = showBuyForm;
+      document.getElementById("backToMainButton").onclick = () => {
+        window.location.href = "juego.html";
+      };
+
+      function showSellForm() {
+        const actionForm = document.getElementById("actionForm");
+        if (!actionForm) {
+          console.error("Element with id 'actionForm' not found");
+          return;
+        }
+        actionForm.innerHTML = `
+              <h3>Vender algo</h3>
+              <input type="text" id="itemDescription" placeholder="Descripción">
+              <input type="number" id="itemPrice" placeholder="Precio">
+              <button onclick="createMarketItem('sell')">Publicar venta</button>
+          `;
+      }
+
+      function showBuyForm() {
+        const actionForm = document.getElementById("actionForm");
+        if (!actionForm) {
+          console.error("Element with id 'actionForm' not found");
+          return;
+        }
+        actionForm.innerHTML = `
+              <h3>Comprar algo</h3>
+              <input type="text" id="itemDescription" placeholder="Descripción">
+              <input type="number" id="itemPrice" placeholder="Precio máximo">
+              <button onclick="createMarketItem('buy')">Publicar compra</button>
+          `;
+      }
+
+      window.createMarketItem = async function (type) {
+        const description = document.getElementById("itemDescription").value;
+        const price = document.getElementById("itemPrice").value;
+        const userId = auth.currentUser.uid;
+
+        try {
+          const userDoc = await getDoc(doc(db, "usuarios", userId));
+          const userData = userDoc.data();
+          const publicDataDoc = await getDoc(
+            doc(db, `usuarios/${userId}/publicData/perfilPublico`)
+          );
+          const publicData = publicDataDoc.data();
+
+          await addDoc(collection(db, "marketItems"), {
+            type: type,
+            description: description,
+            price: Number(price),
+            userId: userId,
+            gameName: userData.gameName || "Usuario Anónimo",
+            photoURL: publicData.photoURL || null,
+            timestamp: new Date(),
+          });
+
+          alert(`Orden de ${type} publicada`);
+          loadMarketItems();
+        } catch (error) {
+          console.error("Error al crear ítem de mercado:", error);
+          alert("Error al publicar la orden: " + error.message);
+        }
+      };
+
+      window.acceptOffer = async function (itemId, itemType) {
+        const user = auth.currentUser;
+        if (!user) {
+          alert("Debes iniciar sesión para aceptar ofertas.");
+          return;
+        }
+
+        try {
+          await runTransaction(db, async (transaction) => {
+            const itemDocRef = doc(db, "marketItems", itemId);
+            const itemDoc = await transaction.get(itemDocRef);
+
+            if (!itemDoc.exists()) {
+              throw "Esta oferta ya no está disponible.";
+            }
+
+            const itemData = itemDoc.data();
+            const currentUserDocRef = doc(db, "usuarios", user.uid);
+            const currentUserDoc = await transaction.get(currentUserDocRef);
+            const currentUserData = currentUserDoc.data();
+
+            const otherUserDocRef = doc(db, "usuarios", itemData.userId);
+            const otherUserDoc = await transaction.get(otherUserDocRef);
+            const otherUserData = otherUserDoc.data();
+
+            if (itemType === "sell") {
+              // Deduct coins from the current user (buyer)
+              if (currentUserData.undertangoCoins < itemData.price) {
+                throw "No tienes suficientes monedas para comprar este ítem.";
+              }
+
+              transaction.update(currentUserDocRef, {
+                undertangoCoins: increment(-itemData.price),
+              });
+              // Add coins to the seller
+              transaction.update(otherUserDocRef, {
+                undertangoCoins: increment(itemData.price),
+              });
+
+              // Add the purchased item to the buyer's profile
+              const purchaseRef = doc(
+                collection(db, `usuarios/${user.uid}/purchases`)
+              );
+              transaction.set(purchaseRef, {
+                description: itemData.description,
+                price: itemData.price,
+                sellerId: itemData.userId,
+                timestamp: new Date(),
+              });
+            } else {
+              // Handle the case where the current user is selling (other user is buying)
+              if (otherUserData.undertangoCoins < itemData.price) {
+                throw "El comprador no tiene suficientes monedas para comprar este ítem.";
+              }
+
+              // Add coins to the current user (seller)
+              transaction.update(currentUserDocRef, {
+                undertangoCoins: increment(itemData.price),
+              });
+              // Deduct coins from the buyer
+              transaction.update(otherUserDocRef, {
+                undertangoCoins: increment(-itemData.price),
+              });
+
+              // Add the purchased item to the buyer's profile
+              const purchaseRef = doc(
+                collection(db, `usuarios/${itemData.userId}/purchases`)
+              );
+              transaction.set(purchaseRef, {
+                description: itemData.description,
+                price: itemData.price,
+                sellerId: user.uid,
+                timestamp: new Date(),
+              });
+            }
+
+            // Register the transaction
+            transaction.set(doc(collection(db, "transactions")), {
+              buyer: itemType === "sell" ? user.uid : itemData.userId,
+              seller: itemType === "sell" ? itemData.userId : user.uid,
+              itemId: itemId,
+              price: itemData.price,
+              description: itemData.description,
+              timestamp: new Date(),
+            });
+
+            // Remove the item from the market
+            transaction.delete(itemDocRef);
+          });
+
+          alert("Transacción completada con éxito!");
+          loadMarketItems();
+          obtenerRanking();
+        } catch (error) {
+          console.error("Error al aceptar la oferta:", error);
+          alert("Hubo un error al procesar la transacción: " + error);
+        }
+      };
     </script>
   </body>
 </html>

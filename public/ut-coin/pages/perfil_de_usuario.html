@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Perfil de Usuario - UnderTango</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        margin: 0;
+        padding: 20px;
+        background-color: #f4f4f4;
+      }
+      .container {
+        max-width: 800px;
+        margin: auto;
+        background: white;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      h1,
+      h2 {
+        color: #333;
+      }
+      .profile-photo {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 20px;
+      }
+      input,
+      button {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+      }
+      button {
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #45a049;
+      }
+      .section {
+        margin-top: 20px;
+        border-top: 1px solid #ddd;
+        padding-top: 20px;
+      }
+      ul {
+        list-style-type: none;
+        padding: 0;
+      }
+      li {
+        background-color: #f9f9f9;
+        margin-bottom: 10px;
+        padding: 10px;
+        border-radius: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Perfil de Usuario</h1>
+      <img
+        id="currentPhoto"
+        class="profile-photo"
+        src=""
+        alt="Foto de perfil"
+      />
+      <form id="editProfileForm">
+        <input
+          type="text"
+          id="gameName"
+          placeholder="Nombre en el juego"
+          required
+        />
+        <input
+          type="text"
+          id="institution"
+          placeholder="Institución"
+          required
+        />
+        <input type="file" id="profilePhoto" accept="image/*" />
+        <button type="submit">Guardar Cambios</button>
+      </form>
+
+      <div class="section">
+        <h2>Compras Recientes</h2>
+        <ul id="recentPurchases">
+          No hay compras recientes.
+        </ul>
+      </div>
+
+      <div class="section">
+        <h2>Artículos en Venta</h2>
+        <ul id="itemsForSale">
+          No hay artículos en venta.
+        </ul>
+      </div>
+
+      <button id="backToGameButton">Volver al Juego</button>
+    </div>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+      import {
+        getAuth,
+        onAuthStateChanged,
+      } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+      import {
+        getFirestore,
+        doc,
+        getDoc,
+        setDoc,
+        collection,
+        query,
+        where,
+        orderBy,
+        limit,
+        getDocs,
+      } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+      import {
+        getStorage,
+        ref,
+        uploadBytes,
+        getDownloadURL,
+      } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyC05s84tQfQbiJua0G0LHnQsZP76HqxMk4",
+        authDomain: "undertango.firebaseapp.com",
+        projectId: "undertango",
+        storageBucket: "undertango.appspot.com",
+        messagingSenderId: "21199358960",
+        appId: "1:21199358960:web:6b751db7c333403057ab35",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+      const storage = getStorage(app);
+
+      const editProfileForm = document.getElementById("editProfileForm");
+      const gameNameInput = document.getElementById("gameName");
+      const institutionInput = document.getElementById("institution");
+      const currentPhotoImg = document.getElementById("currentPhoto");
+      const recentPurchasesList = document.getElementById("recentPurchases");
+      const itemsForSaleList = document.getElementById("itemsForSale");
+
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          loadUserProfile(user.uid);
+          loadRecentPurchases(user.uid);
+          loadItemsForSale(user.uid);
+        } else {
+          window.location.href = "registro.html";
+        }
+      });
+
+      async function loadUserProfile(userId) {
+        try {
+          const userDocRef = doc(db, "usuarios", userId);
+          const publicDataRef = doc(
+            db,
+            `usuarios/${userId}/publicData/perfilPublico`
+          );
+          const [userDoc, publicDataDoc] = await Promise.all([
+            getDoc(userDocRef),
+            getDoc(publicDataRef),
+          ]);
+
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            institutionInput.value = userData.institution || "";
+          }
+
+          if (publicDataDoc.exists()) {
+            const publicData = publicDataDoc.data();
+            gameNameInput.value = publicData.gameName || "";
+            if (publicData.photoURL) {
+              currentPhotoImg.src = publicData.photoURL;
+            }
+          }
+        } catch (error) {
+          console.error("Error al cargar el perfil del usuario:", error);
+        }
+      }
+
+      async function loadRecentPurchases(userId) {
+        try {
+          const purchasesQuery = query(
+            collection(db, "transactions"),
+            where("buyer", "==", userId),
+            orderBy("timestamp", "desc"),
+            limit(5)
+          );
+          const querySnapshot = await getDocs(purchasesQuery);
+          recentPurchasesList.innerHTML = ""; // Clear list
+          if (querySnapshot.empty) {
+            recentPurchasesList.innerHTML =
+              "<li>No hay compras recientes.</li>";
+          } else {
+            querySnapshot.forEach((doc) => {
+              const purchase = doc.data();
+              const li = document.createElement("li");
+              li.textContent = `Comprado: ${
+                purchase.description || "Artículo"
+              } de ${purchase.sellerName || "Vendedor"} por ${
+                purchase.price
+              } monedas`;
+              recentPurchasesList.appendChild(li);
+            });
+          }
+        } catch (error) {
+          console.error("Error al cargar las compras recientes:", error);
+        }
+      }
+
+      async function loadItemsForSale(userId) {
+        try {
+          const itemsQuery = query(
+            collection(db, "marketItems"),
+            where("userId", "==", userId),
+            where("type", "==", "sell")
+          );
+          const querySnapshot = await getDocs(itemsQuery);
+          itemsForSaleList.innerHTML = ""; // Clear list
+          if (querySnapshot.empty) {
+            itemsForSaleList.innerHTML = "<li>No hay artículos en venta.</li>";
+          } else {
+            querySnapshot.forEach((doc) => {
+              const item = doc.data();
+              const li = document.createElement("li");
+              li.textContent = `En venta: ${item.description} por ${item.price} monedas`;
+              itemsForSaleList.appendChild(li);
+            });
+          }
+        } catch (error) {
+          console.error("Error al cargar los artículos en venta:", error);
+        }
+      }
+
+      editProfileForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const user = auth.currentUser;
+        if (!user) return;
+
+        const gameName = gameNameInput.value;
+        const institution = institutionInput.value;
+        const profilePhotoFile =
+          document.getElementById("profilePhoto").files[0];
+
+        try {
+          const userId = user.uid;
+          const userDocRef = doc(db, "usuarios", userId);
+          const publicDataRef = doc(
+            db,
+            `usuarios/${userId}/publicData/perfilPublico`
+          );
+
+          let photoURL = currentPhotoImg.src;
+
+          if (profilePhotoFile) {
+            const storageRef = ref(storage, `profilePhotos/${userId}`);
+            await uploadBytes(storageRef, profilePhotoFile);
+            photoURL = await getDownloadURL(storageRef);
+          }
+
+          await Promise.all([
+            setDoc(userDocRef, { institution }, { merge: true }),
+            setDoc(publicDataRef, { gameName, photoURL }, { merge: true }),
+          ]);
+
+          alert("Perfil actualizado con éxito");
+          loadUserProfile(userId);
+        } catch (error) {
+          console.error("Error al actualizar el perfil:", error);
+          alert("Error al actualizar el perfil. Por favor, intenta de nuevo.");
+        }
+      });
+
+      document
+        .getElementById("backToGameButton")
+        .addEventListener("click", () => {
+          window.location.href = "juego.html";
+        });
+    </script>
+  </body>
+</html>
