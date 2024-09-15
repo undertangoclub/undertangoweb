@@ -62,6 +62,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // Agregar event listener para click
+  document.addEventListener("click", (event) => {
+    skipIntro();
+  });
+
   function updateLayout() {
     const radius =
       Math.min(container.clientWidth, container.clientHeight) * 0.35;

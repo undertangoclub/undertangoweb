@@ -178,7 +178,7 @@
               // Mostrar popup
               alert("¡Ya estás inscripto, genial!");
               // Redirigir a juego.html
-              window.location.href = "/ut-coin/pages/juego.html";
+              window.location.href = "juego.html";
             }
           } catch (error) {
             console.error("Error al obtener datos del usuario:", error);
@@ -243,7 +243,7 @@
               localStorage.setItem("undertangoCoins", undertangoCoins.toString());
 
               // Redirigir a juego.html
-              window.location.href = "/ut-coin/pages/juego.html";
+              window.location.href = "juego.html";
             } catch (error) {
               console.error("Error al actualizar el perfil:", error);
               alert("Hubo un error al actualizar tu perfil. Por favor, intenta de nuevo.");
@@ -253,7 +253,7 @@
           // Si no hay usuario autenticado, redirigir al registro
           console.error("No se pudo obtener información del usuario.");
           alert("Error: No se pudo obtener información del usuario.");
-          window.location.replace("/ut-coin/pages/registro.html");
+          window.location.replace("registro.html");
         }
       });
     </script>

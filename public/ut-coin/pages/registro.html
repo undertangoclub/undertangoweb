@@ -166,11 +166,15 @@
         }
 
         if (userData.gameName && userData.institution) {
-          console.log("Usuario tiene todos los datos. Redirigiendo a juego.html");
-          window.location.href = "/ut-coin/pages/juego.html";
+          console.log(
+            "Usuario tiene todos los datos. Redirigiendo a juego.html"
+          );
+          window.location.href = "juego.html";
         } else {
-          console.log("Faltan datos del usuario. Redirigiendo a formulario.html");
-          window.location.href = "/ut-coin/pages/formulario.html";
+          console.log(
+            "Faltan datos del usuario. Redirigiendo a formulario.html"
+          );
+          window.location.href = "formulario.html";
         }
       }
 
@@ -201,17 +205,24 @@
 
             if (totalUsuariosRegistrados === 0) {
               monedasIniciales = 20;
-              mensajeRegistro = "¡Ey! Eres la primera persona en registrarte, normalmente corresponden 10 monedas, pero tú tienes 10 más";
+              mensajeRegistro =
+                "¡Ey! Eres la primera persona en registrarte, normalmente corresponden 10 monedas, pero tú tienes 10 más";
             } else if (totalUsuariosRegistrados < 10) {
               monedasIniciales = 10 - totalUsuariosRegistrados;
-              mensajeRegistro = `¡Ey! Eres la persona número ${totalUsuariosRegistrados + 1} en registrarte, recibes ${monedasIniciales} monedas`;
+              mensajeRegistro = `¡Ey! Eres la persona número ${
+                totalUsuariosRegistrados + 1
+              } en registrarte, recibes ${monedasIniciales} monedas`;
             } else {
               monedasIniciales = 1;
               mensajeRegistro = "¡Bienvenido! Recibes 1 moneda por registrarte";
             }
 
             // Crear el usuario en Auth
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const userCredential = await createUserWithEmailAndPassword(
+              auth,
+              email,
+              password
+            );
             const user = userCredential.user;
             console.log("Usuario creado con UID:", user.uid);
 
@@ -225,11 +236,15 @@
               photoURL: null,
             };
             await setDoc(userDocRef, userData);
-            console.log("Perfil de usuario creado con monedas iniciales:", monedasIniciales);
+            console.log(
+              "Perfil de usuario creado con monedas iniciales:",
+              monedasIniciales
+            );
 
             // Actualizar contadores globales
             totalUsuariosRegistrados += 1;
-            const totalCoinsDisponibles = (data.totalCoinsDisponibles || 1000) - monedasIniciales;
+            const totalCoinsDisponibles =
+              (data.totalCoinsDisponibles || 1000) - monedasIniciales;
 
             transaction.update(globalesRef, {
               totalUsuariosRegistrados,
@@ -257,7 +272,11 @@
 
         try {
           console.log("Iniciando proceso de inicio de sesión...");
-          const userCredential = await signInWithEmailAndPassword(auth, loginEmail, loginPassword);
+          const userCredential = await signInWithEmailAndPassword(
+            auth,
+            loginEmail,
+            loginPassword
+          );
           const user = userCredential.user;
           console.log("Usuario autenticado con UID:", user.uid);
 
@@ -270,12 +289,15 @@
             console.log("Datos del usuario recuperados:", userData);
             handleUserRedirect(userData, user.uid);
           } else {
-            console.log("No se encontró el documento del usuario. Redirigiendo a formulario.html");
+            console.log(
+              "No se encontró el documento del usuario. Redirigiendo a formulario.html"
+            );
             handleUserRedirect({ email: user.email }, user.uid);
           }
         } catch (error) {
           console.error("Error al iniciar sesión:", error);
-          errorMessage.textContent = "Error al iniciar sesión: " + error.message;
+          errorMessage.textContent =
+            "Error al iniciar sesión: " + error.message;
         }
       });
     </script>
