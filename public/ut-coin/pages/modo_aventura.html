@@ -127,6 +127,7 @@
         updateDoc,
         increment,
         getDoc,
+        setDoc,
       } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
       // Configuración de Firebase
@@ -146,10 +147,11 @@
 
       let currentUser;
 
-      onAuthStateChanged(auth, async (user) => {
+      onAuthStateChanged(auth, async function (user) {
         if (user) {
           currentUser = user;
           await loadUserProfile(user.uid);
+          await loadCompletedChallenges(user.uid); // Cargar los desafíos completados
           loadRanking();
         } else {
           alert("Debes iniciar sesión para acceder a esta página.");
@@ -188,6 +190,33 @@
         }
       }
 
+      // Cargar desafíos completados
+      async function loadCompletedChallenges(userId) {
+        try {
+          const completedChallengesList = document.getElementById(
+            "completedChallengesList"
+          );
+          completedChallengesList.innerHTML = ""; // Limpiar la lista antes de agregar desafíos
+
+          const challengesRef = collection(
+            db,
+            `usuarios/${userId}/completedChallenges`
+          );
+          const querySnapshot = await getDocs(challengesRef);
+
+          querySnapshot.forEach(function (doc) {
+            const challengeData = doc.data();
+            if (challengeData.completed) {
+              const listItem = document.createElement("li");
+              listItem.textContent = `${doc.id}: Completado`;
+              completedChallengesList.appendChild(listItem);
+            }
+          });
+        } catch (error) {
+          console.error("Error al cargar los desafíos completados:", error);
+        }
+      }
+
       // Cargar ranking de jugadores
       async function loadRanking() {
         const rankingList = document.getElementById("rankingList");
@@ -196,7 +225,6 @@
         try {
           const querySnapshot = await getDocs(collection(db, "usuarios"));
           for (const userDoc of querySnapshot.docs) {
-            // Cambié 'doc' a 'userDoc'
             const userData = userDoc.data();
 
             // Obtener datos públicos
@@ -207,11 +235,11 @@
               ? publicDataDoc.data()
               : {};
 
-            const li = document.createElement("li");
-            li.textContent = `${publicData.gameName || "Usuario Anónimo"} - ${
-              userData.undertangoCoins || 0
-            } monedas`;
-            rankingList.appendChild(li);
+            const listItem = document.createElement("li");
+            listItem.textContent = `${
+              publicData.gameName || "Usuario Anónimo"
+            } - ${userData.undertangoCoins || 0} monedas`;
+            rankingList.appendChild(listItem);
           }
         } catch (error) {
           console.error("Error al cargar el ranking:", error);
@@ -221,7 +249,7 @@
       // Evento para Desafío 1
       document
         .getElementById("challenge1")
-        .addEventListener("click", async () => {
+        .addEventListener("click", async function () {
           document.getElementById("userListContainer").style.display = "block";
           const userList = document.getElementById("userList");
           userList.innerHTML = ""; // Limpiar la lista antes de agregar usuarios
@@ -229,7 +257,6 @@
           try {
             const querySnapshot = await getDocs(collection(db, "usuarios"));
             for (const userDoc of querySnapshot.docs) {
-              // Cambié 'doc' a 'userDoc'
               const userData = userDoc.data();
 
               // Obtener datos públicos
@@ -242,10 +269,12 @@
 
               if (userDoc.id !== currentUser.uid) {
                 // Evitar mostrar al usuario actual en la lista
-                const li = document.createElement("li");
-                li.textContent = publicData.gameName || "Usuario Anónimo";
-                li.addEventListener("click", () => sendCoin(userDoc.id));
-                userList.appendChild(li);
+                const listItem = document.createElement("li");
+                listItem.textContent = publicData.gameName || "Usuario Anónimo";
+                listItem.addEventListener("click", function () {
+                  sendCoin(userDoc.id);
+                });
+                userList.appendChild(listItem);
               }
             }
           } catch (error) {
@@ -266,17 +295,16 @@
             undertangoCoins: increment(1),
           });
 
+          // Marcar el desafío como completado en la base de datos
+          const completedChallengeRef = doc(
+            db,
+            `usuarios/${currentUser.uid}/completedChallenges/challenge1`
+          );
+          await setDoc(completedChallengeRef, { completed: true });
+
           alert("¡Moneda enviada con éxito!");
           await loadUserProfile(currentUser.uid);
-
-          // Marcar el desafío como completado
-          const completedChallengesList = document.getElementById(
-            "completedChallengesList"
-          );
-          const li = document.createElement("li");
-          li.textContent =
-            "Desafío 1: Mandar una moneda a otro usuario - Completado";
-          completedChallengesList.appendChild(li);
+          await loadCompletedChallenges(currentUser.uid);
 
           // Ocultar la lista de usuarios
           document.getElementById("userListContainer").style.display = "none";
@@ -288,7 +316,7 @@
       // Botón "Volver al menú principal"
       document
         .getElementById("backToMainButton")
-        .addEventListener("click", () => {
+        .addEventListener("click", function () {
           window.location.href = "juego.html";
         });
     </script>
