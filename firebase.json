@@ -10,7 +10,7 @@
     "rewrites": [
       {
         "source": "/ut-coin/**",
-        "destination": "/ut-coin/public/index.html"
+        "destination": "/ut-coin/index.html"
       },
       {
         "source": "**",
