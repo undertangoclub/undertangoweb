@@ -169,54 +169,57 @@ document.addEventListener("DOMContentLoaded", () => {
   function handleCircleClick(circle, radius, circleSize) {
     const clickedLogoName = circle.getAttribute("data-name");
 
-    if (isShowsCentered && clickedLogoName === "Shows") {
-      // Recargar la página sin mostrar la intro
-      window.location.href = window.location.pathname + "?skipIntro=true";
-      return;
-    } else if (clickedLogoName === "Shows") {
-      // Centrar "Shows" y mostrar contenido relacionado
-      stopAnimation();
-      centeredCircle = circle;
-      centeredCircle.style.transition = "transform 0.3s ease";
-      centeredCircle.style.transform = `translate(0, 0) scale(1.5)`;
-      showShowsIntro();
-      redistributeCircles(radius, circleSize, true);
-      isShowsCentered = true;
-    } else if (centeredCircle === circle) {
-      // Descentrar cualquier otro círculo
-      stopAnimation();
-      const circles = document.querySelectorAll(".circle");
-      circles.forEach((c) => {
-        c.style.transition = "opacity 0.3s ease, transform 0.3s ease";
-        c.style.opacity = "0";
-        if (c === centeredCircle) {
-          c.style.transform = `scale(0.5)`;
-        }
-      });
-
-      setTimeout(() => {
-        centeredCircle.style.transform = `scale(1)`;
-        centeredCircle = null;
-        lastUpdateTime = Date.now();
-        resetCircles();
-        redistributeCircles(radius, circleSize, false);
-        requestAnimationFrame(() => {
-          circles.forEach((c) => {
-            c.style.opacity = "1";
-          });
-          startAnimation(radius, circleSize);
-        });
-      }, 300);
-    } else {
-      // Centrar cualquier otro círculo
-      if (centeredCircle) {
+    if (clickedLogoName === "Shows") {
+      // Check if "Shows" is already centered
+      if (!isShowsCentered) {
+        // Center "Shows" and show related content
+        stopAnimation();
+        centeredCircle = circle;
         centeredCircle.style.transition = "transform 0.3s ease";
-        centeredCircle.style.transform = `scale(1)`;
+        centeredCircle.style.transform = `translate(0, 0) scale(1.5)`;
+        showShowsIntro();
+        redistributeCircles(radius, circleSize, true);
+        isShowsCentered = true; // Mark "Shows" as centered
       }
-      centeredCircle = circle;
-      centeredCircle.style.transition = "transform 0.3s ease";
-      centeredCircle.style.transform = `translate(0, 0) scale(1.5)`;
-      redistributeCircles(radius, circleSize, true);
+    } else {
+      // Handle clicks on other circles
+      if (centeredCircle === circle) {
+        // Un-center the current circle
+        stopAnimation();
+        const circles = document.querySelectorAll(".circle");
+        circles.forEach((c) => {
+          c.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+          c.style.opacity = "0";
+          if (c === centeredCircle) {
+            c.style.transform = `scale(0.5)`;
+          }
+        });
+
+        setTimeout(() => {
+          centeredCircle.style.transform = `scale(1)`;
+          centeredCircle = null;
+          lastUpdateTime = Date.now();
+          resetCircles();
+          redistributeCircles(radius, circleSize, false);
+          requestAnimationFrame(() => {
+            circles.forEach((c) => {
+              c.style.opacity = "1";
+            });
+            startAnimation(radius, circleSize);
+          });
+        }, 300);
+        isShowsCentered = false; // Reset the "Shows" centered state
+      } else {
+        // Center any other circle
+        if (centeredCircle) {
+          centeredCircle.style.transition = "transform 0.3s ease";
+          centeredCircle.style.transform = `scale(1)`;
+        }
+        centeredCircle = circle;
+        centeredCircle.style.transition = "transform 0.3s ease";
+        centeredCircle.style.transform = `translate(0, 0) scale(1.5)`;
+        redistributeCircles(radius, circleSize, true);
+      }
     }
   }
 
