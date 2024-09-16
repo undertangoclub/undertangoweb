@@ -21,38 +21,57 @@
     <meta property="og:image" content="URL_de_la_imagen" />
 
     <style>
+      @import url("https://fonts.googleapis.com/css2?family=Poiret+One&display=swap");
+
+      :root {
+        --background-color: #000000;
+        --text-color: #ffffff;
+        --accent-color: #8b0000;
+        --secondary-color: #4a0000;
+      }
+
       body {
-        font-family: Arial, sans-serif;
-        background-color: #f4f4f4;
+        font-family: "Poiret One", cursive;
+        background-color: var(--background-color);
+        color: var(--text-color);
         margin: 0;
         padding: 0;
         display: flex;
         justify-content: center;
         align-items: center;
-        min-height: 100vh; /* Usamos min-height para mejorar en dispositivos móviles */
+        min-height: 100vh;
       }
+
       .container {
         text-align: center;
-        background-color: #ffffff;
+        background-color: rgba(74, 0, 0, 0.2);
         padding: 50px;
         border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 8px rgba(139, 0, 0, 0.3);
       }
+
       h1 {
-        color: #333;
+        color: var(--text-color);
+        text-shadow: 2px 2px 4px var(--accent-color);
       }
+
       .adventure-btn {
-        background-color: #4285f4;
-        color: #ffffff;
+        background-color: var(--accent-color);
+        color: var(--text-color);
         border: none;
         padding: 15px 30px;
         font-size: 18px;
         cursor: pointer;
         border-radius: 5px;
         margin-top: 20px;
+        font-family: "Poiret One", cursive;
+        font-weight: bold;
+        transition: background-color 0.3s, transform 0.3s;
       }
+
       .adventure-btn:hover {
-        background-color: #357ae8;
+        background-color: var(--secondary-color);
+        transform: scale(1.05);
       }
     </style>
   </head>
