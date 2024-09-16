@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const container = document.querySelector(".container");
   const welcomeText = document.querySelector(".welcome-text");
   const subText = document.querySelector(".sub-text");
+  const centerLogo = document.querySelector(".center img");
   const totalCircles = 6;
   let circleStates = [];
   let lastUpdateTime = Date.now();
@@ -9,11 +10,12 @@ document.addEventListener("DOMContentLoaded", () => {
   let animationFrameId = null;
   let isInitialized = false;
   let introSkipped = false;
+  let isShowsCentered = false;
   let welcomeTextTimeout, subTextTimeout, layoutTimeout;
 
   // Configuraciones para cambiar imágenes y enlaces
   const relatedContent = {
-    "Logo 1": [
+    Shows: [
       {
         name: "Upcoming Shows",
         image: "./img/upcoming-shows.jpg",
@@ -42,19 +44,26 @@ document.addEventListener("DOMContentLoaded", () => {
     ],
   };
 
+  // Comprobar si la página se cargó con el parámetro skipIntro
+  const urlParams = new URLSearchParams(window.location.search);
+  introSkipped = urlParams.has("skipIntro");
+
   function skipIntro() {
     if (!introSkipped) {
       introSkipped = true;
-      welcomeText.style.opacity = "0";
-      subText.style.opacity = "0";
       clearTimeout(welcomeTextTimeout);
       clearTimeout(subTextTimeout);
       clearTimeout(layoutTimeout);
+      welcomeText.style.transition = "none";
+      subText.style.transition = "none";
+      welcomeText.style.opacity = "0";
+      subText.style.opacity = "0";
+      centerLogo.style.opacity = "1";
       updateLayout();
     }
   }
 
-  // Agregar event listener para la barra espaciadora
+  // Event listeners para saltar la intro
   document.addEventListener("keydown", (event) => {
     if (event.code === "Space") {
       event.preventDefault();
@@ -62,10 +71,41 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Agregar event listener para click
-  document.addEventListener("click", (event) => {
-    skipIntro();
-  });
+  document.addEventListener("click", skipIntro);
+
+  function fadeIn(element, duration, delay = 0) {
+    return new Promise((resolve) => {
+      if (introSkipped) {
+        resolve();
+        return;
+      }
+      element.style.opacity = "0";
+      setTimeout(() => {
+        element.style.transition = `opacity ${duration}ms ease`;
+        element.style.opacity = "1";
+        setTimeout(resolve, duration);
+      }, delay);
+    });
+  }
+
+  async function playIntroAnimation() {
+    if (introSkipped) {
+      centerLogo.style.opacity = "1";
+      updateLayout();
+      return;
+    }
+
+    centerLogo.style.opacity = "0";
+    await Promise.all([fadeIn(welcomeText, 1000), fadeIn(centerLogo, 1000)]);
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    welcomeText.style.opacity = "0";
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    await fadeIn(subText, 1000);
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    subText.style.opacity = "0";
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    updateLayout();
+  }
 
   function updateLayout() {
     const radius =
@@ -122,7 +162,21 @@ document.addEventListener("DOMContentLoaded", () => {
   function handleCircleClick(circle, radius, circleSize) {
     const clickedLogoName = circle.getAttribute("data-name");
 
-    if (centeredCircle === circle) {
+    if (isShowsCentered && clickedLogoName === "Shows") {
+      // Recargar la página sin mostrar la intro
+      window.location.href = window.location.pathname + "?skipIntro=true";
+      return;
+    } else if (clickedLogoName === "Shows") {
+      // Centrar "Shows" y mostrar contenido relacionado
+      stopAnimation();
+      centeredCircle = circle;
+      centeredCircle.style.transition = "transform 0.3s ease";
+      centeredCircle.style.transform = `translate(0, 0) scale(1.5)`;
+      showShowsIntro();
+      redistributeCircles(radius, circleSize, true);
+      isShowsCentered = true;
+    } else if (centeredCircle === circle) {
+      // Descentrar cualquier otro círculo
       stopAnimation();
       const circles = document.querySelectorAll(".circle");
       circles.forEach((c) => {
@@ -137,7 +191,7 @@ document.addEventListener("DOMContentLoaded", () => {
         centeredCircle.style.transform = `scale(1)`;
         centeredCircle = null;
         lastUpdateTime = Date.now();
-        resetCircles(); // Restablecer al estado original
+        resetCircles();
         redistributeCircles(radius, circleSize, false);
         requestAnimationFrame(() => {
           circles.forEach((c) => {
@@ -147,6 +201,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       }, 300);
     } else {
+      // Centrar cualquier otro círculo
       if (centeredCircle) {
         centeredCircle.style.transition = "transform 0.3s ease";
         centeredCircle.style.transform = `scale(1)`;
@@ -154,13 +209,80 @@ document.addEventListener("DOMContentLoaded", () => {
       centeredCircle = circle;
       centeredCircle.style.transition = "transform 0.3s ease";
       centeredCircle.style.transform = `translate(0, 0) scale(1.5)`;
-
-      if (clickedLogoName === "Logo 1") {
-        updateRelatedCircles(relatedContent["Logo 1"]);
-      }
-
       redistributeCircles(radius, circleSize, true);
     }
+  }
+
+  function showShowsIntro() {
+    stopAnimation();
+    welcomeText.textContent = "Shows de tango";
+    subText.textContent = "Producciones inolvidables";
+
+    fadeInOutSequence(welcomeText, subText, 1000, 1500, 200);
+    transitionCircleImages(relatedContent["Shows"]);
+  }
+
+  function fadeInOutSequence(
+    element1,
+    element2,
+    fadeInDuration,
+    stayDuration,
+    betweenDelay
+  ) {
+    element1.style.transition = `opacity ${fadeInDuration}ms ease`;
+    element2.style.transition = `opacity ${fadeInDuration}ms ease`;
+
+    setTimeout(() => {
+      element1.style.opacity = "1";
+      setTimeout(() => {
+        element1.style.opacity = "0";
+        setTimeout(() => {
+          element2.style.opacity = "1";
+          setTimeout(() => {
+            element2.style.opacity = "0";
+          }, stayDuration);
+        }, betweenDelay);
+      }, stayDuration);
+    }, 100);
+  }
+
+  function transitionCircleImages(relatedItems) {
+    const circles = Array.from(document.querySelectorAll(".circle"));
+    const remainingCircles = circles.filter(
+      (circle) => circle !== centeredCircle
+    );
+
+    remainingCircles.forEach((circle, index) => {
+      if (index < relatedItems.length) {
+        const item = relatedItems[index];
+        const oldImg = circle.querySelector("img");
+        const newImg = document.createElement("img");
+
+        newImg.src = item.image;
+        newImg.alt = item.name;
+        newImg.style.position = "absolute";
+        newImg.style.top = "0";
+        newImg.style.left = "0";
+        newImg.style.width = "100%";
+        newImg.style.height = "100%";
+        newImg.style.opacity = "0";
+        newImg.style.transition = "opacity 0.5s ease-in-out";
+
+        circle.appendChild(newImg);
+        newImg.offsetHeight; // Trigger reflow
+        newImg.style.opacity = "1";
+
+        setTimeout(() => {
+          oldImg.remove();
+          const link = document.createElement("a");
+          link.href = item.link;
+          link.appendChild(newImg);
+          circle.innerHTML = "";
+          circle.appendChild(link);
+          circle.setAttribute("data-name", item.name);
+        }, 500);
+      }
+    });
   }
 
   function redistributeCircles(radius, circleSize, animate = true) {
@@ -177,44 +299,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
       circleStates[circles.indexOf(circle)].angle = angle;
 
-      if (animate) {
-        circle.style.transition = "transform 0.3s ease";
-      } else {
-        circle.style.transition = "none";
-      }
+      circle.style.transition = animate ? "transform 0.3s ease" : "none";
       circle.style.transform = `translate(${x}px, ${y}px) scale(1.7)`;
-    });
-  }
-
-  function updateRelatedCircles(relatedItems) {
-    const circles = Array.from(document.querySelectorAll(".circle"));
-    const remainingCircles = circles.filter(
-      (circle) => circle !== centeredCircle
-    );
-
-    remainingCircles.forEach((circle, index) => {
-      if (index < relatedItems.length) {
-        const item = relatedItems[index];
-        const img = document.createElement("img");
-        img.src = item.image;
-        img.alt = item.name;
-
-        const link = document.createElement("a");
-        link.href = item.link;
-        link.appendChild(img);
-
-        circle.innerHTML = "";
-        circle.appendChild(link);
-
-        circle.setAttribute("data-name", item.name);
-      }
     });
   }
 
   function resetCircles() {
     const circles = document.querySelectorAll(".circle");
     const originalLogos = [
-      { src: "./img/logo1.gif", alt: "Logo 1" },
+      { src: "./img/logo1.gif", alt: "Shows" },
       { src: "./img/logo2.gif", alt: "Logo 2" },
       { src: "./img/logo3.gif", alt: "Logo 3" },
       { src: "./img/logo4.png", alt: "Logo 4" },
@@ -240,19 +333,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
     });
-
-    // Si faltan círculos, crea los que falten
-    while (circles.length < originalLogos.length) {
-      const newCircle = document.createElement("div");
-      newCircle.className = "circle";
-      const newImg = document.createElement("img");
-      const newLogo = originalLogos[circles.length];
-      newImg.src = newLogo.src;
-      newImg.alt = newLogo.alt;
-      newCircle.appendChild(newImg);
-      newCircle.setAttribute("data-name", newLogo.alt);
-      container.appendChild(newCircle);
-    }
   }
 
   function animateCircles(radius, circleSize) {
@@ -299,20 +379,6 @@ document.addEventListener("DOMContentLoaded", () => {
     updateLayout();
   });
 
-  welcomeText.style.opacity = "1";
-
-  welcomeTextTimeout = setTimeout(() => {
-    welcomeText.style.opacity = "0";
-    subTextTimeout = setTimeout(() => {
-      subText.style.opacity = "1";
-    }, 200);
-
-    setTimeout(() => {
-      subText.style.opacity = "0";
-    }, 1500);
-
-    layoutTimeout = setTimeout(() => {
-      updateLayout();
-    }, 2000);
-  }, 1500);
+  // Iniciar la secuencia de animación
+  playIntroAnimation();
 });
