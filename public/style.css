@@ -26,9 +26,10 @@ body {
   align-items: center;
 }
 
-.welcome-text {
+.welcome-text,
+.sub-text {
   position: absolute;
-  top: 25%; /* Más arriba */
+  top: 25%; /* Ajusta la posición según sea necesario */
   left: 50%;
   transform: translateX(-50%);
   font-size: 6vmin;
@@ -36,18 +37,15 @@ body {
   opacity: 0;
   transition: opacity 1s ease;
   z-index: 10;
-}
+  font-weight: bold; /* Making the text bold */
 
-.sub-text {
-  position: absolute;
-  top: 65%; /* Debajo del logo */
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 4vmin;
-  color: white;
-  opacity: 0;
-  transition: opacity 1s ease;
-  z-index: 10;
+  /* Adding background with transparency */
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 0.5em;
+  border-radius: 5px;
+
+  /* Enhancing text shadow */
+  text-shadow: 3px 3px 12px rgba(0, 0, 0, 1);
 }
 
 .center {

@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const welcomeText = document.querySelector(".welcome-text");
   const subText = document.querySelector(".sub-text");
   const centerLogo = document.querySelector(".center img");
+  const circles = document.querySelectorAll(".circle");
   const totalCircles = 6;
   let circleStates = [];
   let lastUpdateTime = Date.now();
@@ -126,9 +127,15 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       circle.addEventListener("mouseover", () => {
-        console.log(
-          `Estás pasando el cursor sobre: ${circle.getAttribute("data-name")}`
-        );
+        // Change text when hovering over the circle
+        const circleName = circle.getAttribute("data-name");
+        welcomeText.textContent = circleName;
+        welcomeText.style.opacity = "1";
+      });
+
+      circle.addEventListener("mouseleave", () => {
+        // Clear the text when leaving the circle
+        welcomeText.style.opacity = "0";
       });
 
       circle.addEventListener("click", () =>
