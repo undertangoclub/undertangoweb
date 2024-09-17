@@ -222,10 +222,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function showShowsIntro() {
     stopAnimation();
-    welcomeText.textContent = "Shows de tango";
-    subText.textContent = "Producciones inolvidables";
-
-    fadeInOutSequence(welcomeText, subText, 1000, 1500, 200);
     transitionCircleImages(relatedContent["Shows"]);
   }
 

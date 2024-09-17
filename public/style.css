@@ -26,10 +26,9 @@ body {
   align-items: center;
 }
 
-.welcome-text,
-.sub-text {
+.welcome-text {
   position: absolute;
-  top: 25%; /* Ajusta la posición según sea necesario */
+  top: 25%; /* Adjust as needed */
   left: 50%;
   transform: translateX(-50%);
   font-size: 6vmin;
@@ -37,14 +36,27 @@ body {
   opacity: 0;
   transition: opacity 1s ease;
   z-index: 10;
-  font-weight: bold; /* Making the text bold */
-
-  /* Adding background with transparency */
+  font-weight: bold;
   background-color: rgba(0, 0, 0, 0.5);
   padding: 0.5em;
   border-radius: 5px;
+  text-shadow: 3px 3px 12px rgba(0, 0, 0, 1);
+}
 
-  /* Enhancing text shadow */
+.sub-text {
+  position: absolute;
+  bottom: 25%; /* Position it at the bottom */
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 4vmin; /* Slightly smaller font size */
+  color: white;
+  opacity: 0;
+  transition: opacity 1s ease;
+  z-index: 10;
+  font-weight: bold;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 0.5em;
+  border-radius: 5px;
   text-shadow: 3px 3px 12px rgba(0, 0, 0, 1);
 }
 
