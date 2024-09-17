@@ -5,9 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Introducción - UnderTango</title>
     <style>
+      :root {
+        --background-color: #4d0a0a;
+        --text-color: #000000;
+        --accent-color: #4285f4;
+      }
+
       body {
         font-family: Arial, sans-serif;
-        background-color: #f4f4f4;
+        background-color: var(--background-color);
         margin: 0;
         padding: 0;
         display: flex;
@@ -20,7 +26,7 @@
         background-color: #ffffff;
         padding: 50px;
         border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         max-width: 600px;
       }
       #introText {
@@ -28,9 +34,11 @@
         line-height: 1.6;
         margin-bottom: 20px;
         cursor: pointer;
+        color: var(--text-color);
+        font-weight: bold;
       }
       #registerBtn {
-        background-color: #4285f4;
+        background-color: var(--accent-color);
         color: #ffffff;
         border: none;
         padding: 15px 30px;
@@ -38,6 +46,7 @@
         cursor: pointer;
         border-radius: 5px;
         display: none;
+        font-weight: bold;
       }
       #registerBtn:hover {
         background-color: #357ae8;
