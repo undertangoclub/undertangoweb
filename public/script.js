@@ -14,6 +14,10 @@ document.addEventListener("DOMContentLoaded", () => {
   let isShowsCentered = false;
   let welcomeTextTimeout, subTextTimeout, layoutTimeout;
 
+  window.addEventListener("unhandledrejection", function (event) {
+    console.error("Unhandled promise rejection:", event.reason);
+  });
+
   // Configuraciones para cambiar imágenes y enlaces
   const relatedContent = {
     Shows: [
@@ -48,8 +52,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // Comprobar si la página se cargó con el parámetro skipIntro
   const urlParams = new URLSearchParams(window.location.search);
   introSkipped = urlParams.has("skipIntro");
+  console.log("Initial introSkipped value:", introSkipped);
 
   function skipIntro() {
+    console.log("skipIntro function called");
     if (!introSkipped) {
       introSkipped = true;
       clearTimeout(welcomeTextTimeout);
@@ -60,6 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
       welcomeText.style.opacity = "0";
       subText.style.opacity = "0";
       centerLogo.style.opacity = "1";
+      console.log("Skipping intro, calling updateLayout");
       updateLayout();
     }
   }
@@ -90,12 +97,15 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function playIntroAnimation() {
+    console.log("Starting playIntroAnimation, introSkipped:", introSkipped);
     if (introSkipped) {
+      console.log("Intro skipped, updating layout immediately");
       centerLogo.style.opacity = "1";
       updateLayout();
       return;
     }
 
+    console.log("Playing full intro animation");
     centerLogo.style.opacity = "0";
     await Promise.all([fadeIn(welcomeText, 1000), fadeIn(centerLogo, 1000)]);
     await new Promise((resolve) => setTimeout(resolve, 400));
@@ -105,10 +115,12 @@ document.addEventListener("DOMContentLoaded", () => {
     await new Promise((resolve) => setTimeout(resolve, 400));
     subText.style.opacity = "0";
     await new Promise((resolve) => setTimeout(resolve, 400));
+    console.log("Intro animation completed, updating layout");
     updateLayout();
   }
 
   function updateLayout() {
+    console.log("updateLayout called, isInitialized:", isInitialized);
     const radius =
       Math.min(container.clientWidth, container.clientHeight) * 0.35;
     const circleSize =
@@ -126,28 +138,33 @@ document.addEventListener("DOMContentLoaded", () => {
         };
       }
 
-      circle.addEventListener("mouseover", () => {
-        // Change text when hovering over the circle
-        const circleName = circle.getAttribute("data-name");
-        welcomeText.textContent = circleName;
-        welcomeText.style.opacity = "1";
-      });
+      // Los event listeners solo deben agregarse una vez, no en cada llamada a updateLayout
+      if (!circle.hasAttribute("data-listeners-added")) {
+        circle.addEventListener("mouseover", () => {
+          const circleName = circle.getAttribute("data-name");
+          welcomeText.textContent = circleName;
+          welcomeText.style.opacity = "1";
+        });
 
-      circle.addEventListener("mouseleave", () => {
-        // Clear the text when leaving the circle
-        welcomeText.style.opacity = "0";
-      });
+        circle.addEventListener("mouseleave", () => {
+          welcomeText.style.opacity = "0";
+        });
 
-      circle.addEventListener("click", () =>
-        handleCircleClick(circle, radius, circleSize)
-      );
+        circle.addEventListener("click", () =>
+          handleCircleClick(circle, radius, circleSize)
+        );
+
+        circle.setAttribute("data-listeners-added", "true");
+      }
     });
 
     if (!isInitialized) {
+      console.log("Initializing circle positions");
       isInitialized = true;
       initializeCirclePositions(radius);
     }
 
+    console.log("Setting circle opacities and starting animation");
     setTimeout(() => {
       circles.forEach((circle) => {
         circle.style.opacity = "1";
@@ -167,56 +184,73 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function handleCircleClick(circle, radius, circleSize) {
-    const clickedLogoName = circle.getAttribute("data-name");
+    try {
+      console.log("Circle clicked:", circle.getAttribute("data-name"));
+      console.log(
+        "Current centered circle:",
+        centeredCircle ? centeredCircle.getAttribute("data-name") : "None"
+      );
+      console.log("isShowsCentered:", isShowsCentered);
 
-    if (isShowsCentered && clickedLogoName === "Shows") {
-      // Recargar la página sin mostrar la intro
-      window.location.href = window.location.pathname + "?skipIntro=true";
-      return;
-    } else if (clickedLogoName === "Shows") {
-      // Centrar "Shows" y mostrar contenido relacionado
-      stopAnimation();
-      centeredCircle = circle;
-      centeredCircle.style.transition = "transform 0.3s ease";
-      centeredCircle.style.transform = `translate(0, 0) scale(1.5)`;
-      showShowsIntro();
-      redistributeCircles(radius, circleSize, true);
-      isShowsCentered = true;
-    } else if (centeredCircle === circle) {
-      // Descentrar cualquier otro círculo
-      stopAnimation();
-      const circles = document.querySelectorAll(".circle");
-      circles.forEach((c) => {
-        c.style.transition = "opacity 0.3s ease, transform 0.3s ease";
-        c.style.opacity = "0";
-        if (c === centeredCircle) {
-          c.style.transform = `scale(0.5)`;
-        }
-      });
+      const clickedLogoName = circle.getAttribute("data-name");
 
-      setTimeout(() => {
-        centeredCircle.style.transform = `scale(1)`;
-        centeredCircle = null;
-        lastUpdateTime = Date.now();
-        resetCircles();
-        redistributeCircles(radius, circleSize, false);
-        requestAnimationFrame(() => {
-          circles.forEach((c) => {
-            c.style.opacity = "1";
-          });
-          startAnimation(radius, circleSize);
-        });
-      }, 300);
-    } else {
-      // Centrar cualquier otro círculo
-      if (centeredCircle) {
+      if (isShowsCentered && clickedLogoName === "Shows") {
+        console.log("Reloading page without intro");
+        window.location.href = window.location.pathname + "?skipIntro=true";
+        return;
+      } else if (clickedLogoName === "Shows") {
+        console.log("Centering Shows");
+        stopAnimation();
+        centeredCircle = circle;
         centeredCircle.style.transition = "transform 0.3s ease";
-        centeredCircle.style.transform = `scale(1)`;
+        centeredCircle.style.transform = `translate(0, 0) scale(1.5)`;
+        showShowsIntro();
+        redistributeCircles(radius, circleSize, true);
+        isShowsCentered = true;
+      } else if (centeredCircle === circle) {
+        console.log("Decentering current circle");
+        stopAnimation();
+        const circles = document.querySelectorAll(".circle");
+        circles.forEach((c) => {
+          c.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+          c.style.opacity = "0";
+          if (c === centeredCircle) {
+            c.style.transform = `scale(0.5)`;
+          }
+        });
+
+        setTimeout(() => {
+          centeredCircle.style.transform = `scale(1)`;
+          centeredCircle = null;
+          lastUpdateTime = Date.now();
+          resetCircles();
+          redistributeCircles(radius, circleSize, false);
+          requestAnimationFrame(() => {
+            circles.forEach((c) => {
+              c.style.opacity = "1";
+            });
+            startAnimation(radius, circleSize);
+          });
+        }, 300);
+      } else {
+        console.log("Centering new circle");
+        if (centeredCircle) {
+          centeredCircle.style.transition = "transform 0.3s ease";
+          centeredCircle.style.transform = `scale(1)`;
+        }
+        centeredCircle = circle;
+        centeredCircle.style.transition = "transform 0.3s ease";
+        centeredCircle.style.transform = `translate(0, 0) scale(1.5)`;
+        redistributeCircles(radius, circleSize, true);
       }
-      centeredCircle = circle;
-      centeredCircle.style.transition = "transform 0.3s ease";
-      centeredCircle.style.transform = `translate(0, 0) scale(1.5)`;
-      redistributeCircles(radius, circleSize, true);
+
+      console.log(
+        "After click - Centered circle:",
+        centeredCircle ? centeredCircle.getAttribute("data-name") : "None"
+      );
+      console.log("After click - isShowsCentered:", isShowsCentered);
+    } catch (error) {
+      console.error("Error in handleCircleClick:", error);
     }
   }
 
@@ -383,5 +417,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Iniciar la secuencia de animación
-  playIntroAnimation();
-});
+  console.log("Starting intro sequence");
+  playIntroAnimation().catch((error) => {
+    console.error("Error during intro animation:", error);
+  });
+}); // Cierre del evento DOMContentLoaded
