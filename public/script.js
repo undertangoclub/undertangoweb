@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
         link: "./pages/book-show.html",
       },
       {
-        name: "Venues",
+        name: "Veni a visitarnos",
         image: "./img/venues.jpg",
         link: "./pages/venues.html",
       },
