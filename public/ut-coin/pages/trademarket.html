@@ -157,12 +157,12 @@
       } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
       const firebaseConfig = {
-        apiKey: "AIzaSyC05s84tQfQbiJua0G0LHnQsZP76HqxMk4",
-        authDomain: "undertango.firebaseapp.com",
-        projectId: "undertango",
-        storageBucket: "undertango.appspot.com",
-        messagingSenderId: "21199358960",
-        appId: "1:21199358960:web:6b751db7c333403057ab35",
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_AUTH_DOMAIN",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_STORAGE_BUCKET",
+        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+        appId: "YOUR_APP_ID",
       };
 
       const app = initializeApp(firebaseConfig);
@@ -384,24 +384,45 @@
         const userId = auth.currentUser.uid;
 
         try {
-          const userDoc = await getDoc(doc(db, "usuarios", userId));
-          const userData = userDoc.data();
-          const publicDataDoc = await getDoc(
-            doc(db, `usuarios/${userId}/publicData/perfilPublico`)
-          );
-          const publicData = publicDataDoc.data();
+          console.log("Creando artículo de mercado para el usuario:", userId);
 
-          await addDoc(collection(db, "marketItems"), {
+          // Obtener el documento de perfil público del usuario
+          const publicDataRef = doc(
+            db,
+            `usuarios/${userId}/publicData/perfilPublico`
+          );
+          const publicDataDoc = await getDoc(publicDataRef);
+
+          if (!publicDataDoc.exists()) {
+            console.error(
+              "El documento de perfil público no existe para el usuario:",
+              userId
+            );
+            throw new Error(
+              "No se pudo obtener el perfil público del usuario."
+            );
+          }
+
+          const publicData = publicDataDoc.data();
+          console.log("Datos del perfil público:", publicData);
+
+          // Usar el gameName del perfil público, o "Usuario Anónimo" si no está disponible
+          const gameName = publicData.gameName || "Usuario Anónimo";
+          console.log("gameName utilizado:", gameName);
+
+          // Crear el elemento de mercado con el gameName correcto
+          const marketItemRef = await addDoc(collection(db, "marketItems"), {
             type: type,
             description: description,
             price: Number(price),
             userId: userId,
-            gameName: userData.gameName || "Usuario Anónimo",
+            gameName: gameName,
             photoURL: publicData.photoURL || null,
-            timestamp: new Date(),
+            timestamp: serverTimestamp(),
           });
 
-          alert(`Orden de ${type} publicada`);
+          console.log(`Elemento de mercado creado con ID: ${marketItemRef.id}`);
+          alert(`Orden de ${type} publicada con gameName: ${gameName}`);
           loadMarketItems();
         } catch (error) {
           console.error("Error al crear ítem de mercado:", error);
@@ -422,7 +443,7 @@
             const itemDoc = await transaction.get(itemDocRef);
 
             if (!itemDoc.exists()) {
-              throw "Esta oferta ya no está disponible.";
+              throw new Error("Esta oferta ya no está disponible.");
             }
 
             const itemData = itemDoc.data();
@@ -435,20 +456,19 @@
             const otherUserData = otherUserDoc.data();
 
             if (itemType === "sell") {
-              // Deduct coins from the current user (buyer)
               if (currentUserData.undertangoCoins < itemData.price) {
-                throw "No tienes suficientes monedas para comprar este ítem.";
+                throw new Error(
+                  "No tienes suficientes monedas para comprar este ítem."
+                );
               }
 
               transaction.update(currentUserDocRef, {
                 undertangoCoins: increment(-itemData.price),
               });
-              // Add coins to the seller
               transaction.update(otherUserDocRef, {
                 undertangoCoins: increment(itemData.price),
               });
 
-              // Add the purchased item to the buyer's profile
               const purchaseRef = doc(
                 collection(db, `usuarios/${user.uid}/purchases`)
               );
@@ -456,24 +476,22 @@
                 description: itemData.description,
                 price: itemData.price,
                 sellerId: itemData.userId,
-                timestamp: new Date(),
+                timestamp: serverTimestamp(),
               });
             } else {
-              // Handle the case where the current user is selling (other user is buying)
               if (otherUserData.undertangoCoins < itemData.price) {
-                throw "El comprador no tiene suficientes monedas para comprar este ítem.";
+                throw new Error(
+                  "El comprador no tiene suficientes monedas para comprar este ítem."
+                );
               }
 
-              // Add coins to the current user (seller)
               transaction.update(currentUserDocRef, {
                 undertangoCoins: increment(itemData.price),
               });
-              // Deduct coins from the buyer
               transaction.update(otherUserDocRef, {
                 undertangoCoins: increment(-itemData.price),
               });
 
-              // Add the purchased item to the buyer's profile
               const purchaseRef = doc(
                 collection(db, `usuarios/${itemData.userId}/purchases`)
               );
@@ -481,30 +499,29 @@
                 description: itemData.description,
                 price: itemData.price,
                 sellerId: user.uid,
-                timestamp: new Date(),
+                timestamp: serverTimestamp(),
               });
             }
 
-            // Register the transaction
             transaction.set(doc(collection(db, "transactions")), {
               buyer: itemType === "sell" ? user.uid : itemData.userId,
               seller: itemType === "sell" ? itemData.userId : user.uid,
               itemId: itemId,
               price: itemData.price,
               description: itemData.description,
-              timestamp: new Date(),
+              timestamp: serverTimestamp(),
             });
 
-            // Remove the item from the market
             transaction.delete(itemDocRef);
           });
 
+          console.log("Transacción completada con éxito");
           alert("Transacción completada con éxito!");
           loadMarketItems();
           obtenerRanking();
         } catch (error) {
           console.error("Error al aceptar la oferta:", error);
-          alert("Hubo un error al procesar la transacción: " + error);
+          alert("Hubo un error al procesar la transacción: " + error.message);
         }
       };
     </script>

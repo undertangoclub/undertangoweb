@@ -1,5 +1,3 @@
-// registro.js
-// Función para registrar un nuevo usuario y actualizar contadores globales
 function registrarUsuario(email, password, otrosDatos) {
   firebase
     .auth()
@@ -9,7 +7,6 @@ function registrarUsuario(email, password, otrosDatos) {
       const db = firebase.firestore();
       const globalesRef = db.collection("globales").doc("contadores");
 
-      // Iniciar una transacción para actualizar contadores globales y registrar usuario
       return db
         .runTransaction((transaction) => {
           return transaction.get(globalesRef).then((globalesDoc) => {
@@ -22,35 +19,43 @@ function registrarUsuario(email, password, otrosDatos) {
             let totalCoinsDisponibles =
               globalesDoc.data().totalCoinsDisponibles;
 
-            // Incrementar el contador de usuarios
             totalUsuariosRegistrados += 1;
-
-            // Calcular la recompensa
             let recompensa = Math.max(
               0,
               100 - 10 * (totalUsuariosRegistrados - 1)
             );
 
-            // Verificar que hay suficientes monedas disponibles
             if (totalCoinsDisponibles < recompensa) {
               throw "No hay suficientes monedas disponibles para otorgar la recompensa.";
             }
 
-            // Actualizar los contadores globales
             transaction.update(globalesRef, {
               totalUsuariosRegistrados: totalUsuariosRegistrados,
               totalCoinsDisponibles: totalCoinsDisponibles - recompensa,
             });
 
-            // Crear el perfil del usuario
             const userRef = db.collection("usuarios").doc(userId);
+            const publicDataRef = db
+              .collection("usuarios")
+              .doc(userId)
+              .collection("publicData")
+              .doc("perfilPublico");
+
+            // Crear el perfil privado del usuario
             transaction.set(userRef, {
               numeroRegistro: totalUsuariosRegistrados,
               undertangoCoins: recompensa,
+              email: email,
               ...otrosDatos,
             });
 
-            // Retornar los resultados
+            // Crear el perfil público del usuario
+            transaction.set(publicDataRef, {
+              gameName: otrosDatos.gameName || "Usuario Anónimo",
+              undertangoCoins: recompensa,
+              photoURL: otrosDatos.photoURL || null,
+            });
+
             return {
               numeroRegistro: totalUsuariosRegistrados,
               recompensa: recompensa,
@@ -59,7 +64,6 @@ function registrarUsuario(email, password, otrosDatos) {
           });
         })
         .then((result) => {
-          // Mostrar los datos al usuario
           console.log(
             `¡Bienvenido! Eres el usuario número ${result.numeroRegistro}.`
           );
@@ -67,6 +71,7 @@ function registrarUsuario(email, password, otrosDatos) {
           console.log(
             `Monedas disponibles en la plataforma: ${result.totalCoinsDisponibles}`
           );
+          console.log("Perfil de usuario creado con éxito.");
         })
         .catch((error) => {
           console.error("Error en la transacción: ", error);
