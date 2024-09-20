@@ -4,7 +4,98 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Book a Show - UnderTango Club</title>
-    <link rel="stylesheet" href="style.css" />
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Poiret+One&display=swap");
+
+      body {
+        font-family: "Poiret One", cursive;
+        background-color: #1a1a1a;
+        color: white;
+        line-height: 1.6;
+        margin: 0;
+        padding: 0;
+      }
+
+      header,
+      footer {
+        background-color: rgba(0, 0, 0, 0.5);
+        padding: 1em;
+        text-align: center;
+      }
+
+      nav a {
+        color: white;
+        text-decoration: none;
+        padding: 0.5em 1em;
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.1);
+        transition: background-color 0.3s ease;
+      }
+
+      nav a:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+      }
+
+      main {
+        padding: 2em;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      form {
+        background-color: rgba(255, 255, 255, 0.1);
+        padding: 2em;
+        border-radius: 10px;
+      }
+
+      label {
+        display: block;
+        margin-top: 1em;
+      }
+
+      input,
+      select {
+        width: 100%;
+        padding: 0.5em;
+        margin-top: 0.5em;
+        border: none;
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.2);
+        color: white;
+      }
+
+      button {
+        display: block;
+        width: 100%;
+        padding: 1em;
+        margin-top: 2em;
+        border: none;
+        border-radius: 5px;
+        background-color: #00c8ff;
+        color: white;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      button:hover {
+        background-color: #0099cc;
+      }
+
+      #message {
+        margin-top: 1em;
+        padding: 1em;
+        border-radius: 5px;
+        text-align: center;
+      }
+
+      .success {
+        background-color: rgba(0, 255, 0, 0.2);
+      }
+
+      .error {
+        background-color: rgba(255, 0, 0, 0.2);
+      }
+    </style>
   </head>
   <body>
     <header>
@@ -16,7 +107,7 @@
     <main>
       <section>
         <h2>Reserva un Espectáculo</h2>
-        <form>
+        <form id="bookingForm">
           <label for="name">Nombre:</label>
           <input type="text" id="name" name="name" required />
 
@@ -36,10 +127,112 @@
 
           <button type="submit">Enviar Solicitud</button>
         </form>
+        <div id="message"></div>
       </section>
     </main>
     <footer>
       <p>&copy; 2024 UnderTango Club. Todos los derechos reservados.</p>
     </footer>
+
+    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <!-- Add Firebase products that you want to use -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <!-- EmailJS SDK -->
+    <script
+      type="text/javascript"
+      src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"
+    ></script>
+
+    <script>
+      // Initialize EmailJS
+      (function () {
+        emailjs.init("j4CBoG8o9GCBGIZvr");
+      })();
+
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyC05s84tQfQbiJua0G0LHnQsZP76HqxMk4",
+        authDomain: "undertango.firebaseapp.com",
+        projectId: "undertango",
+        storageBucket: "undertango.appspot.com",
+        messagingSenderId: "21199358960",
+        appId: "1:21199358960:web:6b751db7c333403057ab35",
+      };
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+
+      // Get a reference to the Firestore database
+      const db = firebase.firestore();
+
+      // Handle form submission
+      document
+        .getElementById("bookingForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          const name = document.getElementById("name").value;
+          const email = document.getElementById("email").value;
+          const date = document.getElementById("date").value;
+          const showType = document.getElementById("show-type").value;
+
+          // Log para verificar que las variables están definidas
+          console.log("Datos del cliente:", { name, email, date, showType });
+
+          // Función para enviar correo
+          const sendEmail = (templateId, params) => {
+            return emailjs.send("undertango", templateId, params);
+          };
+
+          // Add a new document in collection "showBookings"
+          db.collection("showBookings")
+            .add({
+              name: name,
+              email: email,
+              date: date,
+              showType: showType,
+              timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            })
+            .then((docRef) => {
+              console.log("Reserva registrada con ID: ", docRef.id);
+
+              // Correo al cliente
+              const clientEmailPromise = sendEmail("clienttemplateid", {
+                to_name: name,
+                email: email, // Email del cliente
+                from_name: "UnderTango Club",
+                show_type: showType,
+                date: date,
+                message: `Gracias por su interés en nuestro espectáculo de ${showType}. Procesaremos su solicitud lo antes posible.`,
+              });
+
+              // Correo al equipo de UnderTango
+              const teamEmailPromise = sendEmail("teamtemplateid", {
+                to_name: "Equipo UnderTango",
+                from_name: name,
+                show_type: showType,
+                date: date,
+                email: email, // Email del cliente para referencia
+                message: `Nueva reserva recibida para ${showType} el día ${date}.`,
+              });
+
+              // Esperar a que ambos correos se envíen
+              return Promise.all([clientEmailPromise, teamEmailPromise]);
+            })
+            .then((responses) => {
+              console.log("Correos enviados exitosamente", responses);
+              document.getElementById("message").innerHTML =
+                "¡Solicitud de reserva enviada con éxito! Por favor, revise su correo electrónico para más detalles.";
+              document.getElementById("message").className = "success";
+              document.getElementById("bookingForm").reset();
+            })
+            .catch((error) => {
+              console.error("Error en el proceso de reserva:", error);
+              document.getElementById("message").innerHTML =
+                "Error al procesar la solicitud. Por favor, intenta de nuevo.";
+              document.getElementById("message").className = "error";
+            });
+        });
+    </script>
   </body>
 </html>
