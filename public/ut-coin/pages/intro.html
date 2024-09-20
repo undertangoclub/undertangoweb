@@ -21,6 +21,7 @@
         align-items: center;
         height: 100vh;
       }
+
       .container {
         text-align: center;
         background-color: #c0bfbf;
@@ -29,15 +30,16 @@
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         max-width: 600px;
       }
+
       #introText {
         font-size: 22px;
         line-height: 1.6;
         margin-bottom: 20px;
-        cursor: pointer;
         color: var(--text-color);
         font-weight: bold;
       }
-      #registerBtn {
+
+      .action-btn {
         background-color: var(--accent-color);
         color: #ffffff;
         border: none;
@@ -45,10 +47,11 @@
         font-size: 18px;
         cursor: pointer;
         border-radius: 5px;
-        display: none;
+        margin: 10px;
         font-weight: bold;
       }
-      #registerBtn:hover {
+
+      .action-btn:hover {
         background-color: #357ae8;
       }
     </style>
@@ -56,26 +59,25 @@
   <body>
     <div class="container">
       <p id="introText">
-        Este juego funciona con UnderTango Tokens! Descubrelas y sé el primero
+        Este juego funciona con UnderTango Tokens! Descúbrelas y sé el primero
         en el ranking!
       </p>
-      <button id="registerBtn" style="display: none">Registrarse</button>
+
+      <!-- Botones visibles desde el inicio -->
+      <button class="action-btn" id="firstTimeBtn">Es mi primera vez</button>
+      <button class="action-btn" id="loginBtn">Ya soy usuario</button>
     </div>
 
     <script>
-      const introText = document.getElementById("introText");
-      const registerBtn = document.getElementById("registerBtn");
+      const firstTimeBtn = document.getElementById("firstTimeBtn");
+      const loginBtn = document.getElementById("loginBtn");
 
-      introText.addEventListener("click", function () {
-        this.textContent =
-          "Está a un paso! Completa el proceso de inscripción Ø";
-        registerBtn.style.display = "inline-block";
+      firstTimeBtn.addEventListener("click", function () {
+        window.location.href = "registro.html";
       });
 
-      registerBtn.addEventListener("click", function () {
-        if (confirm("Iniciando proceso de registro")) {
-          window.location.href = "registro.html";
-        }
+      loginBtn.addEventListener("click", function () {
+        window.location.href = "login.html";
       });
     </script>
   </body>

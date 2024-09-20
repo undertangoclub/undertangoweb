@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Registro e Inicio de Sesión - UnderTango</title>
+    <title>Registro - UnderTango</title>
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -47,12 +47,6 @@
       button:hover {
         background-color: #357ae8;
       }
-      hr {
-        border: 0;
-        height: 1px;
-        background-color: #ddd;
-        margin: 30px 0;
-      }
       .error {
         color: red;
         margin-top: 10px;
@@ -61,7 +55,6 @@
   </head>
   <body>
     <div class="container">
-      <!-- Sección de Registro -->
       <h2>¿Eres nuevo? ¡Regístrate!</h2>
       <form id="registrationForm">
         <input
@@ -78,28 +71,6 @@
         />
         <button type="submit">Registrarse</button>
       </form>
-
-      <!-- Línea divisora -->
-      <hr />
-
-      <!-- Sección de Inicio de Sesión -->
-      <h2>Ya eres usuario, ¡ingresa! ØØ :D</h2>
-      <form id="loginForm">
-        <input
-          type="email"
-          id="loginEmail"
-          placeholder="Correo electrónico"
-          required
-        />
-        <input
-          type="password"
-          id="loginPassword"
-          placeholder="Contraseña"
-          required
-        />
-        <button type="submit">Iniciar Sesión</button>
-      </form>
-
       <p class="error" id="errorMessage"></p>
     </div>
 
@@ -109,19 +80,14 @@
       import {
         getAuth,
         createUserWithEmailAndPassword,
-        signInWithEmailAndPassword,
-        setPersistence,
-        browserLocalPersistence,
       } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
       import {
         getFirestore,
         doc,
-        getDoc,
         setDoc,
         runTransaction,
       } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
-      // Configuración de Firebase (reemplaza con tu propia configuración)
       const firebaseConfig = {
         apiKey: "AIzaSyC05s84tQfQbiJua0G0LHnQsZP76HqxMk4",
         authDomain: "undertango.firebaseapp.com",
@@ -131,173 +97,39 @@
         appId: "1:21199358960:web:6b751db7c333403057ab35",
       };
 
-      // Inicializar Firebase
       const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
       const db = getFirestore(app);
 
-      // Establecer persistencia local
-      setPersistence(auth, browserLocalPersistence)
-        .then(() => {
-          console.log("Persistencia de sesión establecida en local.");
-        })
-        .catch((error) => {
-          console.error("Error al establecer persistencia:", error);
-        });
-
+      // Manejar el registro de usuario
       const registrationForm = document.getElementById("registrationForm");
-      const loginForm = document.getElementById("loginForm");
       const errorMessage = document.getElementById("errorMessage");
 
-      // Función para manejar la redirección basada en los datos del usuario
-      function handleUserRedirect(userData, userId) {
-        localStorage.setItem("userId", userId);
-        localStorage.setItem("userEmail", userData.email);
-        localStorage.setItem("undertangoCoins", userData.undertangoCoins);
-
-        if (userData.gameName) {
-          localStorage.setItem("gameName", userData.gameName);
-        }
-        if (userData.institution) {
-          localStorage.setItem("institution", userData.institution);
-        }
-        if (userData.photoURL) {
-          localStorage.setItem("photoURL", userData.photoURL);
-        }
-
-        if (userData.gameName && userData.institution) {
-          console.log(
-            "Usuario tiene todos los datos. Redirigiendo a juego.html"
-          );
-          window.location.href = "juego.html";
-        } else {
-          console.log(
-            "Faltan datos del usuario. Redirigiendo a formulario.html"
-          );
-          window.location.href = "formulario.html";
-        }
-      }
-
-      // Manejar el registro de usuario
       registrationForm.addEventListener("submit", async (event) => {
         event.preventDefault();
         const email = document.getElementById("email").value;
         const password = document.getElementById("password").value;
 
         try {
-          console.log("Iniciando proceso de registro...");
+          const userCredential = await createUserWithEmailAndPassword(
+            auth,
+            email,
+            password
+          );
+          const user = userCredential.user;
 
-          // Obtener totalUsuariosRegistrados desde Firestore
-          const globalesRef = doc(db, "globales", "contadores");
-          await runTransaction(db, async (transaction) => {
-            const globalesDoc = await transaction.get(globalesRef);
-
-            if (!globalesDoc.exists()) {
-              throw new Error("El documento de contadores globales no existe.");
-            }
-
-            let data = globalesDoc.data();
-            let totalUsuariosRegistrados = data.totalUsuariosRegistrados || 0;
-
-            // Calculamos monedasIniciales según totalUsuariosRegistrados
-            let monedasIniciales;
-            let mensajeRegistro = "";
-
-            if (totalUsuariosRegistrados === 0) {
-              monedasIniciales = 20;
-              mensajeRegistro =
-                "¡Ey! Eres la primera persona en registrarte, normalmente corresponden 10 monedas, pero tú tienes 10 más";
-            } else if (totalUsuariosRegistrados < 10) {
-              monedasIniciales = 10 - totalUsuariosRegistrados;
-              mensajeRegistro = `¡Ey! Eres la persona número ${
-                totalUsuariosRegistrados + 1
-              } en registrarte, recibes ${monedasIniciales} monedas`;
-            } else {
-              monedasIniciales = 1;
-              mensajeRegistro = "¡Bienvenido! Recibes 1 moneda por registrarte";
-            }
-
-            // Crear el usuario en Auth
-            const userCredential = await createUserWithEmailAndPassword(
-              auth,
-              email,
-              password
-            );
-            const user = userCredential.user;
-            console.log("Usuario creado con UID:", user.uid);
-
-            // Crear el perfil del usuario en Firestore
-            const userDocRef = doc(db, "usuarios", user.uid);
-            const userData = {
-              email: user.email,
-              undertangoCoins: monedasIniciales,
-              gameName: null,
-              institution: null,
-              photoURL: null,
-            };
-            await setDoc(userDocRef, userData);
-            console.log(
-              "Perfil de usuario creado con monedas iniciales:",
-              monedasIniciales
-            );
-
-            // Actualizar contadores globales
-            totalUsuariosRegistrados += 1;
-            const totalCoinsDisponibles =
-              (data.totalCoinsDisponibles || 1000) - monedasIniciales;
-
-            transaction.update(globalesRef, {
-              totalUsuariosRegistrados,
-              totalCoinsDisponibles,
-            });
-            console.log("Contadores globales actualizados.");
-
-            // Mostrar mensaje de registro
-            alert(mensajeRegistro);
-
-            // Manejar la redirección
-            handleUserRedirect(userData, user.uid);
+          // Guardar el perfil del usuario en Firestore
+          const userDocRef = doc(db, "usuarios", user.uid);
+          await setDoc(userDocRef, {
+            email: user.email,
+            undertangoCoins: 1,
           });
+
+          alert("Registro exitoso. Redirigiendo a juego...");
+          window.location.href = "juego.html";
         } catch (error) {
           console.error("Error en el registro:", error);
           errorMessage.textContent = "Error en el registro: " + error.message;
-        }
-      });
-
-      // Manejar el inicio de sesión de usuario
-      loginForm.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        const loginEmail = document.getElementById("loginEmail").value;
-        const loginPassword = document.getElementById("loginPassword").value;
-
-        try {
-          console.log("Iniciando proceso de inicio de sesión...");
-          const userCredential = await signInWithEmailAndPassword(
-            auth,
-            loginEmail,
-            loginPassword
-          );
-          const user = userCredential.user;
-          console.log("Usuario autenticado con UID:", user.uid);
-
-          // Verificar si el usuario ya tiene los datos necesarios en Firestore
-          const userDocRef = doc(db, "usuarios", user.uid);
-          const userDoc = await getDoc(userDocRef);
-
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            console.log("Datos del usuario recuperados:", userData);
-            handleUserRedirect(userData, user.uid);
-          } else {
-            console.log(
-              "No se encontró el documento del usuario. Redirigiendo a formulario.html"
-            );
-            handleUserRedirect({ email: user.email }, user.uid);
-          }
-        } catch (error) {
-          console.error("Error al iniciar sesión:", error);
-          errorMessage.textContent =
-            "Error al iniciar sesión: " + error.message;
         }
       });
     </script>
