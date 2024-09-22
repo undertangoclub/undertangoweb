@@ -101,6 +101,18 @@
       .accept-offer-btn:hover {
         background-color: #45a049;
       }
+
+      .acquisitions-list {
+        list-style-type: none;
+        padding: 0;
+      }
+
+      .acquisitions-list li {
+        background-color: #f9f9f9;
+        margin-bottom: 10px;
+        padding: 10px;
+        border-radius: 5px;
+      }
     </style>
   </head>
   <body>
@@ -120,6 +132,12 @@
       <button id="sellButton">Vender algo</button>
       <button id="buyButton">Comprar algo</button>
       <button id="backToMainButton">Volver al menú principal</button>
+
+      <!-- Nueva sección "Mis Adquisiciones" -->
+      <h2>Mis Adquisiciones</h2>
+      <ul id="myAcquisitionsList" class="acquisitions-list">
+        No hay adquisiciones recientes.
+      </ul>
       <div id="actionForm"></div>
     </div>
 
@@ -154,6 +172,8 @@
         collectionGroup,
         increment,
         runTransaction,
+        serverTimestamp,
+        where,
       } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
       const firebaseConfig = {
@@ -175,6 +195,7 @@
           loadUsers();
           loadMarketItems();
           obtenerRanking();
+          loadUserAcquisitions(user.uid); // Cargar las adquisiciones del usuario
         } else {
           window.location.href = "registro.html";
         }
@@ -232,17 +253,25 @@
           console.error("Element with id 'marketList' not found");
           return;
         }
-        marketList.innerHTML = "";
+        marketList.innerHTML = ""; // Limpiar la lista antes de cargar los ítems
+
         try {
           const itemsSnapshot = await getDocs(collection(db, "marketItems"));
+
           for (const itemDoc of itemsSnapshot.docs) {
             const itemData = itemDoc.data();
+
+            // Aquí obtenemos el documento del perfil público del usuario que creó el ítem
             const publicDataDoc = await getDoc(
               doc(db, `usuarios/${itemData.userId}/publicData/perfilPublico`)
             );
             const publicData = publicDataDoc.exists()
               ? publicDataDoc.data()
               : {};
+
+            // Si `gameName` no existe en `publicData`, mostrar un nombre por defecto
+            const gameName =
+              itemData.gameName || publicData.gameName || "Usuario Anónimo";
 
             const li = document.createElement("li");
             li.className = "market-item";
@@ -251,7 +280,7 @@
                 <img src="${
                   publicData.photoURL || "https://via.placeholder.com/30"
                 }" alt="User Photo">
-                <span>${publicData.gameName || "Usuario Anónimo"}</span>
+                <span>${gameName}</span> <!-- Mostrar el gameName correctamente -->
               </div>
               <span>${itemData.type === "sell" ? "Vende" : "Compra"}: ${
               itemData.description
@@ -524,6 +553,42 @@
           alert("Hubo un error al procesar la transacción: " + error.message);
         }
       };
+      async function loadUserAcquisitions(userId) {
+        const acquisitionsList = document.getElementById("myAcquisitionsList");
+        acquisitionsList.innerHTML = ""; // Limpiar la lista
+
+        try {
+          // Obtener las transacciones donde el usuario es el comprador
+          const acquisitionsQuery = query(
+            collection(db, "transactions"),
+            where("buyer", "==", userId),
+            orderBy("timestamp", "desc"),
+            limit(5)
+          );
+          const querySnapshot = await getDocs(acquisitionsQuery);
+
+          if (querySnapshot.empty) {
+            acquisitionsList.innerHTML =
+              "<li>No hay adquisiciones recientes.</li>";
+          } else {
+            querySnapshot.forEach((doc) => {
+              const acquisition = doc.data();
+              const li = document.createElement("li");
+              li.textContent = `Adquirido: ${
+                acquisition.description || "Artículo"
+              } de ${acquisition.seller || "Vendedor"} por ${
+                acquisition.price
+              } monedas`;
+              acquisitionsList.appendChild(li);
+            });
+          }
+        } catch (error) {
+          console.error(
+            "Error al cargar las adquisiciones del usuario:",
+            error
+          );
+        }
+      }
     </script>
   </body>
 </html>
