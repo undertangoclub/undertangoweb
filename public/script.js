@@ -47,6 +47,33 @@ document.addEventListener("DOMContentLoaded", () => {
         link: "./pages/artists.html",
       },
     ],
+    Clases: [
+      {
+        name: "Clases Grupales",
+        image: "./img/clases-grupales.jpg",
+        link: "./pages/clases-grupales.html",
+      },
+      {
+        name: "Clases Privadas",
+        image: "./img/clases-privadas.jpg",
+        link: "./pages/clases-privadas.html",
+      },
+      {
+        name: "Cursos On-Line",
+        image: "./img/cursos-on-line.jpg",
+        link: "./pages/cursos-on-line.html",
+      },
+      {
+        name: "Otras Disciplinas",
+        image: "./img/otros-cursos.jpg",
+        link: "./pages/otras-disciplinas.html",
+      },
+      {
+        name: "Academia de Aprendizaje",
+        image: "./img/academia-de-aprendizaje.jpg",
+        link: "./pages/academia-de-aprendizaje.html",
+      },
+    ],
   };
 
   // Comprobar si la página se cargó con el parámetro skipIntro
@@ -186,29 +213,32 @@ document.addEventListener("DOMContentLoaded", () => {
   function handleCircleClick(circle, radius, circleSize) {
     try {
       console.log("Circle clicked:", circle.getAttribute("data-name"));
-      console.log(
-        "Current centered circle:",
-        centeredCircle ? centeredCircle.getAttribute("data-name") : "None"
-      );
-      console.log("isShowsCentered:", isShowsCentered);
 
       const clickedLogoName = circle.getAttribute("data-name");
 
-      if (isShowsCentered && clickedLogoName === "Shows") {
-        console.log("Reloading page without intro");
+      if (
+        (isShowsCentered && clickedLogoName === "Shows") ||
+        (centeredCircle === circle && clickedLogoName === "Clases")
+      ) {
+        // Reiniciar la página si se hace clic en "Shows" o "Clases" una segunda vez
         window.location.href = window.location.pathname + "?skipIntro=true";
         return;
       } else if (clickedLogoName === "Shows") {
-        console.log("Centering Shows");
         stopAnimation();
         centeredCircle = circle;
         centeredCircle.style.transition = "transform 0.3s ease";
         centeredCircle.style.transform = `translate(0, 0) scale(1.5)`;
-        showShowsIntro();
+        showShowsIntro(); // Función específica para Shows
         redistributeCircles(radius, circleSize, true);
         isShowsCentered = true;
+      } else if (clickedLogoName === "Clases") {
+        stopAnimation();
+        centeredCircle = circle;
+        centeredCircle.style.transition = "transform 0.3s ease";
+        centeredCircle.style.transform = `translate(0, 0) scale(1.5)`;
+        showClasesIntro(); // Función específica para Clases
+        redistributeCircles(radius, circleSize, true);
       } else if (centeredCircle === circle) {
-        console.log("Decentering current circle");
         stopAnimation();
         const circles = document.querySelectorAll(".circle");
         circles.forEach((c) => {
@@ -222,18 +252,14 @@ document.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => {
           centeredCircle.style.transform = `scale(1)`;
           centeredCircle = null;
-          lastUpdateTime = Date.now();
           resetCircles();
           redistributeCircles(radius, circleSize, false);
           requestAnimationFrame(() => {
-            circles.forEach((c) => {
-              c.style.opacity = "1";
-            });
+            circles.forEach((c) => (c.style.opacity = "1"));
             startAnimation(radius, circleSize);
           });
         }, 300);
       } else {
-        console.log("Centering new circle");
         if (centeredCircle) {
           centeredCircle.style.transition = "transform 0.3s ease";
           centeredCircle.style.transform = `scale(1)`;
@@ -243,12 +269,6 @@ document.addEventListener("DOMContentLoaded", () => {
         centeredCircle.style.transform = `translate(0, 0) scale(1.5)`;
         redistributeCircles(radius, circleSize, true);
       }
-
-      console.log(
-        "After click - Centered circle:",
-        centeredCircle ? centeredCircle.getAttribute("data-name") : "None"
-      );
-      console.log("After click - isShowsCentered:", isShowsCentered);
     } catch (error) {
       console.error("Error in handleCircleClick:", error);
     }
@@ -257,6 +277,11 @@ document.addEventListener("DOMContentLoaded", () => {
   function showShowsIntro() {
     stopAnimation();
     transitionCircleImages(relatedContent["Shows"]);
+  }
+
+  function showClasesIntro() {
+    stopAnimation();
+    transitionCircleImages(relatedContent["Clases"]);
   }
 
   function fadeInOutSequence(
