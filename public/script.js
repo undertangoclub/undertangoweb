@@ -12,13 +12,14 @@ document.addEventListener("DOMContentLoaded", () => {
   let isInitialized = false;
   let introSkipped = false;
   let isShowsCentered = false;
+  let isFDICentered = false;
   let welcomeTextTimeout, subTextTimeout, layoutTimeout;
 
   window.addEventListener("unhandledrejection", function (event) {
     console.error("Unhandled promise rejection:", event.reason);
   });
 
-  // Configuraciones para cambiar imágenes y enlaces
+  // Configurations for changing images and links
   const relatedContent = {
     Shows: [
       {
@@ -76,14 +77,34 @@ document.addEventListener("DOMContentLoaded", () => {
     ],
     "Fondo de Inversión": [
       {
-        name: "Fondo de Inversión",
-        image: "./img/logo6.png", // Use your FDI logo or image here
-        link: "./pages/fdi/fondo-de-inversiones.html",
+        name: "Página de Inversores",
+        image: "./img/pagina-inversores.jpg",
+        link: "fdi/fondo-de-inversiones.html",
+      },
+      {
+        name: "Boletín Semanal",
+        image: "./img/boletin-semanal.jpg",
+        link: "./pages/fdi/boletin-semanal.html",
+      },
+      {
+        name: "Docs sobre tokenización y web3",
+        image: "./img/docs-tokenizacion-web3.jpg",
+        link: "./pages/fdi/docs-tokenizacion-web3.html",
+      },
+      {
+        name: "Cursos sobre criptografía y blockchains",
+        image: "./img/cursos-cripto-blockchain.jpg",
+        link: "./pages/fdi/cursos-cripto-blockchain.html",
+      },
+      {
+        name: "Whitepaper",
+        image: "./img/whitepaper.jpg",
+        link: "./pages/fdi/whitepaper.html",
       },
     ],
   };
 
-  // Comprobar si la página se cargó con el parámetro skipIntro
+  // Check if the page was loaded with the skipIntro parameter
   const urlParams = new URLSearchParams(window.location.search);
   introSkipped = urlParams.has("skipIntro");
   console.log("Initial introSkipped value:", introSkipped);
@@ -105,7 +126,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Event listeners para saltar la intro
+  // Event listeners to skip the intro
   document.addEventListener("keydown", (event) => {
     if (event.code === "Space") {
       event.preventDefault();
@@ -172,7 +193,7 @@ document.addEventListener("DOMContentLoaded", () => {
         };
       }
 
-      // Los event listeners solo deben agregarse una vez, no en cada llamada a updateLayout
+      // Event listeners should only be added once, not in every call to updateLayout
       if (!circle.hasAttribute("data-listeners-added")) {
         circle.addEventListener("mouseover", () => {
           const circleName = circle.getAttribute("data-name");
@@ -223,33 +244,38 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const clickedLogoName = circle.getAttribute("data-name");
 
-      // Redirect to Fondo de Inversión page when FDI circle is clicked
-      if (clickedLogoName === "Fondo de Inversión") {
-        window.location.href = "fdi/fondo-de-inversiones.html";
-        return; // Prevent further actions on this circle (stop animation for FDI)
-      }
-
       if (
         (isShowsCentered && clickedLogoName === "Shows") ||
+        (isFDICentered && clickedLogoName === "Fondo de Inversión") ||
         (centeredCircle === circle && clickedLogoName === "Clases")
       ) {
-        // Reiniciar la página si se hace clic en "Shows" o "Clases" una segunda vez
+        // Reset the page if "Shows", "Clases", or "Fondo de Inversión" is clicked a second time
         window.location.href = window.location.pathname + "?skipIntro=true";
         return;
-      } else if (clickedLogoName === "Shows") {
+      } else if (
+        clickedLogoName === "Shows" ||
+        clickedLogoName === "Clases" ||
+        clickedLogoName === "Fondo de Inversión"
+      ) {
         stopAnimation();
         centeredCircle = circle;
         centeredCircle.style.transition = "transform 0.3s ease";
         centeredCircle.style.transform = `translate(0, 0) scale(1.5)`;
-        showShowsIntro(); // Función específica para Shows
-        redistributeCircles(radius, circleSize, true);
-        isShowsCentered = true;
-      } else if (clickedLogoName === "Clases") {
-        stopAnimation();
-        centeredCircle = circle;
-        centeredCircle.style.transition = "transform 0.3s ease";
-        centeredCircle.style.transform = `translate(0, 0) scale(1.5)`;
-        showClasesIntro(); // Función específica para Clases
+
+        if (clickedLogoName === "Shows") {
+          showShowsIntro();
+          isShowsCentered = true;
+          isFDICentered = false;
+        } else if (clickedLogoName === "Clases") {
+          showClasesIntro();
+          isShowsCentered = false;
+          isFDICentered = false;
+        } else if (clickedLogoName === "Fondo de Inversión") {
+          showFDIIntro();
+          isShowsCentered = false;
+          isFDICentered = true;
+        }
+
         redistributeCircles(radius, circleSize, true);
       } else if (centeredCircle === circle) {
         stopAnimation();
@@ -295,6 +321,11 @@ document.addEventListener("DOMContentLoaded", () => {
   function showClasesIntro() {
     stopAnimation();
     transitionCircleImages(relatedContent["Clases"]);
+  }
+
+  function showFDIIntro() {
+    stopAnimation();
+    transitionCircleImages(relatedContent["Fondo de Inversión"]);
   }
 
   function fadeInOutSequence(
@@ -383,11 +414,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const circles = document.querySelectorAll(".circle");
     const originalLogos = [
       { src: "./img/logo1.gif", alt: "Shows" },
-      { src: "./img/logo2.gif", alt: "Logo 2" },
-      { src: "./img/logo3.gif", alt: "Logo 3" },
-      { src: "./img/logo4.png", alt: "Logo 4" },
-      { src: "./img/logo5.jpg", alt: "Logo 5" },
-      { src: "./img/logo6.png", alt: "Logo 6" },
+      { src: "./img/logo2.gif", alt: "Clases" },
+      { src: "./img/logo3.gif", alt: "Moda" },
+      { src: "./img/logo4.png", alt: "Red Social" },
+      { src: "./img/logo5.jpg", alt: "Taller" },
+      { src: "./img/logo6.png", alt: "Fondo de Inversión" },
     ];
 
     circles.forEach((circle, index) => {
@@ -454,9 +485,9 @@ document.addEventListener("DOMContentLoaded", () => {
     updateLayout();
   });
 
-  // Iniciar la secuencia de animación
+  // Start the animation sequence
   console.log("Starting intro sequence");
   playIntroAnimation().catch((error) => {
     console.error("Error during intro animation:", error);
   });
-}); // Cierre del evento DOMContentLoaded
+}); // End of DOMContentLoaded event
