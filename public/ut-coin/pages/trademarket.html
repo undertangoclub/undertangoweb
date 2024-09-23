@@ -192,10 +192,9 @@
       onAuthStateChanged(auth, (user) => {
         if (user) {
           loadUserProfile(user.uid);
-          loadUsers();
           loadMarketItems();
           obtenerRanking();
-          loadUserAcquisitions(user.uid); // Cargar las adquisiciones del usuario
+          loadUserAcquisitions(user.uid);
         } else {
           window.location.href = "registro.html";
         }
@@ -224,72 +223,30 @@
         }
       }
 
-      async function loadUsers() {
-        const userList = document.getElementById("rankingList");
-        if (!userList) {
-          console.error("Element with id 'rankingList' not found");
-          return;
-        }
-        userList.innerHTML = "";
-        try {
-          const usersSnapshot = await getDocs(collection(db, "usuarios"));
-          usersSnapshot.forEach((doc) => {
-            const userData = doc.data();
-            const li = document.createElement("li");
-            li.textContent = `${userData.gameName || "Usuario"} - ${
-              userData.undertangoCoins || 0
-            } monedas`;
-            li.onclick = () => showSendMoneyForm(doc.id, userData.gameName);
-            userList.appendChild(li);
-          });
-        } catch (error) {
-          console.error("Error loading users:", error);
-        }
-      }
-
       async function loadMarketItems() {
         const marketList = document.getElementById("marketList");
         if (!marketList) {
           console.error("Element with id 'marketList' not found");
           return;
         }
-        marketList.innerHTML = ""; // Limpiar la lista antes de cargar los ítems
+        marketList.innerHTML = "";
 
         try {
-          // Obtener los documentos de los ítems del mercado
           const itemsSnapshot = await getDocs(collection(db, "marketItems"));
 
-          // Recorrer cada ítem del mercado
           for (const itemDoc of itemsSnapshot.docs) {
             const itemData = itemDoc.data();
 
-            // Obtener el userId del ítem
-            const userId = itemData.userId;
+            let gameName = itemData.gameName || "Usuario Anónimo";
+            let photoURL =
+              itemData.photoURL || "https://via.placeholder.com/30";
 
-            // Aquí obtenemos el documento del perfil público del usuario que creó el ítem
-            const publicDataDoc = await getDoc(
-              doc(db, `usuarios/${userId}/publicData/perfilPublico`)
-            );
-
-            // Definir el valor predeterminado de gameName y photoURL
-            let gameName = "Usuario Anónimo";
-            let photoURL = "https://via.placeholder.com/30"; // Imagen por defecto
-
-            // Si existe el documento de perfil público, obtener el gameName y photoURL
-            if (publicDataDoc.exists()) {
-              const publicData = publicDataDoc.data();
-              gameName = publicData.gameName || "Usuario Anónimo";
-              photoURL =
-                publicData.photoURL || "https://via.placeholder.com/30";
-            }
-
-            // Crear el elemento de la lista del mercado
             const li = document.createElement("li");
             li.className = "market-item";
             li.innerHTML = `
               <div class="user-info">
                 <img src="${photoURL}" alt="User Photo">
-                <span>${gameName}</span> <!-- Mostrar el gameName -->
+                <span>${gameName}</span>
               </div>
               <span>${itemData.type === "sell" ? "Vende" : "Compra"}: ${
               itemData.description
@@ -329,6 +286,8 @@
             li.textContent = `${data.gameName || "Usuario Anónimo"} - ${
               data.undertangoCoins || 0
             } monedas`;
+            li.onclick = () =>
+              showSendMoneyForm(doc.ref.parent.parent.id, data.gameName);
             rankingList.appendChild(li);
           });
         } catch (error) {
@@ -343,11 +302,11 @@
           return;
         }
         actionForm.innerHTML = `
-              <h3>Enviar monedas a ${userName}</h3>
-              <input type="number" id="amount" placeholder="Cantidad">
-              <input type="text" id="message" placeholder="Mensaje">
-              <button onclick="sendMoney('${userId}')">Enviar</button>
-          `;
+          <h3>Enviar monedas a ${userName}</h3>
+          <input type="number" id="amount" placeholder="Cantidad">
+          <input type="text" id="message" placeholder="Mensaje">
+          <button onclick="sendMoney('${userId}')">Enviar</button>
+        `;
       }
 
       window.sendMoney = async function (recipientId) {
@@ -357,11 +316,11 @@
 
         try {
           await addDoc(collection(db, "transactions"), {
-            sender: senderId,
-            recipient: recipientId,
+            senderId: senderId,
+            recipientId: recipientId,
             amount: Number(amount),
             message: message,
-            timestamp: new Date(),
+            timestamp: serverTimestamp(),
           });
 
           const senderDoc = doc(db, "usuarios", senderId);
@@ -374,7 +333,6 @@
           });
 
           alert("Transacción completada");
-          loadUsers();
           obtenerRanking();
         } catch (error) {
           console.error("Error en la transacción:", error);
@@ -395,11 +353,11 @@
           return;
         }
         actionForm.innerHTML = `
-              <h3>Vender algo</h3>
-              <input type="text" id="itemDescription" placeholder="Descripción">
-              <input type="number" id="itemPrice" placeholder="Precio">
-              <button onclick="createMarketItem('sell')">Publicar venta</button>
-          `;
+          <h3>Vender algo</h3>
+          <input type="text" id="itemDescription" placeholder="Descripción">
+          <input type="number" id="itemPrice" placeholder="Precio">
+          <button onclick="createMarketItem('sell')">Publicar venta</button>
+        `;
       }
 
       function showBuyForm() {
@@ -409,11 +367,11 @@
           return;
         }
         actionForm.innerHTML = `
-              <h3>Comprar algo</h3>
-              <input type="text" id="itemDescription" placeholder="Descripción">
-              <input type="number" id="itemPrice" placeholder="Precio máximo">
-              <button onclick="createMarketItem('buy')">Publicar compra</button>
-          `;
+          <h3>Comprar algo</h3>
+          <input type="text" id="itemDescription" placeholder="Descripción">
+          <input type="number" id="itemPrice" placeholder="Precio máximo">
+          <button onclick="createMarketItem('buy')">Publicar compra</button>
+        `;
       }
 
       window.createMarketItem = async function (type) {
@@ -422,9 +380,6 @@
         const userId = auth.currentUser.uid;
 
         try {
-          console.log("Creando artículo de mercado para el usuario:", userId);
-
-          // Obtener el documento de perfil público del usuario
           const publicDataRef = doc(
             db,
             `usuarios/${userId}/publicData/perfilPublico`
@@ -432,24 +387,15 @@
           const publicDataDoc = await getDoc(publicDataRef);
 
           if (!publicDataDoc.exists()) {
-            console.error(
-              "El documento de perfil público no existe para el usuario:",
-              userId
-            );
             throw new Error(
               "No se pudo obtener el perfil público del usuario."
             );
           }
 
           const publicData = publicDataDoc.data();
-          console.log("Datos del perfil público:", publicData);
-
-          // Usar el gameName del perfil público, o "Usuario Anónimo" si no está disponible
           const gameName = publicData.gameName || "Usuario Anónimo";
-          console.log("gameName utilizado:", gameName);
 
-          // Crear el elemento de mercado con el gameName correcto
-          const marketItemRef = await addDoc(collection(db, "marketItems"), {
+          await addDoc(collection(db, "marketItems"), {
             type: type,
             description: description,
             price: Number(price),
@@ -459,7 +405,6 @@
             timestamp: serverTimestamp(),
           });
 
-          console.log(`Elemento de mercado creado con ID: ${marketItemRef.id}`);
           alert(`Orden de ${type} publicada con gameName: ${gameName}`);
           loadMarketItems();
         } catch (error) {
@@ -506,16 +451,6 @@
               transaction.update(otherUserDocRef, {
                 undertangoCoins: increment(itemData.price),
               });
-
-              const purchaseRef = doc(
-                collection(db, `usuarios/${user.uid}/purchases`)
-              );
-              transaction.set(purchaseRef, {
-                description: itemData.description,
-                price: itemData.price,
-                sellerId: itemData.userId,
-                timestamp: serverTimestamp(),
-              });
             } else {
               if (otherUserData.undertangoCoins < itemData.price) {
                 throw new Error(
@@ -529,48 +464,65 @@
               transaction.update(otherUserDocRef, {
                 undertangoCoins: increment(-itemData.price),
               });
-
-              const purchaseRef = doc(
-                collection(db, `usuarios/${itemData.userId}/purchases`)
-              );
-              transaction.set(purchaseRef, {
-                description: itemData.description,
-                price: itemData.price,
-                sellerId: user.uid,
-                timestamp: serverTimestamp(),
-              });
             }
 
-            transaction.set(doc(collection(db, "transactions")), {
-              buyer: itemType === "sell" ? user.uid : itemData.userId,
-              seller: itemType === "sell" ? itemData.userId : user.uid,
+            const currentUserPublicDataDoc = await getDoc(
+              doc(db, `usuarios/${user.uid}/publicData/perfilPublico`)
+            );
+            const otherUserPublicDataDoc = await getDoc(
+              doc(db, `usuarios/${itemData.userId}/publicData/perfilPublico`)
+            );
+
+            const currentUserGameName = currentUserPublicDataDoc.exists()
+              ? currentUserPublicDataDoc.data().gameName || "Usuario Anónimo"
+              : "Usuario Anónimo";
+            const otherUserGameName = otherUserPublicDataDoc.exists()
+              ? otherUserPublicDataDoc.data().gameName || "Usuario Anónimo"
+              : "Usuario Anónimo";
+
+            const transactionData = {
+              buyerId: itemType === "sell" ? user.uid : itemData.userId,
+              buyerName:
+                itemType === "sell" ? currentUserGameName : otherUserGameName,
+              sellerId: itemType === "sell" ? itemData.userId : user.uid,
+              sellerName:
+                itemType === "sell" ? otherUserGameName : currentUserGameName,
               itemId: itemId,
               price: itemData.price,
               description: itemData.description,
               timestamp: serverTimestamp(),
-            });
+            };
+
+            transaction.set(
+              doc(collection(db, "transactions")),
+              transactionData
+            );
 
             transaction.delete(itemDocRef);
           });
 
-          console.log("Transacción completada con éxito");
           alert("Transacción completada con éxito!");
           loadMarketItems();
           obtenerRanking();
+          loadUserAcquisitions(user.uid);
         } catch (error) {
           console.error("Error al aceptar la oferta:", error);
           alert("Hubo un error al procesar la transacción: " + error.message);
         }
       };
+
       async function loadUserAcquisitions(userId) {
         const acquisitionsList = document.getElementById("myAcquisitionsList");
-        acquisitionsList.innerHTML = ""; // Limpiar la lista
+        if (!acquisitionsList) {
+          console.error("Element with id 'myAcquisitionsList' not found");
+          return;
+        }
+        acquisitionsList.innerHTML = "";
 
         try {
-          // Obtener las transacciones donde el usuario es el comprador
           const acquisitionsQuery = query(
             collection(db, "transactions"),
-            where("buyer", "==", userId),
+            where("buyerId", "==", userId),
             orderBy("timestamp", "desc"),
             limit(5)
           );
@@ -585,7 +537,7 @@
               const li = document.createElement("li");
               li.textContent = `Adquirido: ${
                 acquisition.description || "Artículo"
-              } de ${acquisition.seller || "Vendedor"} por ${
+              } de ${acquisition.sellerName || "Vendedor"} por ${
                 acquisition.price
               } monedas`;
               acquisitionsList.appendChild(li);

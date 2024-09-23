@@ -155,9 +155,10 @@
 
       onAuthStateChanged(auth, async (user) => {
         if (user) {
-          loadUserProfile(user.uid);
-          loadRecentPurchases(user.uid);
-          loadItemsForSale(user.uid);
+          const userId = user.uid;
+          loadUserProfile(userId);
+          loadRecentPurchases(userId);
+          loadItemsForSale(userId);
         } else {
           window.location.href = "registro.html";
         }
@@ -196,12 +197,12 @@
         try {
           const purchasesQuery = query(
             collection(db, "transactions"),
-            where("buyer", "==", userId),
+            where("buyerId", "==", userId),
             orderBy("timestamp", "desc"),
             limit(5)
           );
           const querySnapshot = await getDocs(purchasesQuery);
-          recentPurchasesList.innerHTML = ""; // Clear list
+          recentPurchasesList.innerHTML = ""; // Limpiar la lista
           if (querySnapshot.empty) {
             recentPurchasesList.innerHTML =
               "<li>No hay compras recientes.</li>";
@@ -219,6 +220,9 @@
           }
         } catch (error) {
           console.error("Error al cargar las compras recientes:", error);
+          if (error.code === "failed-precondition") {
+            alert("Necesitas crear un índice para esta consulta en Firestore.");
+          }
         }
       }
 
@@ -230,7 +234,7 @@
             where("type", "==", "sell")
           );
           const querySnapshot = await getDocs(itemsQuery);
-          itemsForSaleList.innerHTML = ""; // Clear list
+          itemsForSaleList.innerHTML = ""; // Limpiar la lista
           if (querySnapshot.empty) {
             itemsForSaleList.innerHTML = "<li>No hay artículos en venta.</li>";
           } else {
