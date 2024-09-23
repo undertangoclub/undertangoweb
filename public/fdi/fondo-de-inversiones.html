@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fondo de Inversión - UnderTango</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: "Poiret One", sans-serif;
+        background-color: black;
+        color: white;
+      }
+
+      .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 2rem;
+      }
+
+      h1 {
+        color: #e84343;
+        text-align: center;
+        font-size: 3rem;
+        margin-bottom: 1rem;
+      }
+
+      .logo img {
+        max-width: 300px;
+        margin: 2rem 0;
+      }
+
+      .info-grid {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        max-width: 1200px;
+      }
+
+      .left-panel,
+      .right-panel {
+        width: 20%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .middle-panel {
+        width: 60%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+      }
+
+      .button {
+        background-color: transparent;
+        border: 2px solid red;
+        color: red;
+        font-size: 1.2rem;
+        padding: 0.5rem 1rem;
+        margin: 1rem 0;
+        cursor: pointer;
+        text-align: center;
+        width: 80%;
+        transition: all 0.3s ease;
+      }
+
+      .button:hover {
+        background-color: red;
+        color: black;
+      }
+
+      .stat-box {
+        background-color: transparent;
+        border: 2px solid red;
+        color: white;
+        padding: 1rem;
+        margin: 1rem 0;
+        text-align: center;
+        font-size: 1.2rem;
+        width: 80%;
+      }
+
+      .chart-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        width: 100%;
+        margin-top: 2rem;
+      }
+
+      .chart-box {
+        width: 45%;
+        margin: 1rem;
+        border: 2px solid red;
+        padding: 1rem;
+      }
+
+      .chart-title {
+        color: red;
+        font-size: 1.2rem;
+        text-align: center;
+        margin-bottom: 1rem;
+      }
+
+      canvas {
+        width: 100%;
+        height: auto;
+      }
+
+      footer {
+        margin-top: 2rem;
+        text-align: center;
+        color: #e84343;
+        font-size: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Fondo de Inversiones Under Tango</h1>
+
+      <div class="info-grid">
+        <!-- Left Panel -->
+        <div class="left-panel">
+          <div class="button">Arte</div>
+          <div class="button">Tecnología</div>
+          <div class="button">Inversión</div>
+          <div class="button">Confiabilidad</div>
+          <div class="stat-box">Período de Recupero Promedio: 3,56 Meses</div>
+        </div>
+
+        <!-- Middle Panel -->
+        <div class="middle-panel">
+          <div class="logo">
+            <img src="../img/underlogoredondo.png" alt="UnderTango Logo" />
+          </div>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="right-panel">
+          <div class="button">Comunidad Global</div>
+          <div class="button">Educación</div>
+          <div class="button">Shows Internacionales</div>
+          <div class="button">Transparencia</div>
+          <div class="stat-box">Reparto de Dividendos: 10%</div>
+        </div>
+      </div>
+
+      <!-- Chart Section -->
+      <div class="chart-container">
+        <div class="chart-box">
+          <div class="chart-title">Evolución Semanal</div>
+          <canvas id="weeklyChart"></canvas>
+        </div>
+        <div class="chart-box">
+          <div class="chart-title">Evolución Mensual</div>
+          <canvas id="monthlyChart"></canvas>
+        </div>
+        <div class="chart-box">
+          <div class="chart-title">
+            Evolución del Valor de la Acción - Cuota
+          </div>
+          <canvas id="stockValueChart"></canvas>
+        </div>
+        <div class="chart-box">
+          <div class="chart-title">Evolución de los Dividendos</div>
+          <canvas id="dividendChart"></canvas>
+        </div>
+      </div>
+
+      <footer>© 2024 UnderTango. Todos los derechos reservados.</footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+      const weeklyChartCtx = document
+        .getElementById("weeklyChart")
+        .getContext("2d");
+      const weeklyChart = new Chart(weeklyChartCtx, {
+        type: "line",
+        data: {
+          labels: [
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+          ],
+          datasets: [
+            {
+              label: "Rendimiento Semanal",
+              data: [25, 15, -5, 10, 20, -10, 5, 10, 15, -10, 5, 5, -5],
+              borderColor: "red",
+              backgroundColor: "transparent",
+            },
+          ],
+        },
+        options: {
+          scales: {
+            x: { display: true },
+            y: { display: true },
+          },
+        },
+      });
+
+      const monthlyChartCtx = document
+        .getElementById("monthlyChart")
+        .getContext("2d");
+      const monthlyChart = new Chart(monthlyChartCtx, {
+        type: "line",
+        data: {
+          labels: ["Junio", "Julio", "Agosto"],
+          datasets: [
+            {
+              label: "Rendimiento Mensual",
+              data: [40, 30, 35],
+              borderColor: "red",
+              backgroundColor: "transparent",
+            },
+          ],
+        },
+        options: {
+          scales: {
+            x: { display: true },
+            y: { display: true },
+          },
+        },
+      });
+
+      const stockValueChartCtx = document
+        .getElementById("stockValueChart")
+        .getContext("2d");
+      const stockValueChart = new Chart(stockValueChartCtx, {
+        type: "line",
+        data: {
+          labels: [
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+          ],
+          datasets: [
+            {
+              label: "Valor de la Acción",
+              data: [
+                3000, 2000, 1500, 1000, 1200, 1300, 1400, 1300, 1500, 1400,
+                1500, 1600, 1700,
+              ],
+              borderColor: "red",
+              backgroundColor: "transparent",
+            },
+          ],
+        },
+        options: {
+          scales: {
+            x: { display: true },
+            y: { display: true },
+          },
+        },
+      });
+
+      const dividendChartCtx = document
+        .getElementById("dividendChart")
+        .getContext("2d");
+      const dividendChart = new Chart(dividendChartCtx, {
+        type: "line",
+        data: {
+          labels: [
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+          ],
+          datasets: [
+            {
+              label: "Evolución de los Dividendos",
+              data: [
+                100, 120, 140, 160, 150, 130, 110, 120, 130, 140, 150, 160, 170,
+              ],
+              borderColor: "red",
+              backgroundColor: "transparent",
+            },
+          ],
+        },
+        options: {
+          scales: {
+            x: { display: true },
+            y: { display: true },
+          },
+        },
+      });
+    </script>
+  </body>
+</html>
