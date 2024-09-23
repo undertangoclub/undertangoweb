@@ -74,6 +74,13 @@ document.addEventListener("DOMContentLoaded", () => {
         link: "./pages/academia-de-aprendizaje.html",
       },
     ],
+    "Fondo de Inversión": [
+      {
+        name: "Fondo de Inversión",
+        image: "./img/logo6.png", // Use your FDI logo or image here
+        link: "./pages/fdi/fondo-de-inversiones.html",
+      },
+    ],
   };
 
   // Comprobar si la página se cargó con el parámetro skipIntro
@@ -215,6 +222,12 @@ document.addEventListener("DOMContentLoaded", () => {
       console.log("Circle clicked:", circle.getAttribute("data-name"));
 
       const clickedLogoName = circle.getAttribute("data-name");
+
+      // Redirect to Fondo de Inversión page when FDI circle is clicked
+      if (clickedLogoName === "Fondo de Inversión") {
+        window.location.href = "fdi/fondo-de-inversiones.html";
+        return; // Prevent further actions on this circle (stop animation for FDI)
+      }
 
       if (
         (isShowsCentered && clickedLogoName === "Shows") ||

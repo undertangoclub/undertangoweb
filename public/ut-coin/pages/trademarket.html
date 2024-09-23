@@ -256,31 +256,40 @@
         marketList.innerHTML = ""; // Limpiar la lista antes de cargar los ítems
 
         try {
+          // Obtener los documentos de los ítems del mercado
           const itemsSnapshot = await getDocs(collection(db, "marketItems"));
 
+          // Recorrer cada ítem del mercado
           for (const itemDoc of itemsSnapshot.docs) {
             const itemData = itemDoc.data();
 
+            // Obtener el userId del ítem
+            const userId = itemData.userId;
+
             // Aquí obtenemos el documento del perfil público del usuario que creó el ítem
             const publicDataDoc = await getDoc(
-              doc(db, `usuarios/${itemData.userId}/publicData/perfilPublico`)
+              doc(db, `usuarios/${userId}/publicData/perfilPublico`)
             );
-            const publicData = publicDataDoc.exists()
-              ? publicDataDoc.data()
-              : {};
 
-            // Si `gameName` no existe en `publicData`, mostrar un nombre por defecto
-            const gameName =
-              itemData.gameName || publicData.gameName || "Usuario Anónimo";
+            // Definir el valor predeterminado de gameName y photoURL
+            let gameName = "Usuario Anónimo";
+            let photoURL = "https://via.placeholder.com/30"; // Imagen por defecto
 
+            // Si existe el documento de perfil público, obtener el gameName y photoURL
+            if (publicDataDoc.exists()) {
+              const publicData = publicDataDoc.data();
+              gameName = publicData.gameName || "Usuario Anónimo";
+              photoURL =
+                publicData.photoURL || "https://via.placeholder.com/30";
+            }
+
+            // Crear el elemento de la lista del mercado
             const li = document.createElement("li");
             li.className = "market-item";
             li.innerHTML = `
               <div class="user-info">
-                <img src="${
-                  publicData.photoURL || "https://via.placeholder.com/30"
-                }" alt="User Photo">
-                <span>${gameName}</span> <!-- Mostrar el gameName correctamente -->
+                <img src="${photoURL}" alt="User Photo">
+                <span>${gameName}</span> <!-- Mostrar el gameName -->
               </div>
               <span>${itemData.type === "sell" ? "Vende" : "Compra"}: ${
               itemData.description
