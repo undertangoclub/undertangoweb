@@ -96,6 +96,9 @@
     <div class="panel center-panel">
       <h2>Desafíos</h2>
       <ul class="challenge-list">
+        <li id="challenge0">
+          Desafío 0: Chequear el número de usuario que eres
+        </li>
         <li id="challenge1">Desafío 1: Mandar una moneda a otro usuario</li>
         <li id="challenge2">Desafío 2: Under Construction - Not Ready Yet</li>
       </ul>
@@ -128,6 +131,7 @@
         increment,
         getDoc,
         setDoc,
+        runTransaction,
       } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
       // Configuración de Firebase
@@ -246,6 +250,78 @@
         }
       }
 
+      // Event listener for Challenge 0
+      document
+        .getElementById("challenge0")
+        .addEventListener("click", async function () {
+          try {
+            const globalesRef = doc(db, "globales", "contadores");
+            const userDocRef = doc(db, "usuarios", currentUser.uid);
+            const publicDataRef = doc(
+              db,
+              `usuarios/${currentUser.uid}/publicData/perfilPublico`
+            );
+
+            const result = await runTransaction(db, async (transaction) => {
+              const globalesDoc = await transaction.get(globalesRef);
+              const userDoc = await transaction.get(userDocRef);
+              const publicDataDoc = await transaction.get(publicDataRef);
+
+              if (!globalesDoc.exists()) {
+                transaction.set(globalesRef, {
+                  totalUsuariosRegistrados: 0,
+                  totalCoinsDisponibles: 1000,
+                });
+              }
+
+              const globalesData = globalesDoc.data() || {};
+              const newCount = (globalesData.totalUsuariosRegistrados || 0) + 1;
+              const reward = Math.max(11 - newCount, 1);
+
+              transaction.update(globalesRef, {
+                totalUsuariosRegistrados: newCount,
+                totalCoinsDisponibles: increment(-reward),
+              });
+
+              const userData = userDoc.data() || {};
+              const currentCoins = userData.undertangoCoins || 0;
+
+              transaction.update(userDocRef, {
+                numeroUsuario: newCount,
+                undertangoCoins: currentCoins + reward,
+              });
+
+              // Update undertangoCoins in publicData
+              const publicData = publicDataDoc.data() || {};
+              const currentPublicCoins = publicData.undertangoCoins || 0;
+
+              transaction.update(publicDataRef, {
+                undertangoCoins: currentPublicCoins + reward,
+              });
+
+              return { newCount, reward };
+            });
+
+            // Mark the challenge as completed
+            const completedChallengeRef = doc(
+              db,
+              `usuarios/${currentUser.uid}/completedChallenges/challenge0`
+            );
+            await setDoc(completedChallengeRef, { completed: true });
+
+            alert(
+              `¡Eres el usuario número ${result.newCount}! Has recibido ${result.reward} monedas como recompensa.`
+            );
+            await loadUserProfile(currentUser.uid);
+            await loadCompletedChallenges(currentUser.uid);
+          } catch (error) {
+            console.error("Error al chequear el número de usuario:", error);
+            alert(
+              "Hubo un error al chequear tu número de usuario. Por favor, intenta de nuevo."
+            );
+          }
+        });
+
       // Evento para Desafío 1
       document
         .getElementById("challenge1")
@@ -286,13 +362,35 @@
       async function sendCoin(recipientId) {
         try {
           // Restar una moneda al usuario actual
-          await updateDoc(doc(db, "usuarios", currentUser.uid), {
-            undertangoCoins: increment(-1),
-          });
+          const senderUserDocRef = doc(db, "usuarios", currentUser.uid);
+          const senderPublicDataRef = doc(
+            db,
+            `usuarios/${currentUser.uid}/publicData/perfilPublico`
+          );
 
           // Sumar una moneda al destinatario
-          await updateDoc(doc(db, "usuarios", recipientId), {
-            undertangoCoins: increment(1),
+          const recipientUserDocRef = doc(db, "usuarios", recipientId);
+          const recipientPublicDataRef = doc(
+            db,
+            `usuarios/${recipientId}/publicData/perfilPublico`
+          );
+
+          await runTransaction(db, async (transaction) => {
+            // Update sender's coins
+            transaction.update(senderUserDocRef, {
+              undertangoCoins: increment(-1),
+            });
+            transaction.update(senderPublicDataRef, {
+              undertangoCoins: increment(-1),
+            });
+
+            // Update recipient's coins
+            transaction.update(recipientUserDocRef, {
+              undertangoCoins: increment(1),
+            });
+            transaction.update(recipientPublicDataRef, {
+              undertangoCoins: increment(1),
+            });
           });
 
           // Marcar el desafío como completado en la base de datos

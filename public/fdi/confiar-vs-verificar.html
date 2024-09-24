@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Verify vs Trust - Bitcoin Principle</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            overflow: hidden;
+        }
+        .container {
+            text-align: center;
+            position: relative;
+        }
+        .balance {
+            width: 400px;
+            height: 10px;
+            background-color: #ffd700;
+            margin: 40px auto;
+            position: relative;
+            transition: transform 0.5s;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+        .pan {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background-color: #333333;
+            position: absolute;
+            bottom: -65px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 40px;
+            cursor: pointer;
+            transition: all 0.5s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        #verify {
+            left: -60px;
+        }
+        #trust {
+            right: -60px;
+        }
+        .bitcoin {
+            font-size: 24px;
+            position: absolute;
+            transition: all 0.8s;
+            opacity: 0.7;
+        }
+        #message {
+            margin-top: 40px;
+            font-size: 24px;
+            font-weight: bold;
+            height: 30px;
+        }
+        .blockchain {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+        .block {
+            width: 40px;
+            height: 40px;
+            background-color: #4CAF50;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            transition: all 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="blockchain" id="blockchain"></div>
+        <h1>Verify vs Trust in Bitcoin</h1>
+        <div class="balance" id="balance">
+            <div class="pan" id="verify">🔍</div>
+            <div class="pan" id="trust">🤝</div>
+        </div>
+        <div id="message">Click on Verify or Trust</div>
+    </div>
+
+    <script>
+        const balance = document.getElementById("balance");
+        const verify = document.getElementById("verify");
+        const trust = document.getElementById("trust");
+        const message = document.getElementById("message");
+        const container = document.querySelector(".container");
+        const blockchain = document.getElementById("blockchain");
+
+        let bitcoins = [];
+        let blocks = [];
+
+        function createBitcoin() {
+            const bitcoin = document.createElement("div");
+            bitcoin.className = "bitcoin";
+            bitcoin.textContent = "₿";
+            bitcoin.style.left = Math.random() * window.innerWidth + "px";
+            bitcoin.style.top = Math.random() * window.innerHeight + "px";
+            container.appendChild(bitcoin);
+            bitcoins.push(bitcoin);
+        }
+
+        function createBlockchain() {
+            for (let i = 0; i < 5; i++) {
+                const block = document.createElement("div");
+                block.className = "block";
+                block.textContent = i + 1;
+                blockchain.appendChild(block);
+                blocks.push(block);
+            }
+        }
+
+        for (let i = 0; i < 30; i++) {
+            createBitcoin();
+        }
+
+        createBlockchain();
+
+        function animateBitcoins(direction) {
+            bitcoins.forEach((bitcoin, index) => {
+                if (direction === "verify") {
+                    bitcoin.style.left = `${50 + (index % 5) * 30}px`;
+                    bitcoin.style.top = `${200 + Math.floor(index / 5) * 30}px`;
+                } else if (direction === "trust") {
+                    bitcoin.style.left = `${250 + (index % 5) * 30}px`;
+                    bitcoin.style.top = `${200 + Math.floor(index / 5) * 30}px`;
+                } else {
+                    bitcoin.style.left = Math.random() * window.innerWidth + "px";
+                    bitcoin.style.top = Math.random() * window.innerHeight + "px";
+                }
+            });
+        }
+
+        function animateBlockchain(verify) {
+            blocks.forEach((block, index) => {
+                setTimeout(() => {
+                    block.style.backgroundColor = verify ? "#4CAF50" : "#FF5722";
+                    block.style.transform = "scale(1.1)";
+                    setTimeout(() => {
+                        block.style.transform = "scale(1)";
+                    }, 300);
+                }, index * 200);
+            });
+        }
+
+        verify.addEventListener("click", () => {
+            balance.style.transform = "rotate(-5deg)";
+            verify.style.transform = "translateY(-20px) scale(1.1)";
+            trust.style.transform = "translateY(20px) scale(0.9)";
+            message.textContent = "In Bitcoin, we verify";
+            animateBitcoins("verify");
+            animateBlockchain(true);
+        });
+
+        trust.addEventListener("click", () => {
+            balance.style.transform = "rotate(5deg)";
+            verify.style.transform = "translateY(20px) scale(0.9)";
+            trust.style.transform = "translateY(-20px) scale(1.1)";
+            message.textContent = "We don't trust blindly";
+            animateBitcoins("trust");
+            animateBlockchain(false);
+        });
+
+        balance.addEventListener("click", () => {
+            balance.style.transform = "rotate(0deg)";
+            verify.style.transform = "translateY(0) scale(1)";
+            trust.style.transform = "translateY(0) scale(1)";
+            message.textContent = "Click on Verify or Trust";
+            animateBitcoins("reset");
+            blocks.forEach(block => {
+                block.style.backgroundColor = "#4CAF50";
+            });
+        });
+    </script>
+</body>
+</html>
