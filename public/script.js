@@ -62,7 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
       {
         name: "Cursos On-Line",
         image: "./img/cursos-on-line.jpg",
-        link: "./pages/cursos-on-line.html",
+        link: "https://hotmart.com/es/marketplace/productos/20-lecciones-de-tango/F62016758K",
       },
       {
         name: "Otras Disciplinas",

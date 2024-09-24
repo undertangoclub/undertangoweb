@@ -111,30 +111,31 @@
     <!-- Barra lateral derecha -->
     <div class="sidebar-right">
       <h3>Ranking de Jugadores</h3>
+      <h3>(Top20)</h3>
       <ul id="rankingList" class="ranking">
         <!-- Aquí se cargará el ranking -->
       </ul>
     </div>
 
     <script type="module">
-      // Importar Firebase
+      // Import Firebase modules
       import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
       import {
         getFirestore,
         doc,
         getDoc,
-        collectionGroup,
+        collection,
+        getDocs,
         query,
         orderBy,
         limit,
-        getDocs,
       } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
       import {
         getAuth,
         onAuthStateChanged,
       } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
-      // Configuración de Firebase (reemplaza con tu propia configuración)
+      // Firebase configuration
       const firebaseConfig = {
         apiKey: "AIzaSyC05s84tQfQbiJua0G0LHnQsZP76HqxMk4",
         authDomain: "undertango.firebaseapp.com",
@@ -144,12 +145,12 @@
         appId: "1:21199358960:web:6b751db7c333403057ab35",
       };
 
-      // Inicializar Firebase
+      // Initialize Firebase
       const app = initializeApp(firebaseConfig);
       const db = getFirestore(app);
       const auth = getAuth(app);
 
-      // Mostrar la información en la página
+      // Display user information
       function mostrarInformacionUsuario(gameName, institution, photoURL) {
         document.getElementById("gameName").textContent = gameName || "Usuario";
         document.getElementById("institution").textContent =
@@ -158,13 +159,13 @@
           photoURL || "ruta_default.jpg";
       }
 
-      // Función para obtener monedas del usuario y globales
+      // Function to get user and global data
       function obtenerDatosUsuarioYGlobales() {
         onAuthStateChanged(auth, async (user) => {
           if (user) {
             const userId = user.uid;
 
-            // Referencias a documentos
+            // Document references
             const userDocRef = doc(db, "usuarios", userId);
             const publicDataRef = doc(
               db,
@@ -172,10 +173,10 @@
             );
 
             try {
-              // Inicializar variables para almacenar datos del usuario
+              // Initialize variables to store user data
               let gameName, institution, photoURL, undertangoCoins;
 
-              // Obtener datos privados del usuario (monedas personales e institución)
+              // Get private user data (personal coins and institution)
               const userDoc = await getDoc(userDocRef);
               if (userDoc.exists()) {
                 const userData = userDoc.data();
@@ -185,7 +186,7 @@
                 console.error("No se encontró el documento del usuario.");
               }
 
-              // Obtener datos públicos del usuario (gameName, photoURL)
+              // Get public user data (gameName, photoURL)
               const publicDataDoc = await getDoc(publicDataRef);
               if (publicDataDoc.exists()) {
                 const publicData = publicDataDoc.data();
@@ -197,15 +198,15 @@
                 );
               }
 
-              // Llamar a mostrarInformacionUsuario con todos los datos disponibles
+              // Call mostrarInformacionUsuario with all available data
               mostrarInformacionUsuario(gameName, institution, photoURL);
 
-              // Mostrar monedas del usuario
+              // Display user coins
               document.getElementById(
                 "userCoins"
               ).textContent = `Monedas de usuario: ${undertangoCoins}`;
 
-              // Obtener los datos globales (monedas disponibles globalmente)
+              // Get global data (globally available coins)
               const globalesRef = doc(db, "globales", "contadores");
               const globalesDoc = await getDoc(globalesRef);
               if (globalesDoc.exists()) {
@@ -219,7 +220,7 @@
                 console.error("No se encontró el documento global.");
               }
 
-              // Obtener el ranking de jugadores
+              // Get player ranking
               obtenerRanking();
             } catch (error) {
               console.error("Error al obtener los datos: ", error);
@@ -231,36 +232,56 @@
         });
       }
 
-      // Función para obtener el ranking de jugadores
+      // Function to get player ranking
       async function obtenerRanking() {
+        const rankingList = document.getElementById("rankingList");
+        rankingList.innerHTML = "Cargando ranking...";
+
         try {
-          const usuariosPublicDataRef = collectionGroup(db, "publicData");
-          const q = query(
-            usuariosPublicDataRef,
-            orderBy("undertangoCoins", "desc"),
-            limit(10)
-          );
-          const querySnapshot = await getDocs(q);
-          const rankingList = document.getElementById("rankingList");
+          const querySnapshot = await getDocs(collection(db, "usuarios"));
+          const users = [];
+
+          for (const userDoc of querySnapshot.docs) {
+            const userData = userDoc.data();
+
+            // Obtener datos públicos
+            const publicDataDoc = await getDoc(
+              doc(db, `usuarios/${userDoc.id}/publicData/perfilPublico`)
+            );
+            const publicData = publicDataDoc.exists()
+              ? publicDataDoc.data()
+              : {};
+
+            users.push({
+              gameName: publicData.gameName || "Usuario Anónimo",
+              undertangoCoins: userData.undertangoCoins || 0,
+            });
+          }
+
+          // Sort users by coins in descending order
+          users.sort((a, b) => b.undertangoCoins - a.undertangoCoins);
+
+          // Clear the loading message
           rankingList.innerHTML = "";
 
-          querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            const li = document.createElement("li");
-            li.textContent = `${data.gameName || "Usuario Anónimo"} - ${
-              data.undertangoCoins || 0
+          // Display top 20 users
+          users.slice(0, 20).forEach((user, index) => {
+            const listItem = document.createElement("li");
+            listItem.textContent = `${index + 1}. ${user.gameName} - ${
+              user.undertangoCoins
             } monedas`;
-            rankingList.appendChild(li);
+            rankingList.appendChild(listItem);
           });
         } catch (error) {
-          console.error("Error al obtener el ranking: ", error);
+          console.error("Error al cargar el ranking:", error);
+          rankingList.innerHTML = "Error al cargar el ranking.";
         }
       }
 
-      // Llamar a la función para obtener datos de usuario y globales
+      // Call the function to get user and global data
       obtenerDatosUsuarioYGlobales();
 
-      // Función para manejar la navegación con autenticación
+      // Function to handle navigation with authentication
       function navegarConAutenticacion(pagina) {
         const user = auth.currentUser;
         if (user) {
@@ -271,7 +292,7 @@
         }
       }
 
-      // Agregar event listeners a los botones
+      // Add event listeners to buttons
       document.getElementById("adventureMode").addEventListener("click", () => {
         window.location.href = "modo_aventura.html";
       });
@@ -284,7 +305,7 @@
         navegarConAutenticacion("living_room.html");
       });
 
-      // Evento para el enlace "Editar Perfil"
+      // Event for "Edit Profile" link
       document
         .getElementById("editProfileLink")
         .addEventListener("click", () => {
