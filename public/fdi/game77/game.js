@@ -1,80 +1,293 @@
-// Configuración inicial de Phaser
 const config = {
   type: Phaser.AUTO,
   width: 800,
   height: 600,
-  backgroundColor: "#282c34",
-  parent: "game-container",
   scene: {
     preload: preload,
     create: create,
-    update: update,
   },
 };
 
-// Variables globales
-let nodes = []; // Lista de nodos
-let playerTurn = true; // Controla el turno del jugador
-
 const game = new Phaser.Game(config);
 
-// Carga de recursos si es necesario
+let currentLevel = 0;
+let commander;
+let lieutenants = [];
+let orderText;
+let nextButton;
+let lieutenantOrders = [null, null];
+
 function preload() {
-  this.load.image("node", "node.png"); // Imagen para el nodo
+  this.load.image("general", "knight_44.png");
+  this.load.image("lieutenant", "teniente.png");
 }
 
-// Crear el tablero y los nodos
 function create() {
-  const cols = 5;
-  const rows = 4;
-  const nodeSize = 40;
-  const offsetX = (config.width - cols * nodeSize) / 2;
-  const offsetY = (config.height - rows * nodeSize) / 2;
+  this.add
+    .text(400, 50, "Juego de los Generales Bizantinos", {
+      fontSize: "32px",
+      fill: "#fff",
+    })
+    .setOrigin(0.5);
+  this.add
+    .text(400, 100, `Nivel ${currentLevel + 1}`, {
+      fontSize: "24px",
+      fill: "#fff",
+    })
+    .setOrigin(0.5);
 
-  // Crear nodos en una cuadrícula
-  for (let i = 0; i < cols; i++) {
-    for (let j = 0; j < rows; j++) {
-      const nodeX = offsetX + i * nodeSize;
-      const nodeY = offsetY + j * nodeSize;
-      const node = this.add.image(nodeX, nodeY, "node").setInteractive();
-      node.status = "safe"; // Todos los nodos empiezan como seguros
-      node.on("pointerdown", () => verifyNode(node));
-      nodes.push(node);
-    }
+  if (currentLevel === 0) {
+    createLevel0.call(this);
+  } else if (currentLevel === 1) {
+    createLevel1.call(this);
+  } else if (currentLevel === 2) {
+    createLevel2.call(this);
   }
+}
 
-  // Texto de instrucciones
-  this.add.text(10, 10, "Haz clic en los nodos para verificar su estado", {
-    fontSize: "16px",
-    fill: "#fff",
+function createLevel0() {
+  const welcomeText = this.add
+    .text(
+      400,
+      150,
+      '¡Bienvenido al juego de los generales bizantinos!\nEste es un comandante, él mismo puede dar dos tipos de órdenes:\n"avanzar" y "retirarse"',
+      { fontSize: "18px", fill: "#fff", align: "center" }
+    )
+    .setOrigin(0.5);
+
+  commander = this.add
+    .image(400, 300, "general")
+    .setScale(0.5)
+    .setInteractive();
+  commander.on("pointerdown", showOrderOptions.bind(this));
+
+  orderText = this.add
+    .text(400, 450, "Haz clic sobre el comandante para dar una orden", {
+      fontSize: "18px",
+      fill: "#fff",
+    })
+    .setOrigin(0.5);
+}
+
+function createLevel1() {
+  const welcomeText = this.add
+    .text(
+      400,
+      150,
+      "Este es un teniente, el mismo puede recibir una orden\nque luego puede replicar. ¡Intenta darle una orden!",
+      { fontSize: "18px", fill: "#fff", align: "center" }
+    )
+    .setOrigin(0.5);
+
+  commander = this.add
+    .image(300, 300, "general")
+    .setScale(0.5)
+    .setInteractive();
+  commander.on("pointerdown", showOrderOptions.bind(this));
+
+  lieutenants[0] = this.add
+    .image(500, 300, "lieutenant")
+    .setScale(0.5)
+    .setInteractive();
+  lieutenants[0].on("pointerdown", () => checkLieutenantOrder.call(this, 0));
+
+  orderText = this.add
+    .text(400, 450, "Haz clic sobre el comandante para dar una orden", {
+      fontSize: "18px",
+      fill: "#fff",
+    })
+    .setOrigin(0.5);
+}
+
+function createLevel2() {
+  const welcomeText = this.add
+    .text(
+      400,
+      150,
+      "En este nivel hay un comandante y dos tenientes.\n¡Intenta dar órdenes!",
+      { fontSize: "18px", fill: "#fff", align: "center" }
+    )
+    .setOrigin(0.5);
+
+  commander = this.add
+    .image(400, 300, "general")
+    .setScale(0.5)
+    .setInteractive();
+  commander.on("pointerdown", showOrderOptions.bind(this));
+
+  lieutenants[0] = this.add
+    .image(200, 400, "lieutenant")
+    .setScale(0.5)
+    .setInteractive();
+  lieutenants[0].on("pointerdown", () => checkLieutenantOrder.call(this, 0));
+
+  lieutenants[1] = this.add
+    .image(600, 400, "lieutenant")
+    .setScale(0.5)
+    .setInteractive();
+  lieutenants[1].on("pointerdown", () => checkLieutenantOrder.call(this, 1));
+
+  // Set a contradictory order for the second lieutenant
+  lieutenantOrders[1] = "Retirarse";
+
+  orderText = this.add
+    .text(400, 500, "Haz clic sobre el comandante para dar una orden", {
+      fontSize: "18px",
+      fill: "#fff",
+    })
+    .setOrigin(0.5);
+}
+
+function showOrderOptions() {
+  if (currentLevel === 0) {
+    const advanceButton = this.add
+      .text(300, 400, "Avanzar", { fontSize: "24px", fill: "#0f0" })
+      .setInteractive()
+      .on("pointerdown", () => giveOrder.call(this, "Avanzar"));
+
+    const retreatButton = this.add
+      .text(500, 400, "Retirarse", { fontSize: "24px", fill: "#f00" })
+      .setInteractive()
+      .on("pointerdown", () => giveOrder.call(this, "Retirarse"));
+
+    commander.disableInteractive();
+  } else if (currentLevel === 1) {
+    const advanceButton = this.add
+      .text(200, 400, "Avanzar", { fontSize: "24px", fill: "#0f0" })
+      .setInteractive()
+      .on("pointerdown", () => selectRecipient.call(this, "Avanzar"));
+
+    const retreatButton = this.add
+      .text(400, 400, "Retirarse", { fontSize: "24px", fill: "#f00" })
+      .setInteractive()
+      .on("pointerdown", () => selectRecipient.call(this, "Retirarse"));
+
+    commander.disableInteractive();
+  } else if (currentLevel === 2) {
+    const advanceButton = this.add
+      .text(300, 550, "Avanzar", { fontSize: "24px", fill: "#0f0" })
+      .setInteractive()
+      .on("pointerdown", () => selectRecipient.call(this, "Avanzar"));
+
+    const retreatButton = this.add
+      .text(500, 550, "Retirarse", { fontSize: "24px", fill: "#f00" })
+      .setInteractive()
+      .on("pointerdown", () => selectRecipient.call(this, "Retirarse"));
+
+    commander.disableInteractive();
+  }
+}
+
+function giveOrder(order) {
+  orderText.setText(`¡Felicitaciones! Has dado tu primera orden: ${order}`);
+
+  this.time.delayedCall(2000, () => {
+    orderText.setText(
+      "No obstante, ¿qué sentido tiene dar una orden si no hay nadie para oírla?\n¡Vamos al nivel 2!"
+    );
+
+    nextButton = this.add
+      .text(400, 500, "Siguiente Nivel", { fontSize: "24px", fill: "#fff" })
+      .setOrigin(0.5)
+      .setInteractive()
+      .on("pointerdown", goToNextLevel.bind(this));
   });
 }
 
-// Función para verificar nodos
-function verifyNode(node) {
-  if (playerTurn) {
-    // Simular una verificación con una probabilidad de éxito
-    const verificationSuccess = Math.random() > 0.3;
+function selectRecipient(order) {
+  if (currentLevel === 1) {
+    const recipientButton = this.add
+      .text(600, 400, "Teniente 1", { fontSize: "24px", fill: "#fff" })
+      .setInteractive()
+      .on("pointerdown", () => sendOrder.call(this, order, 0));
 
-    if (verificationSuccess) {
-      node.setTint(0x00ff00); // Verde si es seguro
-      node.status = "verified";
-      console.log("Nodo verificado correctamente.");
-    } else {
-      node.setTint(0xff0000); // Rojo si falla la verificación
-      node.status = "compromised";
-      console.log("Falló la verificación del nodo.");
-    }
+    orderText.setText("¿A quién?");
+  } else if (currentLevel === 2) {
+    const lieutenant1Button = this.add
+      .text(200, 550, "Teniente 1", { fontSize: "24px", fill: "#fff" })
+      .setInteractive()
+      .on("pointerdown", () => sendOrder.call(this, order, 0));
 
-    playerTurn = false;
-    // Iniciar el turno del rival (aún no implementado)
-    setTimeout(() => {
-      playerTurn = true;
-    }, 1000);
+    const lieutenant2Button = this.add
+      .text(400, 550, "Teniente 2", { fontSize: "24px", fill: "#fff" })
+      .setInteractive()
+      .on("pointerdown", () => sendOrder.call(this, order, 1));
+
+    orderText.setText("¿A quién?");
   }
 }
 
-// Actualización en cada frame (si es necesario)
-function update() {
-  // Aquí se pueden implementar futuras actualizaciones en tiempo real
+function sendOrder(order, lieutenantIndex) {
+  lieutenantOrders[lieutenantIndex] = order;
+  orderText.setText(
+    `Orden "${order}" enviada al Teniente ${lieutenantIndex + 1}`
+  );
+  commander.setInteractive();
+}
+
+function checkLieutenantOrder(lieutenantIndex) {
+  if (currentLevel === 1) {
+    if (lieutenantOrders[lieutenantIndex] === null) {
+      orderText.setText("Este teniente no tiene órdenes");
+    } else {
+      orderText.setText(
+        `¡Felicitaciones! Has dado tu primera orden y fue recibida correctamente: ${lieutenantOrders[lieutenantIndex]}\n¡Pasemos al nivel 3!`
+      );
+
+      this.time.delayedCall(2000, () => {
+        nextButton = this.add
+          .text(400, 500, "Siguiente Nivel", { fontSize: "24px", fill: "#fff" })
+          .setOrigin(0.5)
+          .setInteractive()
+          .on("pointerdown", goToNextLevel.bind(this));
+      });
+    }
+  } else if (currentLevel === 2) {
+    if (lieutenantOrders[lieutenantIndex] === null) {
+      orderText.setText(`El Teniente ${lieutenantIndex + 1} no tiene órdenes`);
+    } else if (
+      lieutenantIndex === 1 &&
+      lieutenantOrders[1] !== lieutenantOrders[0]
+    ) {
+      orderText.setText(
+        "¡Oh! Este teniente tiene una orden contradictoria a la del comandante.\n¡Santas mandarinas saltarinas! ¡Un traidor!"
+      );
+
+      this.time.delayedCall(2000, () => {
+        const dialogBox = this.add.rectangle(400, 300, 600, 200, 0x000000, 0.8);
+        const dialogText = this.add
+          .text(
+            400,
+            300,
+            "¡No me peguen, soy Giordano!\nUn comandante me pasó esa orden.\nEn el nivel 4 puedo explicarlo, ¡se los aseguro!",
+            { fontSize: "18px", fill: "#fff", align: "center" }
+          )
+          .setOrigin(0.5);
+
+        this.time.delayedCall(4000, () => {
+          dialogBox.destroy();
+          dialogText.destroy();
+          nextButton = this.add
+            .text(400, 500, "Siguiente Nivel", {
+              fontSize: "24px",
+              fill: "#fff",
+            })
+            .setOrigin(0.5)
+            .setInteractive()
+            .on("pointerdown", goToNextLevel.bind(this));
+        });
+      });
+    } else {
+      orderText.setText(
+        `El Teniente ${lieutenantIndex + 1} recibió la orden: ${
+          lieutenantOrders[lieutenantIndex]
+        }`
+      );
+    }
+  }
+}
+
+function goToNextLevel() {
+  currentLevel++;
+  this.scene.restart();
 }
