@@ -1,27 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Descentralización - Juego de Nodos</title>
+    <title>Juego de los Generales Bizantinos</title>
     <style>
       body {
         margin: 0;
         padding: 0;
         display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
         height: 100vh;
         background-color: #20232a;
+        color: white;
+        font-family: Arial, sans-serif;
+      }
+      #game-container {
+        border: 2px solid #ffffff;
       }
     </style>
   </head>
   <body>
     <div id="game-container"></div>
-
-    <!-- Importar Phaser -->
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.js"></script>
     <script src="game.js"></script>
-    <!-- Aquí se incluirá el código del juego -->
   </body>
 </html>
