@@ -73,6 +73,25 @@
         color: black;
       }
 
+      a.button {
+        display: block;
+        text-align: center;
+        margin: 1rem 0;
+        width: 80%; /* O el tamaño deseado */
+        background-color: transparent;
+        border: 2px solid red;
+        color: red;
+        font-size: 1.2rem;
+        padding: 0.5rem 1rem;
+        transition: all 0.3s ease;
+        text-decoration: none; /* Sin subrayado */
+      }
+
+      a.button:hover {
+        background-color: red;
+        color: black;
+      }
+
       .central-button {
         background-color: red;
         color: black;
@@ -140,7 +159,13 @@
       <div class="info-grid">
         <!-- Left Panel -->
         <div class="left-panel">
-          <div class="button">Arte</div>
+          <a
+            href="https://www.instagram.com/undertangoclub/"
+            target="_blank"
+            class="button no-underline"
+          >
+            Arte
+          </a>
           <div class="button">Tecnología</div>
           <div class="button">Inversión</div>
           <div class="button">Confiabilidad</div>

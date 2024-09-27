@@ -51,18 +51,19 @@ function createLevel0() {
       400,
       150,
       '¡Bienvenido al juego de los generales bizantinos!\nEste es un comandante, él mismo puede dar dos tipos de órdenes:\n"avanzar" y "retirarse"',
-      { fontSize: "18px", fill: "#fff", align: "center" }
+      { fontSize: "18px", fill: "#fff", align: "center", lineSpacing: 10 }
     )
     .setOrigin(0.5);
 
   commander = this.add
     .image(400, 300, "general")
-    .setScale(0.5)
+    .setScale(0.3)
     .setInteractive();
   commander.on("pointerdown", showOrderOptions.bind(this));
 
+  // Move this text further down
   orderText = this.add
-    .text(400, 450, "Haz clic sobre el comandante para dar una orden", {
+    .text(400, 550, "Haz clic sobre el comandante para dar una orden", {
       fontSize: "18px",
       fill: "#fff",
     })
@@ -81,13 +82,13 @@ function createLevel1() {
 
   commander = this.add
     .image(300, 300, "general")
-    .setScale(0.5)
+    .setScale(0.3)
     .setInteractive();
   commander.on("pointerdown", showOrderOptions.bind(this));
 
   lieutenants[0] = this.add
     .image(500, 300, "lieutenant")
-    .setScale(0.5)
+    .setScale(0.3)
     .setInteractive();
   lieutenants[0].on("pointerdown", () => checkLieutenantOrder.call(this, 0));
 
@@ -111,19 +112,19 @@ function createLevel2() {
 
   commander = this.add
     .image(400, 300, "general")
-    .setScale(0.5)
+    .setScale(0.2)
     .setInteractive();
   commander.on("pointerdown", showOrderOptions.bind(this));
 
   lieutenants[0] = this.add
     .image(200, 400, "lieutenant")
-    .setScale(0.5)
+    .setScale(0.2)
     .setInteractive();
   lieutenants[0].on("pointerdown", () => checkLieutenantOrder.call(this, 0));
 
   lieutenants[1] = this.add
     .image(600, 400, "lieutenant")
-    .setScale(0.5)
+    .setScale(0.2)
     .setInteractive();
   lieutenants[1].on("pointerdown", () => checkLieutenantOrder.call(this, 1));
 
@@ -141,12 +142,12 @@ function createLevel2() {
 function showOrderOptions() {
   if (currentLevel === 0) {
     const advanceButton = this.add
-      .text(300, 400, "Avanzar", { fontSize: "24px", fill: "#0f0" })
+      .text(250, 430, "Avanzar", { fontSize: "24px", fill: "#0f0" })
       .setInteractive()
       .on("pointerdown", () => giveOrder.call(this, "Avanzar"));
 
     const retreatButton = this.add
-      .text(500, 400, "Retirarse", { fontSize: "24px", fill: "#f00" })
+      .text(450, 430, "Retirarse", { fontSize: "24px", fill: "#f00" })
       .setInteractive()
       .on("pointerdown", () => giveOrder.call(this, "Retirarse"));
 

@@ -29,26 +29,29 @@
     <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <script src="https://unpkg.com/react-beautiful-dnd@13.1.0/dist/react-beautiful-dnd.min.js"></script>
     <script type="text/babel">
-      const TaskManager = () => {
-        const [tasks, setTasks] = React.useState([]);
-        const [archivedTasks, setArchivedTasks] = React.useState([]);
-        const [newTaskName, setNewTaskName] = React.useState("");
-        const [showArchived, setShowArchived] = React.useState(false);
-        const [openMenuId, setOpenMenuId] = React.useState(null);
+      const { useState, useEffect } = React;
+      const { DragDropContext, Droppable, Draggable } =
+        window.ReactBeautifulDnd;
 
-        React.useEffect(() => {
+      const TaskManager = () => {
+        const [tasks, setTasks] = useState([]);
+        const [archivedTasks, setArchivedTasks] = useState([]);
+        const [newTaskName, setNewTaskName] = useState("");
+        const [showArchived, setShowArchived] = useState(false);
+        const [openMenuId, setOpenMenuId] = useState(null);
+        const [editingSubTask, setEditingSubTask] = useState(null);
+
+        useEffect(() => {
           const storedTasks = localStorage.getItem("tasks");
           const storedArchivedTasks = localStorage.getItem("archivedTasks");
-          if (storedTasks) {
-            setTasks(JSON.parse(storedTasks));
-          }
-          if (storedArchivedTasks) {
+          if (storedTasks) setTasks(JSON.parse(storedTasks));
+          if (storedArchivedTasks)
             setArchivedTasks(JSON.parse(storedArchivedTasks));
-          }
         }, []);
 
-        React.useEffect(() => {
+        useEffect(() => {
           localStorage.setItem("tasks", JSON.stringify(tasks));
           localStorage.setItem("archivedTasks", JSON.stringify(archivedTasks));
         }, [tasks, archivedTasks]);
@@ -119,8 +122,36 @@
           );
         };
 
+        const editSubTask = (taskId, subTaskId, newName) => {
+          setTasks(
+            tasks.map((task) =>
+              task.id === taskId
+                ? {
+                    ...task,
+                    subTasks: task.subTasks.map((subTask) =>
+                      subTask.id === subTaskId
+                        ? { ...subTask, name: newName }
+                        : subTask
+                    ),
+                  }
+                : task
+            )
+          );
+          setEditingSubTask(null);
+        };
+
         const toggleMenu = (id) => {
           setOpenMenuId(openMenuId === id ? null : id);
+        };
+
+        const onDragEnd = (result) => {
+          if (!result.destination) return;
+
+          const newTasks = Array.from(tasks);
+          const [reorderedItem] = newTasks.splice(result.source.index, 1);
+          newTasks.splice(result.destination.index, 0, reorderedItem);
+
+          setTasks(newTasks);
         };
 
         return (
@@ -141,74 +172,129 @@
                 Agregar Tarea
               </button>
             </div>
-            <div className="space-y-4">
-              {tasks.map((task) => (
-                <div key={task.id} className="border p-4 rounded">
-                  <div className="flex justify-between items-center mb-2">
-                    <h2 className="text-xl font-semibold">{task.name}</h2>
-                    <div className="relative">
-                      <button
-                        onClick={() => toggleMenu(task.id)}
-                        className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center focus:outline-none hover:bg-gray-300"
-                        aria-label="Opciones de tarea"
+
+            <DragDropContext onDragEnd={onDragEnd}>
+              <Droppable droppableId="tasks">
+                {(provided) => (
+                  <div
+                    {...provided.droppableProps}
+                    ref={provided.innerRef}
+                    className="space-y-4"
+                  >
+                    {tasks.map((task, index) => (
+                      <Draggable
+                        key={task.id}
+                        draggableId={task.id}
+                        index={index}
                       >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-6 w-6 text-gray-600"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"
-                          />
-                        </svg>
-                      </button>
-                      {openMenuId === task.id && (
-                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
-                          <button
-                            onClick={() => archiveTask(task.id)}
-                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        {(provided) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            className="border p-4 rounded"
                           >
-                            Archivar
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="mb-2">
-                    <h3 className="font-medium">Sub-tareas:</h3>
-                    {task.subTasks.map((subTask) => (
-                      <div key={subTask.id} className="flex items-center">
-                        <input
-                          type="checkbox"
-                          checked={subTask.completed}
-                          onChange={() => toggleSubTask(task.id, subTask.id)}
-                          className="mr-2"
-                        />
-                        <span>{subTask.name}</span>
-                      </div>
+                            <div className="flex justify-between items-center mb-2">
+                              <div className="flex items-center">
+                                <div
+                                  {...provided.dragHandleProps}
+                                  className="mr-2 cursor-move"
+                                >
+                                  ☰
+                                </div>
+                                <h2 className="text-xl font-semibold">
+                                  {task.name}
+                                </h2>
+                              </div>
+                              <div className="relative">
+                                <button
+                                  onClick={() => toggleMenu(task.id)}
+                                  className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center focus:outline-none hover:bg-gray-300"
+                                  aria-label="Opciones de tarea"
+                                >
+                                  ⋮
+                                </button>
+                                {openMenuId === task.id && (
+                                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
+                                    <button
+                                      onClick={() => archiveTask(task.id)}
+                                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                    >
+                                      Archivar
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <div className="mb-2">
+                              <h3 className="font-medium">Sub-tareas:</h3>
+                              {task.subTasks.map((subTask) => (
+                                <div
+                                  key={subTask.id}
+                                  className="flex items-center"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={subTask.completed}
+                                    onChange={() =>
+                                      toggleSubTask(task.id, subTask.id)
+                                    }
+                                    className="mr-2"
+                                  />
+                                  {editingSubTask === subTask.id ? (
+                                    <input
+                                      type="text"
+                                      value={subTask.name}
+                                      onChange={(e) =>
+                                        editSubTask(
+                                          task.id,
+                                          subTask.id,
+                                          e.target.value
+                                        )
+                                      }
+                                      onBlur={() => setEditingSubTask(null)}
+                                      onKeyPress={(e) => {
+                                        if (e.key === "Enter") {
+                                          setEditingSubTask(null);
+                                        }
+                                      }}
+                                      className="border p-1"
+                                      autoFocus
+                                    />
+                                  ) : (
+                                    <span
+                                      onClick={() =>
+                                        setEditingSubTask(subTask.id)
+                                      }
+                                    >
+                                      {subTask.name}
+                                    </span>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                            <div className="flex">
+                              <input
+                                type="text"
+                                placeholder="Nueva sub-tarea"
+                                onKeyPress={(e) => {
+                                  if (e.key === "Enter") {
+                                    addSubTask(task.id, e.target.value);
+                                    e.target.value = "";
+                                  }
+                                }}
+                                className="border p-2 mr-2 flex-grow"
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </Draggable>
                     ))}
+                    {provided.placeholder}
                   </div>
-                  <div className="flex">
-                    <input
-                      type="text"
-                      placeholder="Nueva sub-tarea"
-                      onKeyPress={(e) => {
-                        if (e.key === "Enter") {
-                          addSubTask(task.id, e.target.value);
-                          e.target.value = "";
-                        }
-                      }}
-                      className="border p-2 mr-2 flex-grow"
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
+                )}
+              </Droppable>
+            </DragDropContext>
+
             <div className="mt-8">
               <button
                 onClick={() => setShowArchived(!showArchived)}
