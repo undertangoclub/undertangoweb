@@ -1,60 +1,62 @@
-const { useState, useEffect } = React;
+import React, { useState, useEffect } from "react";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
-function HabitTracker() {
-  const [habits, setHabits] = useState([]);
-  const [newHabitName, setNewHabitName] = useState("");
+const TaskManager = () => {
+  const [tasks, setTasks] = useState([]);
+  const [archivedTasks, setArchivedTasks] = useState([]);
+  const [newTaskName, setNewTaskName] = useState("");
+  const [showArchived, setShowArchived] = useState(false);
+  const [openMenuId, setOpenMenuId] = useState(null);
 
   useEffect(() => {
-    const storedHabits = localStorage.getItem("habits");
-    if (storedHabits) {
-      setHabits(JSON.parse(storedHabits));
-    }
+    const storedTasks = localStorage.getItem("tasks");
+    const storedArchivedTasks = localStorage.getItem("archivedTasks");
+    if (storedTasks) setTasks(JSON.parse(storedTasks));
+    if (storedArchivedTasks) setArchivedTasks(JSON.parse(storedArchivedTasks));
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("habits", JSON.stringify(habits));
-  }, [habits]);
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+    localStorage.setItem("archivedTasks", JSON.stringify(archivedTasks));
+  }, [tasks, archivedTasks]);
 
-  const addHabit = () => {
-    if (newHabitName.trim()) {
-      const newHabit = {
+  const addTask = () => {
+    if (newTaskName.trim()) {
+      const newTask = {
         id: Date.now().toString(),
-        name: newHabitName,
-        days: [false, false, false, false, false, false, false],
+        name: newTaskName,
         subTasks: [],
       };
-      setHabits([...habits, newHabit]);
-      setNewHabitName("");
+      setTasks([...tasks, newTask]);
+      setNewTaskName("");
     }
   };
 
-  const deleteHabit = (id) => {
-    setHabits(habits.filter((habit) => habit.id !== id));
+  const archiveTask = (id) => {
+    const taskToArchive = tasks.find((task) => task.id === id);
+    setArchivedTasks([...archivedTasks, taskToArchive]);
+    setTasks(tasks.filter((task) => task.id !== id));
+    setOpenMenuId(null);
   };
 
-  const toggleDay = (habitId, dayIndex) => {
-    setHabits(
-      habits.map((habit) =>
-        habit.id === habitId
-          ? {
-              ...habit,
-              days: habit.days.map((day, index) =>
-                index === dayIndex ? !day : day
-              ),
-            }
-          : habit
-      )
-    );
+  const restoreTask = (id) => {
+    const taskToRestore = archivedTasks.find((task) => task.id === id);
+    setTasks([...tasks, taskToRestore]);
+    setArchivedTasks(archivedTasks.filter((task) => task.id !== id));
   };
 
-  const addSubTask = (habitId, subTaskName) => {
-    setHabits(
-      habits.map((habit) =>
-        habit.id === habitId
+  const deleteArchivedTask = (id) => {
+    setArchivedTasks(archivedTasks.filter((task) => task.id !== id));
+  };
+
+  const addSubTask = (taskId, subTaskName) => {
+    setTasks(
+      tasks.map((task) =>
+        task.id === taskId
           ? {
-              ...habit,
+              ...task,
               subTasks: [
-                ...habit.subTasks,
+                ...task.subTasks,
                 {
                   id: Date.now().toString(),
                   name: subTaskName,
@@ -62,106 +64,182 @@ function HabitTracker() {
                 },
               ],
             }
-          : habit
+          : task
       )
     );
   };
 
-  const toggleSubTask = (habitId, subTaskId) => {
-    setHabits(
-      habits.map((habit) =>
-        habit.id === habitId
+  const toggleSubTask = (taskId, subTaskId) => {
+    setTasks(
+      tasks.map((task) =>
+        task.id === taskId
           ? {
-              ...habit,
-              subTasks: habit.subTasks.map((subTask) =>
+              ...task,
+              subTasks: task.subTasks.map((subTask) =>
                 subTask.id === subTaskId
                   ? { ...subTask, completed: !subTask.completed }
                   : subTask
               ),
             }
-          : habit
+          : task
       )
     );
   };
 
+  const toggleMenu = (id) => {
+    setOpenMenuId(openMenuId === id ? null : id);
+  };
+
+  const onDragEnd = (result) => {
+    if (!result.destination) return;
+
+    const newTasks = Array.from(tasks);
+    const [reorderedItem] = newTasks.splice(result.source.index, 1);
+    newTasks.splice(result.destination.index, 0, reorderedItem);
+
+    setTasks(newTasks);
+  };
+
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Gestor de Hábitos</h1>
+      <h1 className="text-2xl font-bold mb-4">Gestor de Tareas</h1>
       <div className="flex mb-4">
         <input
           type="text"
-          value={newHabitName}
-          onChange={(e) => setNewHabitName(e.target.value)}
-          placeholder="Nuevo hábito"
+          value={newTaskName}
+          onChange={(e) => setNewTaskName(e.target.value)}
+          placeholder="Nueva tarea"
           className="border p-2 mr-2 flex-grow"
         />
         <button
-          onClick={addHabit}
+          onClick={addTask}
           className="bg-blue-500 text-white px-4 py-2 rounded"
         >
-          Agregar Hábito
+          Agregar Tarea
         </button>
       </div>
-      <div className="space-y-4">
-        {habits.map((habit) => (
-          <div key={habit.id} className="border p-4 rounded">
-            <h2 className="text-xl font-semibold mb-2">{habit.name}</h2>
-            <div className="flex space-x-2 mb-2">
-              {["D", "L", "M", "X", "J", "V", "S"].map((day, index) => (
-                <label key={index} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={habit.days[index]}
-                    onChange={() => toggleDay(habit.id, index)}
-                    className="mr-1"
-                  />
-                  {day}
-                </label>
+
+      <DragDropContext onDragEnd={onDragEnd}>
+        <Droppable droppableId="tasks">
+          {(provided) => (
+            <div
+              {...provided.droppableProps}
+              ref={provided.innerRef}
+              className="space-y-4"
+            >
+              {tasks.map((task, index) => (
+                <Draggable key={task.id} draggableId={task.id} index={index}>
+                  {(provided) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      className="border p-4 rounded"
+                    >
+                      <div className="flex justify-between items-center mb-2">
+                        <div className="flex items-center">
+                          <div
+                            {...provided.dragHandleProps}
+                            className="mr-2 cursor-move"
+                          >
+                            ☰
+                          </div>
+                          <h2 className="text-xl font-semibold">{task.name}</h2>
+                        </div>
+                        <div className="relative">
+                          <button
+                            onClick={() => toggleMenu(task.id)}
+                            className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center focus:outline-none hover:bg-gray-300"
+                            aria-label="Opciones de tarea"
+                          >
+                            ⋮
+                          </button>
+                          {openMenuId === task.id && (
+                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
+                              <button
+                                onClick={() => archiveTask(task.id)}
+                                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                              >
+                                Archivar
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="mb-2">
+                        <h3 className="font-medium">Sub-tareas:</h3>
+                        {task.subTasks.map((subTask) => (
+                          <div key={subTask.id} className="flex items-center">
+                            <input
+                              type="checkbox"
+                              checked={subTask.completed}
+                              onChange={() =>
+                                toggleSubTask(task.id, subTask.id)
+                              }
+                              className="mr-2"
+                            />
+                            <span>{subTask.name}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex">
+                        <input
+                          type="text"
+                          placeholder="Nueva sub-tarea"
+                          onKeyPress={(e) => {
+                            if (e.key === "Enter") {
+                              addSubTask(task.id, e.target.value);
+                              e.target.value = "";
+                            }
+                          }}
+                          className="border p-2 mr-2 flex-grow"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </Draggable>
               ))}
+              {provided.placeholder}
             </div>
-            <div className="mb-2">
-              <h3 className="font-medium">Sub-tareas:</h3>
-              {habit.subTasks.map((subTask) => (
-                <div key={subTask.id} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={subTask.completed}
-                    onChange={() => toggleSubTask(habit.id, subTask.id)}
-                    className="mr-2"
-                  />
-                  <span>{subTask.name}</span>
+          )}
+        </Droppable>
+      </DragDropContext>
+
+      <div className="mt-8">
+        <button
+          onClick={() => setShowArchived(!showArchived)}
+          className="bg-gray-500 text-white px-4 py-2 rounded mb-4"
+        >
+          {showArchived
+            ? "Ocultar Tareas Archivadas"
+            : "Mostrar Tareas Archivadas"}
+        </button>
+        {showArchived && (
+          <div className="space-y-4">
+            <h2 className="text-xl font-bold">Tareas Archivadas</h2>
+            {archivedTasks.map((task) => (
+              <div key={task.id} className="border p-4 rounded bg-gray-100">
+                <h3 className="text-lg font-semibold mb-2">{task.name}</h3>
+                <div className="flex">
+                  <button
+                    onClick={() => restoreTask(task.id)}
+                    className="bg-green-500 text-white px-4 py-2 rounded mr-2"
+                  >
+                    Restaurar
+                  </button>
+                  <button
+                    onClick={() => deleteArchivedTask(task.id)}
+                    className="bg-red-500 text-white px-4 py-2 rounded"
+                  >
+                    Eliminar Permanentemente
+                  </button>
                 </div>
-              ))}
-            </div>
-            <div className="flex">
-              <input
-                type="text"
-                placeholder="Nueva sub-tarea"
-                onKeyPress={(e) => {
-                  if (e.key === "Enter") {
-                    addSubTask(habit.id, e.target.value);
-                    e.target.value = "";
-                  }
-                }}
-                className="border p-2 mr-2 flex-grow"
-              />
-              <button
-                onClick={() => deleteHabit(habit.id)}
-                className="bg-red-500 text-white px-4 py-2 rounded"
-              >
-                Eliminar Hábito
-              </button>
-            </div>
+              </div>
+            ))}
           </div>
-        ))}
+        )}
       </div>
     </div>
   );
-}
+};
 
-ReactDOM.render(
-  <React.StrictMode>
-    <HabitTracker />
-  </React.StrictMode>,
-  document.getElementById("root")
-);
+export default TaskManager;
