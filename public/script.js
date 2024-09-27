@@ -12,6 +12,8 @@ document.addEventListener("DOMContentLoaded", () => {
   let isInitialized = false;
   let introSkipped = false;
   let isShowsCentered = false;
+  let isClasesCentered = false;
+  let isModaCentered = false;
   let isFDICentered = false;
   let welcomeTextTimeout, subTextTimeout, layoutTimeout;
 
@@ -73,6 +75,33 @@ document.addEventListener("DOMContentLoaded", () => {
         name: "Academia de Aprendizaje",
         image: "./img/academia-de-aprendizaje.jpg",
         link: "./pages/academia-de-aprendizaje.html",
+      },
+    ],
+    Moda: [
+      {
+        name: "Actualidad",
+        image: "./img/moda.png",
+        link: "./pages/moda.html",
+      },
+      {
+        name: "Nuestro Taller",
+        image: "./img/moda-taller.jpg",
+        link: "./pages/moda-taller.html",
+      },
+      {
+        name: "Catálogo Primavera-Otoño",
+        image: "./img/catalogo-primavera-otono.jpg",
+        link: "./pages/catalogo-primavera-otono.html",
+      },
+      {
+        name: "Catálogo Otoño-Invierno",
+        image: "./img/catalogo-otono-invierno.jpg",
+        link: "./pages/catalogo-otono-invierno.html",
+      },
+      {
+        name: "Tienda",
+        image: "./img/moda-tienda.jpg",
+        link: "./pages/moda-tienda.html",
       },
     ],
     "Fondo de Inversión": [
@@ -193,7 +222,6 @@ document.addEventListener("DOMContentLoaded", () => {
         };
       }
 
-      // Event listeners should only be added once, not in every call to updateLayout
       if (!circle.hasAttribute("data-listeners-added")) {
         circle.addEventListener("mouseover", () => {
           const circleName = circle.getAttribute("data-name");
@@ -246,15 +274,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (
         (isShowsCentered && clickedLogoName === "Shows") ||
-        (isFDICentered && clickedLogoName === "Fondo de Inversión") ||
-        (centeredCircle === circle && clickedLogoName === "Clases")
+        (isClasesCentered && clickedLogoName === "Clases") ||
+        (isModaCentered && clickedLogoName === "Moda") ||
+        (isFDICentered && clickedLogoName === "Fondo de Inversión")
       ) {
-        // Reset the page if "Shows", "Clases", or "Fondo de Inversión" is clicked a second time
+        // Reset the page if a centered circle is clicked again
         window.location.href = window.location.pathname + "?skipIntro=true";
         return;
       } else if (
         clickedLogoName === "Shows" ||
         clickedLogoName === "Clases" ||
+        clickedLogoName === "Moda" ||
         clickedLogoName === "Fondo de Inversión"
       ) {
         stopAnimation();
@@ -265,15 +295,19 @@ document.addEventListener("DOMContentLoaded", () => {
         if (clickedLogoName === "Shows") {
           showShowsIntro();
           isShowsCentered = true;
-          isFDICentered = false;
+          isClasesCentered = isModaCentered = isFDICentered = false;
         } else if (clickedLogoName === "Clases") {
           showClasesIntro();
-          isShowsCentered = false;
-          isFDICentered = false;
+          isClasesCentered = true;
+          isShowsCentered = isModaCentered = isFDICentered = false;
+        } else if (clickedLogoName === "Moda") {
+          showModaIntro();
+          isModaCentered = true;
+          isShowsCentered = isClasesCentered = isFDICentered = false;
         } else if (clickedLogoName === "Fondo de Inversión") {
           showFDIIntro();
-          isShowsCentered = false;
           isFDICentered = true;
+          isShowsCentered = isClasesCentered = isModaCentered = false;
         }
 
         redistributeCircles(radius, circleSize, true);
@@ -321,6 +355,11 @@ document.addEventListener("DOMContentLoaded", () => {
   function showClasesIntro() {
     stopAnimation();
     transitionCircleImages(relatedContent["Clases"]);
+  }
+
+  function showModaIntro() {
+    stopAnimation();
+    transitionCircleImages(relatedContent["Moda"]);
   }
 
   function showFDIIntro() {
@@ -490,4 +529,4 @@ document.addEventListener("DOMContentLoaded", () => {
   playIntroAnimation().catch((error) => {
     console.error("Error during intro animation:", error);
   });
-}); // End of DOMContentLoaded event
+});

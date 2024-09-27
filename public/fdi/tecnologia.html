@@ -53,7 +53,8 @@
         max-width: 600px; /* Limita el ancho máximo */
         margin: 2rem 0;
       }
-      input, textarea {
+      input,
+      textarea {
         width: 100%;
         margin-bottom: 1rem;
         padding: 0.5rem;
@@ -80,7 +81,7 @@
         background-color: #39ff14;
         color: black;
       }
-      
+
       /* Comentarios */
       #commentsSection {
         width: 100%;
@@ -154,72 +155,91 @@
       </p>
       <a href="fondo-de-inversiones.html" class="button">Volver al Inicio</a>
 
-       <!-- Caja de comentarios -->
-     <h2>Deja un comentario</h2>
-     <form id="commentForm">
-       <input type="text" id="userName" placeholder="Tu nombre" maxlength="50" required>
-       <textarea id="userMessage" placeholder="Tu comentario (máximo 200 caracteres)" maxlength="200" required></textarea>
-       <button type="submit">Enviar comentario</button>
-     </form>
-     <script>
-        // Configuración de Firebase
-        const firebaseConfig = {
-           apiKey: "AIzaSyC05s84tQfQbiJua0G0LHnQsZP76HqxMk4",
-           authDomain: "undertango.firebaseapp.com",
-           projectId: "undertango",
-           storageBucket: "undertango.appspot.com",
-           messagingSenderId: "21199358960",
-           appId: "1:21199358960:web:6b751db7c333403057ab35",
-         };
-   
-        // Inicializa Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-   
-        // Función para agregar comentarios
-        const commentForm = document.getElementById('commentForm');
-        commentForm.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          const name = document.getElementById('userName').value;
-          const message = document.getElementById('userMessage').value;
-   
-          // Guarda el comentario en Firestore
-          await db.collection('comments').add({
-            name: name,
-            message: message,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-          });
-   
-          // Limpia el formulario
-          commentForm.reset();
-          loadComments(); // Recarga los comentarios
-        });
-   
-        // Función para cargar los comentarios
-        async function loadComments() {
-          const commentsList = document.getElementById('commentsList');
-          commentsList.innerHTML = ''; // Limpiar la lista de comentarios
-   
-          // Obtener los comentarios ordenados por fecha
-          const querySnapshot = await db.collection('comments').orderBy('timestamp', 'desc').get();
-          querySnapshot.forEach((doc) => {
-            const comment = doc.data();
-            const li = document.createElement('li');
-            li.textContent = `${comment.name}: ${comment.message}`;
-            commentsList.appendChild(li);
-          });
-        }
-   
-        // Cargar comentarios cuando la página se carga
-        window.onload = loadComments;
-      </script>
+      <!-- Caja de comentarios -->
+      <h2>Deja un comentario</h2>
+      <form id="commentForm">
+        <input
+          type="text"
+          id="userName"
+          placeholder="Tu nombre"
+          maxlength="50"
+          required
+        />
+        <textarea
+          id="userMessage"
+          placeholder="Tu comentario (máximo 200 caracteres)"
+          maxlength="200"
+          required
+        ></textarea>
+        <button type="submit">Enviar comentario</button>
+      </form>
 
-     <div id="commentsSection">
-       <h3>Comentarios recientes</h3>
-       <ul id="commentsList"></ul>
-     </div>
+      <div id="commentsSection">
+        <h3>Comentarios recientes</h3>
+        <ul id="commentsList"></ul>
+      </div>
     </div>
-   </div>
+
     <footer>© 2024 UnderTango. Todos los derechos reservados.</footer>
+
+    <!-- Add Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+    <script>
+      // Configuración de Firebase
+      const firebaseConfig = {
+        apiKey: "AIzaSyC05s84tQfQbiJua0G0LHnQsZP76HqxMk4",
+        authDomain: "undertango.firebaseapp.com",
+        projectId: "undertango",
+        storageBucket: "undertango.appspot.com",
+        messagingSenderId: "21199358960",
+        appId: "1:21199358960:web:6b751db7c333403057ab35",
+      };
+
+      // Inicializa Firebase
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+
+      // Función para agregar comentarios
+      const commentForm = document.getElementById("commentForm");
+      commentForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const name = document.getElementById("userName").value;
+        const message = document.getElementById("userMessage").value;
+
+        // Guarda el comentario en Firestore
+        await db.collection("comments").add({
+          name: name,
+          message: message,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+
+        // Limpia el formulario
+        commentForm.reset();
+        loadComments(); // Recarga los comentarios
+      });
+
+      // Función para cargar los comentarios
+      async function loadComments() {
+        const commentsList = document.getElementById("commentsList");
+        commentsList.innerHTML = ""; // Limpiar la lista de comentarios
+
+        // Obtener los comentarios ordenados por fecha
+        const querySnapshot = await db
+          .collection("comments")
+          .orderBy("timestamp", "desc")
+          .get();
+        querySnapshot.forEach((doc) => {
+          const comment = doc.data();
+          const li = document.createElement("li");
+          li.textContent = `${comment.name}: ${comment.message}`;
+          commentsList.appendChild(li);
+        });
+      }
+
+      // Cargar comentarios cuando la página se carga
+      window.onload = loadComments;
+    </script>
   </body>
 </html>
