@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tecnología - UnderTango</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: "Poiret One", sans-serif;
+        background-color: black;
+        color: white;
+      }
+      .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 2rem;
+      }
+      h1 {
+        color: #39ff14;
+        font-size: 3rem;
+        margin-bottom: 1rem;
+      }
+      p {
+        font-size: 1.2rem;
+        color: white;
+        max-width: 800px;
+        text-align: justify;
+      }
+      .button {
+        background-color: red;
+        border: 2px solid #e84343;
+        color: white;
+        font-size: 1.2rem;
+        padding: 0.5rem 1rem;
+        margin: 1rem 0;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+      }
+      .button:hover {
+        background-color: #39ff14;
+        color: black;
+      }
+
+      /* Caja de comentarios */
+      #commentForm {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        max-width: 600px; /* Limita el ancho máximo */
+        margin: 2rem 0;
+      }
+      input, textarea {
+        width: 100%;
+        margin-bottom: 1rem;
+        padding: 0.5rem;
+        font-size: 1rem;
+        border-radius: 4px;
+        border: 1px solid #e84343;
+        background-color: #333;
+        color: white;
+      }
+      textarea {
+        resize: none;
+        height: 100px; /* Ajusta el tamaño del área de texto */
+      }
+      button {
+        background-color: red;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+      button:hover {
+        background-color: #39ff14;
+        color: black;
+      }
+      
+      /* Comentarios */
+      #commentsSection {
+        width: 100%;
+        max-width: 600px; /* Limita el ancho máximo */
+        margin-top: 2rem;
+      }
+      #commentsList {
+        list-style-type: none;
+        padding: 0;
+      }
+      #commentsList li {
+        background-color: #222;
+        border: 1px solid #e84343;
+        margin-bottom: 1rem;
+        padding: 1rem;
+        color: white;
+      }
+
+      footer {
+        margin-top: 2rem;
+        text-align: center;
+        color: #e84343;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Tecnología en UnderTango</h1>
+      <p>
+        En UnderTango estamos impulsando la tecnología a través de múltiples
+        frentes. Uno de nuestros proyectos más ambiciosos es el desarrollo de
+        una aplicación móvil basada en **Kotlin y Flutter** que permitirá a los
+        usuarios acceder a contenido exclusivo, como clases de tango, eventos, y
+        la posibilidad de adquirir productos usando nuestra criptomoneda,
+        **UnderTango Crypto Cøin**, que está integrada en la **blockchain
+        DeSo**.
+      </p>
+      <p>
+        Nuestro enfoque en la **Web3 y la DeFi** busca conectar el arte y la
+        tecnología en un solo ecosistema, creando oportunidades para que
+        artistas y entusiastas de la danza interactúen con tecnologías
+        descentralizadas. Estamos trabajando en integrar funcionalidades como la
+        venta de entradas para shows y el intercambio de productos a través de
+        la app, todo respaldado por nuestra moneda digital.
+      </p>
+      <p>
+        Además, estamos desarrollando una tienda virtual donde los usuarios
+        podrán adquirir indumentaria y artículos relacionados con el tango y la
+        danza. Este sistema también permitirá transacciones rápidas y seguras
+        utilizando nuestra moneda digital. La tienda será accesible tanto desde
+        la aplicación móvil como desde la web.
+      </p>
+      <p>
+        Otro aspecto innovador es la creación de la **D.A.O. (Decentralized
+        Autonomous Organization)** que gestionará la distribución de dividendos
+        y apoyará las iniciativas artísticas y tecnológicas dentro de nuestra
+        comunidad global. Esta organización descentralizada permitirá a los
+        usuarios participar activamente en la toma de decisiones del ecosistema
+        UnderTango.
+      </p>
+      <p>
+        Con estos avances, nos aseguramos de estar a la vanguardia tecnológica,
+        integrando lo mejor del arte, la tecnología y las finanzas
+        descentralizadas en un solo espacio.
+      </p>
+
+      <p>
+        NOTA: Todo el complejo digital de UnderTango está en construcción, esta
+        página web está siendo construída diariamente, si has llegado hasta
+        aquí, dejanos un comentario abajo! Es un gusto conectar Ø
+      </p>
+      <a href="fondo-de-inversiones.html" class="button">Volver al Inicio</a>
+
+       <!-- Caja de comentarios -->
+     <h2>Deja un comentario</h2>
+     <form id="commentForm">
+       <input type="text" id="userName" placeholder="Tu nombre" maxlength="50" required>
+       <textarea id="userMessage" placeholder="Tu comentario (máximo 200 caracteres)" maxlength="200" required></textarea>
+       <button type="submit">Enviar comentario</button>
+     </form>
+     <script>
+        // Configuración de Firebase
+        const firebaseConfig = {
+           apiKey: "AIzaSyC05s84tQfQbiJua0G0LHnQsZP76HqxMk4",
+           authDomain: "undertango.firebaseapp.com",
+           projectId: "undertango",
+           storageBucket: "undertango.appspot.com",
+           messagingSenderId: "21199358960",
+           appId: "1:21199358960:web:6b751db7c333403057ab35",
+         };
+   
+        // Inicializa Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+   
+        // Función para agregar comentarios
+        const commentForm = document.getElementById('commentForm');
+        commentForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const name = document.getElementById('userName').value;
+          const message = document.getElementById('userMessage').value;
+   
+          // Guarda el comentario en Firestore
+          await db.collection('comments').add({
+            name: name,
+            message: message,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          });
+   
+          // Limpia el formulario
+          commentForm.reset();
+          loadComments(); // Recarga los comentarios
+        });
+   
+        // Función para cargar los comentarios
+        async function loadComments() {
+          const commentsList = document.getElementById('commentsList');
+          commentsList.innerHTML = ''; // Limpiar la lista de comentarios
+   
+          // Obtener los comentarios ordenados por fecha
+          const querySnapshot = await db.collection('comments').orderBy('timestamp', 'desc').get();
+          querySnapshot.forEach((doc) => {
+            const comment = doc.data();
+            const li = document.createElement('li');
+            li.textContent = `${comment.name}: ${comment.message}`;
+            commentsList.appendChild(li);
+          });
+        }
+   
+        // Cargar comentarios cuando la página se carga
+        window.onload = loadComments;
+      </script>
+
+     <div id="commentsSection">
+       <h3>Comentarios recientes</h3>
+       <ul id="commentsList"></ul>
+     </div>
+    </div>
+   </div>
+    <footer>© 2024 UnderTango. Todos los derechos reservados.</footer>
+  </body>
+</html>
