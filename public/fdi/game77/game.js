@@ -6,6 +6,7 @@ const config = {
     preload: preload,
     create: create,
   },
+  backgroundColor: "#20232a",
 };
 
 const game = new Phaser.Game(config);
@@ -23,18 +24,8 @@ function preload() {
 }
 
 function create() {
-  this.add
-    .text(400, 50, "Juego de los Generales Bizantinos", {
-      fontSize: "32px",
-      fill: "#fff",
-    })
-    .setOrigin(0.5);
-  this.add
-    .text(400, 100, `Nivel ${currentLevel + 1}`, {
-      fontSize: "24px",
-      fill: "#fff",
-    })
-    .setOrigin(0.5);
+  createTitle.call(this);
+  createLevelText.call(this);
 
   if (currentLevel === 0) {
     createLevel0.call(this);
@@ -45,13 +36,41 @@ function create() {
   }
 }
 
+function createTitle() {
+  this.add
+    .text(400, 50, "Juego de los Generales Bizantinos", {
+      fontSize: "32px",
+      fontFamily: "Arial, sans-serif",
+      color: "#ffffff",
+      fontStyle: "bold",
+    })
+    .setOrigin(0.5);
+}
+
+function createLevelText() {
+  this.add
+    .text(400, 100, `Nivel ${currentLevel + 1}`, {
+      fontSize: "24px",
+      fontFamily: "Arial, sans-serif",
+      color: "#ffffff",
+    })
+    .setOrigin(0.5);
+}
+
 function createLevel0() {
   const welcomeText = this.add
     .text(
       400,
       150,
       '¡Bienvenido al juego de los generales bizantinos!\nEste es un comandante, él mismo puede dar dos tipos de órdenes:\n"avanzar" y "retirarse"',
-      { fontSize: "18px", fill: "#fff", align: "center", lineSpacing: 10 }
+      {
+        fontSize: "18px",
+        fontFamily: "Arial, sans-serif",
+        color: "#ffffff",
+        align: "center",
+        lineSpacing: 10,
+        wordWrap: { width: 600 },
+      }
     )
     .setOrigin(0.5);
 
@@ -61,11 +80,12 @@ function createLevel0() {
     .setInteractive();
   commander.on("pointerdown", showOrderOptions.bind(this));
 
-  // Move this text further down
   orderText = this.add
-    .text(400, 550, "Haz clic sobre el comandante para dar una orden", {
+    .text(400, 500, "Haz clic sobre el comandante para dar una orden", {
       fontSize: "18px",
-      fill: "#fff",
+      fontFamily: "Arial, sans-serif",
+      color: "#ffffff",
+      align: "center",
     })
     .setOrigin(0.5);
 }
@@ -76,7 +96,13 @@ function createLevel1() {
       400,
       150,
       "Este es un teniente, el mismo puede recibir una orden\nque luego puede replicar. ¡Intenta darle una orden!",
-      { fontSize: "18px", fill: "#fff", align: "center" }
+      {
+        fontSize: "18px",
+        fontFamily: "Arial, sans-serif",
+        color: "#ffffff",
+        align: "center",
+        wordWrap: { width: 600 },
+      }
     )
     .setOrigin(0.5);
 
@@ -95,7 +121,9 @@ function createLevel1() {
   orderText = this.add
     .text(400, 450, "Haz clic sobre el comandante para dar una orden", {
       fontSize: "18px",
-      fill: "#fff",
+      fontFamily: "Arial, sans-serif",
+      color: "#ffffff",
+      align: "center",
     })
     .setOrigin(0.5);
 }
@@ -106,7 +134,13 @@ function createLevel2() {
       400,
       150,
       "En este nivel hay un comandante y dos tenientes.\n¡Intenta dar órdenes!",
-      { fontSize: "18px", fill: "#fff", align: "center" }
+      {
+        fontSize: "18px",
+        fontFamily: "Arial, sans-serif",
+        color: "#ffffff",
+        align: "center",
+        wordWrap: { width: 600 },
+      }
     )
     .setOrigin(0.5);
 
@@ -128,50 +162,63 @@ function createLevel2() {
     .setInteractive();
   lieutenants[1].on("pointerdown", () => checkLieutenantOrder.call(this, 1));
 
-  // Set a contradictory order for the second lieutenant
   lieutenantOrders[1] = "Retirarse";
 
   orderText = this.add
     .text(400, 500, "Haz clic sobre el comandante para dar una orden", {
       fontSize: "18px",
-      fill: "#fff",
+      fontFamily: "Arial, sans-serif",
+      color: "#ffffff",
+      align: "center",
     })
     .setOrigin(0.5);
 }
 
 function showOrderOptions() {
+  const buttonStyle = {
+    fontSize: "20px",
+    fontFamily: "Arial, sans-serif",
+    backgroundColor: "#4a4a4a",
+    padding: {
+      left: 10,
+      right: 10,
+      top: 5,
+      bottom: 5,
+    },
+  };
+
   if (currentLevel === 0) {
     const advanceButton = this.add
-      .text(250, 430, "Avanzar", { fontSize: "24px", fill: "#0f0" })
+      .text(250, 430, "Avanzar", buttonStyle)
       .setInteractive()
       .on("pointerdown", () => giveOrder.call(this, "Avanzar"));
 
     const retreatButton = this.add
-      .text(450, 430, "Retirarse", { fontSize: "24px", fill: "#f00" })
+      .text(450, 430, "Retirarse", buttonStyle)
       .setInteractive()
       .on("pointerdown", () => giveOrder.call(this, "Retirarse"));
 
     commander.disableInteractive();
   } else if (currentLevel === 1) {
     const advanceButton = this.add
-      .text(200, 400, "Avanzar", { fontSize: "24px", fill: "#0f0" })
+      .text(200, 400, "Avanzar", buttonStyle)
       .setInteractive()
       .on("pointerdown", () => selectRecipient.call(this, "Avanzar"));
 
     const retreatButton = this.add
-      .text(400, 400, "Retirarse", { fontSize: "24px", fill: "#f00" })
+      .text(400, 400, "Retirarse", buttonStyle)
       .setInteractive()
       .on("pointerdown", () => selectRecipient.call(this, "Retirarse"));
 
     commander.disableInteractive();
   } else if (currentLevel === 2) {
     const advanceButton = this.add
-      .text(300, 550, "Avanzar", { fontSize: "24px", fill: "#0f0" })
+      .text(300, 550, "Avanzar", buttonStyle)
       .setInteractive()
       .on("pointerdown", () => selectRecipient.call(this, "Avanzar"));
 
     const retreatButton = this.add
-      .text(500, 550, "Retirarse", { fontSize: "24px", fill: "#f00" })
+      .text(500, 550, "Retirarse", buttonStyle)
       .setInteractive()
       .on("pointerdown", () => selectRecipient.call(this, "Retirarse"));
 
@@ -183,12 +230,25 @@ function giveOrder(order) {
   orderText.setText(`¡Felicitaciones! Has dado tu primera orden: ${order}`);
 
   this.time.delayedCall(2000, () => {
-    orderText.setText(
-      "No obstante, ¿qué sentido tiene dar una orden si no hay nadie para oírla?\n¡Vamos al nivel 2!"
-    );
+    orderText
+      .setText(
+        "No obstante, ¿qué sentido tiene dar una orden si no hay nadie para oírla?\n¡Vamos al nivel 2!"
+      )
+      .setWordWrapWidth(600)
+      .setAlign("center");
 
     nextButton = this.add
-      .text(400, 500, "Siguiente Nivel", { fontSize: "24px", fill: "#fff" })
+      .text(400, 550, "Siguiente Nivel", {
+        fontSize: "20px",
+        fontFamily: "Arial, sans-serif",
+        backgroundColor: "#4a4a4a",
+        padding: {
+          left: 10,
+          right: 10,
+          top: 5,
+          bottom: 5,
+        },
+      })
       .setOrigin(0.5)
       .setInteractive()
       .on("pointerdown", goToNextLevel.bind(this));
@@ -196,21 +256,33 @@ function giveOrder(order) {
 }
 
 function selectRecipient(order) {
+  const buttonStyle = {
+    fontSize: "20px",
+    fontFamily: "Arial, sans-serif",
+    backgroundColor: "#4a4a4a",
+    padding: {
+      left: 10,
+      right: 10,
+      top: 5,
+      bottom: 5,
+    },
+  };
+
   if (currentLevel === 1) {
     const recipientButton = this.add
-      .text(600, 400, "Teniente 1", { fontSize: "24px", fill: "#fff" })
+      .text(600, 400, "Teniente 1", buttonStyle)
       .setInteractive()
       .on("pointerdown", () => sendOrder.call(this, order, 0));
 
     orderText.setText("¿A quién?");
   } else if (currentLevel === 2) {
     const lieutenant1Button = this.add
-      .text(200, 550, "Teniente 1", { fontSize: "24px", fill: "#fff" })
+      .text(200, 550, "Teniente 1", buttonStyle)
       .setInteractive()
       .on("pointerdown", () => sendOrder.call(this, order, 0));
 
     const lieutenant2Button = this.add
-      .text(400, 550, "Teniente 2", { fontSize: "24px", fill: "#fff" })
+      .text(400, 550, "Teniente 2", buttonStyle)
       .setInteractive()
       .on("pointerdown", () => sendOrder.call(this, order, 1));
 
@@ -237,7 +309,17 @@ function checkLieutenantOrder(lieutenantIndex) {
 
       this.time.delayedCall(2000, () => {
         nextButton = this.add
-          .text(400, 500, "Siguiente Nivel", { fontSize: "24px", fill: "#fff" })
+          .text(400, 500, "Siguiente Nivel", {
+            fontSize: "20px",
+            fontFamily: "Arial, sans-serif",
+            backgroundColor: "#4a4a4a",
+            padding: {
+              left: 10,
+              right: 10,
+              top: 5,
+              bottom: 5,
+            },
+          })
           .setOrigin(0.5)
           .setInteractive()
           .on("pointerdown", goToNextLevel.bind(this));
@@ -255,13 +337,19 @@ function checkLieutenantOrder(lieutenantIndex) {
       );
 
       this.time.delayedCall(2000, () => {
-        const dialogBox = this.add.rectangle(400, 300, 600, 200, 0x000000, 0.8);
+        const dialogBox = this.add.rectangle(400, 300, 600, 200, 0x4a4a4a, 0.8);
         const dialogText = this.add
           .text(
             400,
             300,
             "¡No me peguen, soy Giordano!\nUn comandante me pasó esa orden.\nEn el nivel 4 puedo explicarlo, ¡se los aseguro!",
-            { fontSize: "18px", fill: "#fff", align: "center" }
+            {
+              fontSize: "18px",
+              fontFamily: "Arial, sans-serif",
+              color: "#ffffff",
+              align: "center",
+              wordWrap: { width: 550 },
+            }
           )
           .setOrigin(0.5);
 
@@ -270,8 +358,15 @@ function checkLieutenantOrder(lieutenantIndex) {
           dialogText.destroy();
           nextButton = this.add
             .text(400, 500, "Siguiente Nivel", {
-              fontSize: "24px",
-              fill: "#fff",
+              fontSize: "20px",
+              fontFamily: "Arial, sans-serif",
+              backgroundColor: "#4a4a4a",
+              padding: {
+                left: 10,
+                right: 10,
+                top: 5,
+                bottom: 5,
+              },
             })
             .setOrigin(0.5)
             .setInteractive()

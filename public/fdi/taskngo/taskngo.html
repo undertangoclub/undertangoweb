@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Gestor de Tareas</title>
+    <title>Gestor de Tareas Avanzado</title>
     <link
       href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
       rel="stylesheet"
@@ -31,7 +31,7 @@
   <body>
     <div id="root"></div>
     <script type="text/babel">
-      const { useState, useEffect } = React;
+      const { useState, useEffect, useRef } = React;
       const { DragDropContext, Droppable, Draggable } =
         window.ReactBeautifulDnd;
 
@@ -159,6 +159,12 @@
           }
         };
 
+        const handleNewTaskKeyPress = (e) => {
+          if (e.key === "Enter") {
+            addTask();
+          }
+        };
+
         const archiveTask = (id) => {
           const taskToArchive = tasks.find((task) => task.id === id);
           if (taskToArchive) {
@@ -229,7 +235,6 @@
                 : task
             )
           );
-          setEditingSubTask(null);
         };
 
         const toggleSubTask = (taskId, subTaskId) => {
@@ -326,23 +331,106 @@
         };
 
         const onDragEnd = (result) => {
-          if (!result.destination) return;
+          const { source, destination, type } = result;
 
-          const newTasks = Array.from(tasks);
-          const [reorderedItem] = newTasks.splice(result.source.index, 1);
-          newTasks.splice(result.destination.index, 0, reorderedItem);
+          if (!destination) {
+            return;
+          }
 
-          setTasks(newTasks);
+          if (type === "task") {
+            const newTasks = Array.from(tasks);
+            const [reorderedItem] = newTasks.splice(source.index, 1);
+            newTasks.splice(destination.index, 0, reorderedItem);
+            setTasks(newTasks);
+          } else if (type === "subTask") {
+            const taskId = source.droppableId;
+            const task = tasks.find((t) => t.id === taskId);
+            if (task) {
+              const newSubTasks = Array.from(task.subTasks);
+              const [reorderedItem] = newSubTasks.splice(source.index, 1);
+              newSubTasks.splice(destination.index, 0, reorderedItem);
+              setTasks(
+                tasks.map((t) =>
+                  t.id === taskId ? { ...t, subTasks: newSubTasks } : t
+                )
+              );
+            }
+          }
+        };
+
+        const SubTaskItem = ({ taskId, subTask }) => {
+          const [isEditing, setIsEditing] = useState(false);
+          const [editedName, setEditedName] = useState(subTask.name);
+          const inputRef = useRef(null);
+
+          useEffect(() => {
+            if (isEditing) {
+              inputRef.current.focus();
+            }
+          }, [isEditing]);
+
+          const handleEdit = () => {
+            setIsEditing(true);
+          };
+
+          const handleSave = () => {
+            editSubTask(taskId, subTask.id, editedName);
+            setIsEditing(false);
+          };
+
+          const handleKeyDown = (e) => {
+            if (e.key === "Enter") {
+              handleSave();
+            }
+          };
+
+          return (
+            <div className="flex items-center mb-1">
+              <input
+                type="checkbox"
+                checked={subTask.completed}
+                onChange={() => toggleSubTask(taskId, subTask.id)}
+                className="mr-2"
+              />
+              {isEditing ? (
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={editedName}
+                  onChange={(e) => setEditedName(e.target.value)}
+                  onBlur={handleSave}
+                  onKeyDown={handleKeyDown}
+                  className="border p-1 flex-grow"
+                />
+              ) : (
+                <span onClick={handleEdit} className="cursor-pointer flex-grow">
+                  {subTask.name}
+                </span>
+              )}
+              {subTask.completed && (
+                <button
+                  onClick={() => archiveSubTask(taskId, subTask.id)}
+                  className="ml-2 text-yellow-500 hover:text-yellow-700"
+                  aria-label="Archivar sub-tarea"
+                >
+                  <Archive size={16} />
+                </button>
+              )}
+            </div>
+          );
         };
 
         return (
           <div className="container mx-auto p-4">
-            <h1 className="text-2xl font-bold mb-4">Gestor de Tareas</h1>
+            <h1 className="text-2xl font-bold mb-4">
+              Gestor de Tareas Avanzado
+            </h1>
             <div className="flex mb-4">
               <input
                 type="text"
                 value={newTaskName}
                 onChange={(e) => setNewTaskName(e.target.value)}
+                onKeyPress={handleNewTaskKeyPress}
                 placeholder="Nueva tarea"
                 className="border p-2 mr-2 flex-grow"
               />
@@ -355,7 +443,7 @@
             </div>
 
             <DragDropContext onDragEnd={onDragEnd}>
-              <Droppable droppableId="tasks">
+              <Droppable droppableId="tasks" type="task">
                 {(provided) => (
                   <div
                     {...provided.droppableProps}
@@ -418,62 +506,38 @@
                             </div>
                             <div className="mb-2">
                               <h3 className="font-medium">Sub-tareas:</h3>
-                              {(task.subTasks || []).map((subTask) => (
-                                <div
-                                  key={subTask.id}
-                                  className="flex items-center"
-                                >
-                                  <input
-                                    type="checkbox"
-                                    checked={subTask.completed}
-                                    onChange={() =>
-                                      toggleSubTask(task.id, subTask.id)
-                                    }
-                                    className="mr-2"
-                                  />
-                                  {editingSubTask === subTask.id ? (
-                                    <input
-                                      type="text"
-                                      value={subTask.name}
-                                      onChange={(e) =>
-                                        editSubTask(
-                                          task.id,
-                                          subTask.id,
-                                          e.target.value
-                                        )
-                                      }
-                                      onBlur={() => setEditingSubTask(null)}
-                                      onKeyPress={(e) => {
-                                        if (e.key === "Enter") {
-                                          setEditingSubTask(null);
-                                        }
-                                      }}
-                                      className="border p-1"
-                                      autoFocus
-                                    />
-                                  ) : (
-                                    <span
-                                      onClick={() =>
-                                        setEditingSubTask(subTask.id)
-                                      }
-                                      className="cursor-pointer"
-                                    >
-                                      {subTask.name}
-                                    </span>
-                                  )}
-                                  {subTask.completed && (
-                                    <button
-                                      onClick={() =>
-                                        archiveSubTask(task.id, subTask.id)
-                                      }
-                                      className="ml-2 text-yellow-500 hover:text-yellow-700"
-                                      aria-label="Archivar sub-tarea"
-                                    >
-                                      <Archive size={16} />
-                                    </button>
-                                  )}
-                                </div>
-                              ))}
+                              <Droppable droppableId={task.id} type="subTask">
+                                {(provided) => (
+                                  <div
+                                    {...provided.droppableProps}
+                                    ref={provided.innerRef}
+                                  >
+                                    {(task.subTasks || []).map(
+                                      (subTask, subIndex) => (
+                                        <Draggable
+                                          key={subTask.id}
+                                          draggableId={subTask.id}
+                                          index={subIndex}
+                                        >
+                                          {(provided) => (
+                                            <div
+                                              ref={provided.innerRef}
+                                              {...provided.draggableProps}
+                                              {...provided.dragHandleProps}
+                                            >
+                                              <SubTaskItem
+                                                taskId={task.id}
+                                                subTask={subTask}
+                                              />
+                                            </div>
+                                          )}
+                                        </Draggable>
+                                      )
+                                    )}
+                                    {provided.placeholder}
+                                  </div>
+                                )}
+                              </Droppable>
                             </div>
                             <div className="flex mb-2">
                               <input
