@@ -74,6 +74,14 @@ function createLevel0() {
     )
     .setOrigin(0.5);
 
+  this.add
+    .text(400, 250, "Comandante", {
+      fontSize: "18px",
+      fontFamily: "Arial, sans-serif",
+      color: "#ffffff",
+    })
+    .setOrigin(0.5);
+
   commander = this.add
     .image(400, 300, "general")
     .setScale(0.3)
@@ -106,17 +114,41 @@ function createLevel1() {
     )
     .setOrigin(0.5);
 
+  this.add
+    .text(300, 250, "Comandante", {
+      fontSize: "18px",
+      fontFamily: "Arial, sans-serif",
+      color: "#ffffff",
+    })
+    .setOrigin(0.5);
+
   commander = this.add
     .image(300, 300, "general")
     .setScale(0.3)
     .setInteractive();
   commander.on("pointerdown", showOrderOptions.bind(this));
 
+  this.add
+    .text(500, 250, "Teniente", {
+      fontSize: "18px",
+      fontFamily: "Arial, sans-serif",
+      color: "#ffffff",
+    })
+    .setOrigin(0.5);
+
   lieutenants[0] = this.add
     .image(500, 300, "lieutenant")
     .setScale(0.3)
     .setInteractive();
   lieutenants[0].on("pointerdown", () => checkLieutenantOrder.call(this, 0));
+
+  this.lieutenantStatusText = this.add
+    .text(500, 350, "Sin órdenes", {
+      fontSize: "16px",
+      fontFamily: "Arial, sans-serif",
+      color: "#ffffff",
+    })
+    .setOrigin(0.5);
 
   orderText = this.add
     .text(400, 450, "Haz clic sobre el comandante para dar una orden", {
@@ -144,11 +176,27 @@ function createLevel2() {
     )
     .setOrigin(0.5);
 
+  this.add
+    .text(400, 250, "Comandante", {
+      fontSize: "18px",
+      fontFamily: "Arial, sans-serif",
+      color: "#ffffff",
+    })
+    .setOrigin(0.5);
+
   commander = this.add
     .image(400, 300, "general")
     .setScale(0.2)
     .setInteractive();
   commander.on("pointerdown", showOrderOptions.bind(this));
+
+  this.add
+    .text(200, 350, "Teniente 1", {
+      fontSize: "18px",
+      fontFamily: "Arial, sans-serif",
+      color: "#ffffff",
+    })
+    .setOrigin(0.5);
 
   lieutenants[0] = this.add
     .image(200, 400, "lieutenant")
@@ -156,13 +204,39 @@ function createLevel2() {
     .setInteractive();
   lieutenants[0].on("pointerdown", () => checkLieutenantOrder.call(this, 0));
 
+  this.add
+    .text(600, 350, "Teniente 2", {
+      fontSize: "18px",
+      fontFamily: "Arial, sans-serif",
+      color: "#ffffff",
+    })
+    .setOrigin(0.5);
+
   lieutenants[1] = this.add
     .image(600, 400, "lieutenant")
     .setScale(0.2)
     .setInteractive();
   lieutenants[1].on("pointerdown", () => checkLieutenantOrder.call(this, 1));
 
+  this.lieutenantStatusTexts = [
+    this.add
+      .text(200, 450, "Sin órdenes", {
+        fontSize: "16px",
+        fontFamily: "Arial, sans-serif",
+        color: "#ffffff",
+      })
+      .setOrigin(0.5),
+    this.add
+      .text(600, 450, "Sin órdenes", {
+        fontSize: "16px",
+        fontFamily: "Arial, sans-serif",
+        color: "#ffffff",
+      })
+      .setOrigin(0.5),
+  ];
+
   lieutenantOrders[1] = "Retirarse";
+  this.lieutenantStatusTexts[1].setText("Retirarse");
 
   orderText = this.add
     .text(400, 500, "Haz clic sobre el comandante para dar una orden", {
@@ -189,36 +263,36 @@ function showOrderOptions() {
 
   if (currentLevel === 0) {
     const advanceButton = this.add
-      .text(250, 430, "Avanzar", buttonStyle)
+      .text(300, 350, "Avanzar", buttonStyle)
       .setInteractive()
       .on("pointerdown", () => giveOrder.call(this, "Avanzar"));
 
     const retreatButton = this.add
-      .text(450, 430, "Retirarse", buttonStyle)
+      .text(500, 350, "Retirarse", buttonStyle)
       .setInteractive()
       .on("pointerdown", () => giveOrder.call(this, "Retirarse"));
 
     commander.disableInteractive();
   } else if (currentLevel === 1) {
     const advanceButton = this.add
-      .text(200, 400, "Avanzar", buttonStyle)
+      .text(250, 350, "Avanzar", buttonStyle)
       .setInteractive()
       .on("pointerdown", () => selectRecipient.call(this, "Avanzar"));
 
     const retreatButton = this.add
-      .text(400, 400, "Retirarse", buttonStyle)
+      .text(350, 350, "Retirarse", buttonStyle)
       .setInteractive()
       .on("pointerdown", () => selectRecipient.call(this, "Retirarse"));
 
     commander.disableInteractive();
   } else if (currentLevel === 2) {
     const advanceButton = this.add
-      .text(300, 550, "Avanzar", buttonStyle)
+      .text(300, 350, "Avanzar", buttonStyle)
       .setInteractive()
       .on("pointerdown", () => selectRecipient.call(this, "Avanzar"));
 
     const retreatButton = this.add
-      .text(500, 550, "Retirarse", buttonStyle)
+      .text(500, 350, "Retirarse", buttonStyle)
       .setInteractive()
       .on("pointerdown", () => selectRecipient.call(this, "Retirarse"));
 
@@ -296,6 +370,12 @@ function sendOrder(order, lieutenantIndex) {
     `Orden "${order}" enviada al Teniente ${lieutenantIndex + 1}`
   );
   commander.setInteractive();
+
+  if (currentLevel === 1 && this.lieutenantStatusText) {
+    this.lieutenantStatusText.setText(order);
+  } else if (currentLevel === 2 && this.lieutenantStatusTexts) {
+    this.lieutenantStatusTexts[lieutenantIndex].setText(order);
+  }
 }
 
 function checkLieutenantOrder(lieutenantIndex) {
