@@ -81,6 +81,19 @@
         object-fit: cover;
         margin-bottom: 10px;
       }
+
+      .ranking li {
+        background-color: #fff;
+        margin-bottom: 5px;
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+      }
+
+      .loading-message {
+        font-style: italic;
+        color: #666;
+        margin-top: 10px;
+      }
     </style>
   </head>
   <body>
@@ -111,7 +124,10 @@
     <!-- Barra lateral derecha -->
     <div class="sidebar-right">
       <h3>Ranking de Jugadores</h3>
-      <h3>(Top20)</h3>
+      <h3>(Top 10)</h3>
+      <div id="loadingMessage" class="loading-message">
+        Cargando a los más capos de este juego... please wait
+      </div>
       <ul id="rankingList" class="ranking">
         <!-- Aquí se cargará el ranking -->
       </ul>
@@ -235,16 +251,19 @@
       // Function to get player ranking
       async function obtenerRanking() {
         const rankingList = document.getElementById("rankingList");
-        rankingList.innerHTML = "Cargando ranking...";
+        const loadingMessage = document.getElementById("loadingMessage");
 
         try {
-          const querySnapshot = await getDocs(collection(db, "usuarios"));
+          const q = query(
+            collection(db, "usuarios"),
+            orderBy("undertangoCoins", "desc"),
+            limit(10)
+          );
+          const querySnapshot = await getDocs(q);
           const users = [];
 
           for (const userDoc of querySnapshot.docs) {
             const userData = userDoc.data();
-
-            // Obtener datos públicos
             const publicDataDoc = await getDoc(
               doc(db, `usuarios/${userDoc.id}/publicData/perfilPublico`)
             );
@@ -258,14 +277,11 @@
             });
           }
 
-          // Sort users by coins in descending order
-          users.sort((a, b) => b.undertangoCoins - a.undertangoCoins);
+          // Hide the loading message
+          loadingMessage.style.display = "none";
 
-          // Clear the loading message
-          rankingList.innerHTML = "";
-
-          // Display top 20 users
-          users.slice(0, 20).forEach((user, index) => {
+          // Display top 10 users
+          users.forEach((user, index) => {
             const listItem = document.createElement("li");
             listItem.textContent = `${index + 1}. ${user.gameName} - ${
               user.undertangoCoins
@@ -274,7 +290,7 @@
           });
         } catch (error) {
           console.error("Error al cargar el ranking:", error);
-          rankingList.innerHTML = "Error al cargar el ranking.";
+          loadingMessage.textContent = "Error al cargar el ranking.";
         }
       }
 

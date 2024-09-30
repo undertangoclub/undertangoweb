@@ -50,7 +50,7 @@
         flex-direction: column;
         align-items: center;
         width: 100%;
-        max-width: 600px; /* Limita el ancho máximo */
+        max-width: 600px;
         margin: 2rem 0;
       }
       input,
@@ -66,7 +66,7 @@
       }
       textarea {
         resize: none;
-        height: 100px; /* Ajusta el tamaño del área de texto */
+        height: 100px;
       }
       button {
         background-color: red;
@@ -85,7 +85,7 @@
       /* Comentarios */
       #commentsSection {
         width: 100%;
-        max-width: 600px; /* Limita el ancho máximo */
+        max-width: 600px;
         margin-top: 2rem;
       }
       #commentsList {
@@ -113,16 +113,16 @@
       <p>
         En UnderTango estamos impulsando la tecnología a través de múltiples
         frentes. Uno de nuestros proyectos más ambiciosos es el desarrollo de
-        una aplicación móvil basada en **Kotlin y Flutter** que permitirá a los
-        usuarios acceder a contenido exclusivo, como clases de tango, eventos, y
-        la posibilidad de adquirir productos usando nuestra criptomoneda,
-        **UnderTango Crypto Cøin**, que está integrada en la **blockchain
-        DeSo**.
+        una aplicación móvil basada en <strong>Kotlin y Flutter</strong> que
+        permitirá a los usuarios acceder a contenido exclusivo, como clases de
+        tango, eventos, y la posibilidad de adquirir productos usando nuestra
+        criptomoneda, <strong>UnderTango Crypto Cøin</strong>, que está
+        integrada en la <strong>blockchain DeSo</strong>.
       </p>
       <p>
-        Nuestro enfoque en la **Web3 y la DeFi** busca conectar el arte y la
-        tecnología en un solo ecosistema, creando oportunidades para que
-        artistas y entusiastas de la danza interactúen con tecnologías
+        Nuestro enfoque en la <strong>Web3 y la DeFi</strong> busca conectar el
+        arte y la tecnología en un solo ecosistema, creando oportunidades para
+        que artistas y entusiastas de la danza interactúen con tecnologías
         descentralizadas. Estamos trabajando en integrar funcionalidades como la
         venta de entradas para shows y el intercambio de productos a través de
         la app, todo respaldado por nuestra moneda digital.
@@ -135,12 +135,12 @@
         la aplicación móvil como desde la web.
       </p>
       <p>
-        Otro aspecto innovador es la creación de la **D.A.O. (Decentralized
-        Autonomous Organization)** que gestionará la distribución de dividendos
-        y apoyará las iniciativas artísticas y tecnológicas dentro de nuestra
-        comunidad global. Esta organización descentralizada permitirá a los
-        usuarios participar activamente en la toma de decisiones del ecosistema
-        UnderTango.
+        Otro aspecto innovador es la creación de la
+        <strong>D.A.O. (Decentralized Autonomous Organization)</strong> que
+        gestionará la distribución de dividendos y apoyará las iniciativas
+        artísticas y tecnológicas dentro de nuestra comunidad global. Esta
+        organización descentralizada permitirá a los usuarios participar
+        activamente en la toma de decisiones del ecosistema UnderTango.
       </p>
       <p>
         Con estos avances, nos aseguramos de estar a la vanguardia tecnológica,
@@ -208,16 +208,23 @@
         const name = document.getElementById("userName").value;
         const message = document.getElementById("userMessage").value;
 
-        // Guarda el comentario en Firestore
-        await db.collection("comments").add({
-          name: name,
-          message: message,
-          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-        });
+        try {
+          // Guarda el comentario en Firestore
+          await db.collection("comments").add({
+            name: name,
+            message: message,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          });
 
-        // Limpia el formulario
-        commentForm.reset();
-        loadComments(); // Recarga los comentarios
+          // Limpia el formulario
+          commentForm.reset();
+          loadComments(); // Recarga los comentarios
+        } catch (error) {
+          console.error("Error al agregar comentario:", error);
+          alert(
+            "Hubo un error al enviar tu comentario. Por favor, intenta de nuevo."
+          );
+        }
       });
 
       // Función para cargar los comentarios
@@ -225,17 +232,25 @@
         const commentsList = document.getElementById("commentsList");
         commentsList.innerHTML = ""; // Limpiar la lista de comentarios
 
-        // Obtener los comentarios ordenados por fecha
-        const querySnapshot = await db
-          .collection("comments")
-          .orderBy("timestamp", "desc")
-          .get();
-        querySnapshot.forEach((doc) => {
-          const comment = doc.data();
-          const li = document.createElement("li");
-          li.textContent = `${comment.name}: ${comment.message}`;
-          commentsList.appendChild(li);
-        });
+        try {
+          // Obtener los comentarios ordenados por fecha
+          const querySnapshot = await db
+            .collection("comments")
+            .orderBy("timestamp", "desc")
+            .limit(10) // Limitar a los 10 comentarios más recientes
+            .get();
+
+          querySnapshot.forEach((doc) => {
+            const comment = doc.data();
+            const li = document.createElement("li");
+            li.innerHTML = `<strong>${comment.name}</strong>: ${comment.message}`;
+            commentsList.appendChild(li);
+          });
+        } catch (error) {
+          console.error("Error al cargar comentarios:", error);
+          commentsList.innerHTML =
+            "<li>Error al cargar comentarios. Por favor, recarga la página.</li>";
+        }
       }
 
       // Cargar comentarios cuando la página se carga
