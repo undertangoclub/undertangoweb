@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Boletín No. 19 - UnderTango Fondo de Inversión 30/9/2024</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        color: #333;
+        margin: 0;
+        padding: 0;
+        font-size: 18px;
+      }
+      .container {
+        width: 95%;
+        max-width: 1080px;
+        margin: auto;
+        overflow: hidden;
+        padding: 5px;
+      }
+      header {
+        background: #333;
+        color: #fff;
+        padding: 10px 0;
+        border-bottom: #77aaff 3px solid;
+      }
+      header h1 {
+        text-align: center;
+        text-transform: uppercase;
+        margin: 0;
+        font-size: 1.5em;
+      }
+      .main {
+        padding: 5px;
+        background: #fff;
+        margin: 10px 0;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      .info-box {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
+        padding: 10px;
+        margin-bottom: 10px;
+        background: #e2e2e2;
+        border-radius: 5px;
+      }
+      .info-box div {
+        text-align: center;
+        flex: 1 1 300px;
+        margin: 5px;
+      }
+      .info-box div h2 {
+        margin: 5px 0;
+        font-size: 1.2em;
+      }
+      .large-text {
+        font-size: 1.5em;
+        font-weight: bold;
+      }
+      .chart {
+        margin: 20px 0;
+        height: 500px;
+        position: relative;
+      }
+      .percentages,
+      .holders {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
+        padding: 10px;
+        background: #e2e2e2;
+        border-radius: 5px;
+        margin: 10px 0;
+      }
+      .percentages div,
+      .holders div {
+        text-align: left;
+        flex: 1 1 300px;
+        margin: 5px;
+        font-size: 1em;
+      }
+      .bold-text {
+        font-weight: bold;
+        font-size: 1.2em;
+      }
+      .green-text {
+        color: #28a745;
+      }
+      .red-text {
+        color: #dc3545;
+      }
+      .results-section {
+        margin-top: 30px;
+        background: #fff;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      .results-section h2 {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      .results-section .info {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+      }
+      .results-section .info div {
+        flex: 1;
+        text-align: center;
+      }
+      @media (max-width: 600px) {
+        header h1 {
+          font-size: 1.2em;
+        }
+        .large-text {
+          font-size: 1.4em;
+        }
+        .info-box div,
+        .percentages div,
+        .holders div {
+          flex: 1 1 100%;
+        }
+        .chart {
+          height: 300px;
+        }
+        .results-section .info {
+          flex-direction: column;
+        }
+        .results-section .info div {
+          margin-bottom: 10px;
+        }
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+  </head>
+  <body>
+    <header>
+      <h1>Boletín No. 19 - UnderTango Fondo de Inversión 30/9/2024</h1>
+    </header>
+    <div class="container">
+      <div class="main">
+        <div class="info-box">
+          <div>
+            <h2>CAJA NETA</h2>
+            <p class="large-text">AR$ 951,721.60</p>
+            <p class="bold-text green-text">
+              Variación Semanal de la Caja: +1.69%
+            </p>
+            <p class="bold-text green-text">
+              Variación mensual entre agosto y septiembre: +30.53%
+            </p>
+          </div>
+          <div>
+            <h2>VALOR DE LA ACCIÓN p/u</h2>
+            <p class="large-text">AR$ 1,547.92</p>
+            <p class="bold-text green-text">Variación de la acción: +1.54%</p>
+          </div>
+        </div>
+        <div class="chart">
+          <canvas id="myChart"></canvas>
+        </div>
+        <div class="percentages">
+          <div>
+            <h3>PORCENTAJES:</h3>
+            <p class="bold-text">40% Caché del Artista</p>
+            <p class="bold-text">30% Caja de Gastos Operativos (G.O.)</p>
+            <p class="bold-text">10% Caja de Producción y Mantenimiento</p>
+            <p class="bold-text">10% Para la Caja UnderTango</p>
+            <p class="bold-text">10% Fondo de Inversiones</p>
+          </div>
+          <div>
+            <h3>TENEDORES:</h3>
+            <p class="bold-text">
+              PABLO CIESLIK : 334 ACCIONES | <span class="green-text">+3</span>
+            </p>
+            <p class="bold-text">
+              BIANCA WAGNER : 244 ACCIONES | <span class="green-text">+2</span>
+            </p>
+            <p class="bold-text">
+              LUCIANO VALDEMARIN : 38 ACCIONES |
+              <span class="green-text">+2</span>
+            </p>
+            <p class="bold-text">Total de acciones efectivas: 616</p>
+            <p class="bold-text">Disponibles para la venta: 20</p>
+          </div>
+        </div>
+        <div class="info-box">
+          <div>
+            <h2>RETRIBUCIÓN SEMANAL</h2>
+            <p class="large-text">Monto a retribuir: AR$ 11,440.00</p>
+            <p class="large-text">AR$ 19.97 por acción</p>
+            <p class="bold-text red-text">Variación por acción: -74.55%</p>
+            <p class="bold-text">
+              Casa Malbec se retrasó en el pago, pero se estabilizará la semana
+              próxima.
+            </p>
+          </div>
+        </div>
+        <div class="info-box">
+          <div>
+            <h2>Gasto de Mantenimiento del FDI</h2>
+            <p class="large-text">AR$ 4,320.00</p>
+            <p class="bold-text">(6 acciones x AR$ 720.00)</p>
+          </div>
+        </div>
+
+        <div class="results-section">
+          <h2>Resultados Mensuales</h2>
+          <div class="info">
+            <div>
+              <h3>Ingresos Mensuales</h3>
+              <p class="large-text">AR$ 2,952,503.00</p>
+            </div>
+            <div>
+              <h3>Egresos Mensuales</h3>
+              <p class="large-text red-text">AR$ 2,761,280.40</p>
+            </div>
+            <div>
+              <h3>Balance Mensual</h3>
+              <p class="large-text green-text">AR$ 191,182.60</p>
+            </div>
+          </div>
+          <h3>Distribución de Gastos Mensuales</h3>
+          <div class="chart">
+            <canvas id="expenseChart"></canvas>
+          </div>
+          <h3>Rendimiento Mensual del Fondo</h3>
+          <p class="large-text green-text">+6.92%</p>
+        </div>
+      </div>
+    </div>
+    <script>
+      const ctx = document.getElementById("myChart").getContext("2d");
+      const myChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: [
+            "mayo",
+            "junio",
+            "julio",
+            "agosto",
+            ["1era semana", "de septiembre"],
+            ["2da semana", "de septiembre"],
+            ["3era semana", "de septiembre"],
+            ["4ta semana", "de septiembre"],
+          ],
+          datasets: [
+            {
+              label:
+                "Montos mensuales mayo-agosto, montos semanales de septiembre",
+              data: [
+                169322, 273790, 488871, 722539, 792041, 845201, 935961,
+                951721.6,
+              ],
+              backgroundColor: [
+                "rgba(255, 159, 64, 0.8)",
+                "rgba(255, 159, 64, 0.8)",
+                "rgba(255, 159, 64, 0.8)",
+                "rgba(255, 159, 64, 0.8)",
+                "rgba(54, 162, 235, 0.8)",
+                "rgba(54, 162, 235, 0.8)",
+                "rgba(54, 162, 235, 0.8)",
+                "rgba(54, 162, 235, 0.8)",
+              ],
+              borderColor: [
+                "rgba(255, 159, 64, 1)",
+                "rgba(255, 159, 64, 1)",
+                "rgba(255, 159, 64, 1)",
+                "rgba(255, 159, 64, 1)",
+                "rgba(54, 162, 235, 1)",
+                "rgba(54, 162, 235, 1)",
+                "rgba(54, 162, 235, 1)",
+                "rgba(54, 162, 235, 1)",
+              ],
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false,
+            },
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  let label = context.dataset.label || "";
+                  if (label) {
+                    label += ": ";
+                  }
+                  if (context.parsed.y !== null) {
+                    label += new Intl.NumberFormat("es-AR", {
+                      style: "currency",
+                      currency: "ARS",
+                    }).format(context.parsed.y);
+                  }
+                  return label;
+                },
+              },
+            },
+            datalabels: {
+              anchor: "end",
+              align: "top",
+              offset: 10,
+              formatter: function (value, context) {
+                return new Intl.NumberFormat("es-AR", {
+                  style: "currency",
+                  currency: "ARS",
+                  maximumFractionDigits: 0,
+                }).format(value);
+              },
+              font: {
+                weight: "bold",
+                size: 16,
+              },
+              color: "black",
+            },
+          },
+          scales: {
+            x: {
+              ticks: {
+                autoSkip: false,
+                maxRotation: 0,
+                minRotation: 0,
+                font: {
+                  weight: "bold",
+                  size: 14,
+                },
+              },
+            },
+            y: {
+              beginAtZero: true,
+              max: 1000000,
+              ticks: {
+                callback: function (value, index, values) {
+                  return new Intl.NumberFormat("es-AR", {
+                    style: "currency",
+                    currency: "ARS",
+                    maximumFractionDigits: 0,
+                  }).format(value);
+                },
+              },
+            },
+          },
+        },
+        plugins: [ChartDataLabels],
+      });
+
+      // Nuevo gráfico de torta para la distribución de gastos mensuales
+      const expenseCtx = document
+        .getElementById("expenseChart")
+        .getContext("2d");
+      const expenseChart = new Chart(expenseCtx, {
+        type: "pie",
+        data: {
+          labels: [
+            "Taxis",
+            "Combustible",
+            "Comida",
+            "Service Moto",
+            "Huerta (insumos)",
+            "Luz",
+            "Agua",
+            "MFW",
+          ],
+          datasets: [
+            {
+              data: [10.0, 6.0, 44.4, 10.0, 14.9, 2.8, 9.6, 2.4],
+              backgroundColor: [
+                "#FF6384",
+                "#36A2EB",
+                "#FFCE56",
+                "#4BC0C0",
+                "#9966FF",
+                "#FF9F40",
+                "#7CFC00",
+                "#FF69B4",
+              ],
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "right",
+            },
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  let label = context.label || "";
+                  if (label) {
+                    label += ": ";
+                  }
+                  if (context.parsed !== null) {
+                    label += context.parsed.toFixed(1) + "%";
+                  }
+                  return label;
+                },
+              },
+            },
+            datalabels: {
+              color: "#000",
+              font: {
+                weight: "bold",
+                size: 12,
+              },
+              formatter: function (value, context) {
+                return (
+                  context.chart.data.labels[context.dataIndex] +
+                  "\n" +
+                  value.toFixed(1) +
+                  "%"
+                );
+              },
+              textAlign: "center",
+              textStrokeColor: "#fff",
+              textStrokeWidth: 2,
+              offset: function (context) {
+                if (context.dataIndex === 7) {
+                  // Misiones Fashion
+                  return 30;
+                }
+                return 0;
+              },
+            },
+          },
+        },
+        plugins: [ChartDataLabels],
+      });
+
+      // Cálculo de la retribución para cada inversor
+      const retribucionPorAccion = 19.97;
+      const accionesPablo = 334;
+      const accionesBianca = 237;
+      const accionesLucho = 2;
+
+      const montoPablo = (accionesPablo * retribucionPorAccion).toFixed(2);
+      const montoBianca = (accionesBianca * retribucionPorAccion).toFixed(2);
+      const montoLucho = (accionesLucho * retribucionPorAccion).toFixed(2);
+
+      console.log("Monto a enviar a Pablo: AR$", montoPablo);
+      console.log("Monto a enviar a Bianca: AR$", montoBianca);
+      console.log("Monto a enviar a Lucho: AR$", montoLucho);
+    </script>
+  </body>
+</html>

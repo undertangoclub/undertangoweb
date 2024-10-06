@@ -15,6 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let isClasesCentered = false;
   let isModaCentered = false;
   let isFDICentered = false;
+  let isTallerCentered = false;
   let welcomeTextTimeout, subTextTimeout, layoutTimeout;
 
   window.addEventListener("unhandledrejection", function (event) {
@@ -90,7 +91,7 @@ document.addEventListener("DOMContentLoaded", () => {
       },
       {
         name: "Catálogo Primavera-Otoño",
-        image: "./img/catalogo-primavera-otono.jpg",
+        image: "./img/catalogo-primavera-otono.png",
         link: "./pages/catalogo-primavera-otono.html",
       },
       {
@@ -113,7 +114,7 @@ document.addEventListener("DOMContentLoaded", () => {
       {
         name: "Boletín Semanal",
         image: "./img/boletin-semanal.jpg",
-        link: "./pages/fdi/boletin-semanal.html",
+        link: "./pages/boletin-semanal.html",
       },
       {
         name: "Docs sobre tokenización y web3",
@@ -128,10 +129,90 @@ document.addEventListener("DOMContentLoaded", () => {
       {
         name: "Whitepaper",
         image: "./img/whitepaper.jpg",
-        link: "./pages/fdi/whitepaper.html",
+        link: "https://docs.google.com/document/d/1-chA3vrOGWxO69qJzOj9P7g9RSxSyxY9Yu0DWcCjX4Y/edit?usp=sharing",
+      },
+    ],
+    Taller: [
+      {
+        name: "Impresiones 3D",
+        image: "./img/impresiones-3d.jpg",
+        link: "./pages/taller/impresiones-3d.html",
+      },
+      {
+        name: "Cortado Laser",
+        image: "./img/cortado-laser.jpg",
+        link: "./pages/taller/cortado-laser.html",
+      },
+      {
+        name: "Diseño Textil",
+        image: "./img/diseno-textil.jpg",
+        link: "./pages/taller/diseno-textil.html",
+      },
+      {
+        name: "Muebles a Medida",
+        image: "./img/muebles-a-medida.jpg",
+        link: "./pages/taller/muebles-a-medida.html",
+      },
+      {
+        name: "Experimentos",
+        image: "./img/experimentos.jpg",
+        link: "./pages/taller/experimentos.html",
       },
     ],
   };
+
+  // -------------------------------------------------------------------
+  // SECCIÓN DE CÓDIGO PARA PRECARGAR LAS IMÁGENES DE FORMA SECUENCIAL
+  // -------------------------------------------------------------------
+
+  // Array con las rutas de las imágenes clave (logo principal y círculos)
+  const mainImages = [
+    "./img/underlogoredondo.png", // Logo principal
+    "./img/logo1.gif", // Imagen de círculo 1
+    "./img/logo2.gif", // Imagen de círculo 2
+    "./img/logo3.gif", // Imagen de círculo 3
+    "./img/logo4.png", // Imagen de círculo 4
+    "./img/logo5.jpg", // Imagen de círculo 5
+    "./img/logo6.png", // Imagen de círculo 6
+  ];
+
+  // Extraemos las rutas de las imágenes de relatedContent
+  const relatedContentImages = Object.values(relatedContent).flatMap(
+    (category) => category.map((item) => item.image)
+  );
+
+  // Combinamos las imágenes principales con las del contenido relacionado
+  const imagesToPreload = [...mainImages, ...relatedContentImages];
+
+  // Función para precargar imágenes secuencialmente
+  function preloadImages(images, callback) {
+    let loadedImages = 0;
+
+    function loadNextImage() {
+      if (loadedImages >= images.length) {
+        if (callback) callback(); // Llamada al callback cuando todas las imágenes están cargadas
+        return;
+      }
+
+      const img = new Image();
+      img.src = images[loadedImages];
+      img.onload = () => {
+        loadedImages++;
+        loadNextImage(); // Carga la siguiente imagen cuando la actual se ha cargado
+      };
+    }
+
+    loadNextImage();
+  }
+
+  // Inicia la precarga cuando el DOM esté listo
+  preloadImages(imagesToPreload, () => {
+    console.log("Todas las imágenes se han precargado.");
+  });
+
+  // -------------------------------------------------------
+  // FIN DE LA SECCIÓN DE CÓDIGO PARA LA PRECARGA DE IMÁGENES
+  // -------------------------------------------------------
 
   // Check if the page was loaded with the skipIntro parameter
   const urlParams = new URLSearchParams(window.location.search);
@@ -276,7 +357,8 @@ document.addEventListener("DOMContentLoaded", () => {
         (isShowsCentered && clickedLogoName === "Shows") ||
         (isClasesCentered && clickedLogoName === "Clases") ||
         (isModaCentered && clickedLogoName === "Moda") ||
-        (isFDICentered && clickedLogoName === "Fondo de Inversión")
+        (isFDICentered && clickedLogoName === "Fondo de Inversión") ||
+        (isTallerCentered && clickedLogoName === "Taller")
       ) {
         // Reset the page if a centered circle is clicked again
         window.location.href = window.location.pathname + "?skipIntro=true";
@@ -285,7 +367,8 @@ document.addEventListener("DOMContentLoaded", () => {
         clickedLogoName === "Shows" ||
         clickedLogoName === "Clases" ||
         clickedLogoName === "Moda" ||
-        clickedLogoName === "Fondo de Inversión"
+        clickedLogoName === "Fondo de Inversión" ||
+        clickedLogoName === "Taller"
       ) {
         stopAnimation();
         centeredCircle = circle;
@@ -308,6 +391,14 @@ document.addEventListener("DOMContentLoaded", () => {
           showFDIIntro();
           isFDICentered = true;
           isShowsCentered = isClasesCentered = isModaCentered = false;
+        } else if (clickedLogoName === "Taller") {
+          showTallerIntro();
+          isTallerCentered = true;
+          isShowsCentered =
+            isClasesCentered =
+            isModaCentered =
+            isFDICentered =
+              false;
         }
 
         redistributeCircles(radius, circleSize, true);
@@ -365,6 +456,11 @@ document.addEventListener("DOMContentLoaded", () => {
   function showFDIIntro() {
     stopAnimation();
     transitionCircleImages(relatedContent["Fondo de Inversión"]);
+  }
+
+  function showTallerIntro() {
+    stopAnimation();
+    transitionCircleImages(relatedContent["Taller"]);
   }
 
   function fadeInOutSequence(
@@ -528,5 +624,29 @@ document.addEventListener("DOMContentLoaded", () => {
   console.log("Starting intro sequence");
   playIntroAnimation().catch((error) => {
     console.error("Error during intro animation:", error);
+  });
+
+  // Código para manejar la redirección a la página en construcción
+  const links = document.querySelectorAll(".circle a");
+
+  links.forEach((link) => {
+    link.addEventListener("click", async (event) => {
+      event.preventDefault(); // Evita que el enlace navegue inmediatamente
+
+      try {
+        const response = await fetch(link.href, { method: "HEAD" });
+        if (response.ok) {
+          // Si la página existe, redirige normalmente
+          window.location.href = link.href;
+        } else {
+          // Si no existe la página, redirige a la página en construcción
+          window.location.href = "/404.html";
+        }
+      } catch (error) {
+        console.error("Error al verificar la página:", error);
+        // Si hay un error de red, también redirige a la página en construcción
+        window.location.href = "/404.html";
+      }
+    });
   });
 });
