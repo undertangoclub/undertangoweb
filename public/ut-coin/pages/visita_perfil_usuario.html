@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Perfil de Usuario - UnderTango</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+      }
+      .profile-container {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        width: 100%;
+        max-width: 500px;
+      }
+      .profile-header {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      .profile-photo {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 10px;
+      }
+      .profile-name {
+        font-size: 24px;
+        font-weight: bold;
+        margin: 0;
+      }
+      .profile-info {
+        margin-top: 20px;
+      }
+      .info-item {
+        margin-bottom: 10px;
+      }
+      .info-label {
+        font-weight: bold;
+        margin-right: 10px;
+      }
+      .loading {
+        text-align: center;
+        font-style: italic;
+        color: #666;
+      }
+      .error-message {
+        color: #ff0000;
+        text-align: center;
+      }
+      .button {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        background-color: #4285f4;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+        margin-top: 10px;
+        text-align: center;
+        text-decoration: none;
+      }
+      .button:hover {
+        background-color: #357ae8;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="profile-container">
+      <div id="loadingMessage" class="loading">
+        Cargando perfil de usuario...
+      </div>
+      <div id="errorMessage" class="error-message" style="display: none"></div>
+      <div id="profileContent" style="display: none">
+        <div class="profile-header">
+          <img
+            id="profilePhoto"
+            src=""
+            alt="Foto de perfil"
+            class="profile-photo"
+          />
+          <h1 id="gameName" class="profile-name"></h1>
+        </div>
+        <div class="profile-info">
+          <div class="info-item">
+            <span class="info-label">Institución:</span>
+            <span id="institution"></span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Monedas UnderTango:</span>
+            <span id="undertangoCoins"></span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Nivel:</span>
+            <span id="level"></span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Fecha de registro:</span>
+            <span id="registrationDate"></span>
+          </div>
+        </div>
+      </div>
+      <a
+        href="juego.html"
+        id="backToRankingButton"
+        class="button"
+        style="display: none"
+      >
+        Volver al juego
+      </a>
+    </div>
+
+    <script type="module">
+      // Import Firebase modules
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+      import {
+        getFirestore,
+        doc,
+        getDoc,
+      } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+      import {
+        getAuth,
+        onAuthStateChanged,
+      } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+
+      // Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyC05s84tQfQbiJua0G0LHnQsZP76HqxMk4",
+        authDomain: "undertango.firebaseapp.com",
+        projectId: "undertango",
+        storageBucket: "undertango.appspot.com",
+        messagingSenderId: "21199358960",
+        appId: "1:21199358960:web:6b751db7c333403057ab35",
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      const auth = getAuth(app);
+
+      // Function to get and display user profile
+      // Function to get and display user profile
+      async function mostrarPerfilUsuario(userId) {
+        const loadingMessage = document.getElementById("loadingMessage");
+        const errorMessage = document.getElementById("errorMessage");
+        const profileContent = document.getElementById("profileContent");
+        const backToRankingButton = document.getElementById(
+          "backToRankingButton"
+        );
+
+        try {
+          const userDocRef = doc(db, "usuarios", userId);
+          const publicDataRef = doc(
+            db,
+            `usuarios/${userId}/publicData/perfilPublico`
+          );
+
+          const [userDoc, publicDataDoc] = await Promise.all([
+            getDoc(userDocRef),
+            getDoc(publicDataRef),
+          ]);
+
+          if (userDoc.exists() && publicDataDoc.exists()) {
+            const userData = userDoc.data();
+            const publicData = publicDataDoc.data();
+
+            // Use optional chaining and nullish coalescing to safely access and set values
+            const profilePhoto = document.getElementById("profilePhoto");
+            if (profilePhoto) {
+              profilePhoto.src = publicData?.photoURL ?? "ruta_default.jpg";
+            }
+
+            const gameName = document.getElementById("gameName");
+            if (gameName) {
+              gameName.textContent = publicData?.gameName ?? "Usuario";
+            }
+
+            const institution = document.getElementById("institution");
+            if (institution) {
+              institution.textContent =
+                userData?.institution ?? "No especificada";
+            }
+
+            const undertangoCoins = document.getElementById("undertangoCoins");
+            if (undertangoCoins) {
+              undertangoCoins.textContent = userData?.undertangoCoins ?? 0;
+            }
+
+            const level = document.getElementById("level");
+            if (level) {
+              level.textContent = userData?.level ?? 1;
+            }
+
+            const registrationDate =
+              document.getElementById("registrationDate");
+            if (registrationDate) {
+              const date = userData?.registrationDate
+                ? new Date(
+                    userData.registrationDate.toDate()
+                  ).toLocaleDateString()
+                : "No disponible";
+              registrationDate.textContent = date;
+            }
+
+            // Hide loading message and show content
+            if (loadingMessage) loadingMessage.style.display = "none";
+            if (profileContent) profileContent.style.display = "block";
+            if (backToRankingButton)
+              backToRankingButton.style.display = "block";
+          } else {
+            throw new Error("No se encontró el perfil del usuario.");
+          }
+        } catch (error) {
+          console.error("Error al cargar el perfil del usuario:", error);
+          if (loadingMessage) loadingMessage.style.display = "none";
+          if (errorMessage) {
+            errorMessage.textContent =
+              "Error al cargar el perfil del usuario. Por favor, intenta de nuevo más tarde.";
+            errorMessage.style.display = "block";
+          }
+        }
+      }
+      // Get user ID from URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const userId = urlParams.get("id");
+
+      // Check if user is authenticated
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          if (userId) {
+            mostrarPerfilUsuario(userId);
+          } else {
+            document.getElementById("loadingMessage").style.display = "none";
+            document.getElementById("errorMessage").textContent =
+              "No se proporcionó un ID de usuario válido.";
+            document.getElementById("errorMessage").style.display = "block";
+          }
+        } else {
+          window.location.href = "registro.html";
+        }
+      });
+    </script>
+  </body>
+</html>

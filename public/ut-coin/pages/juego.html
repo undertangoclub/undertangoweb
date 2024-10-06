@@ -83,10 +83,11 @@
       }
 
       .ranking li {
-        background-color: #fff;
-        margin-bottom: 5px;
-        padding: 10px;
-        border-bottom: 1px solid #ddd;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+      .ranking li:hover {
+        background-color: #f0f0f0;
       }
 
       .loading-message {
@@ -166,7 +167,7 @@
       const db = getFirestore(app);
       const auth = getAuth(app);
 
-      // Display user information
+      // Function declarations
       function mostrarInformacionUsuario(gameName, institution, photoURL) {
         document.getElementById("gameName").textContent = gameName || "Usuario";
         document.getElementById("institution").textContent =
@@ -175,7 +176,6 @@
           photoURL || "ruta_default.jpg";
       }
 
-      // Function to get user and global data
       function obtenerDatosUsuarioYGlobales() {
         onAuthStateChanged(auth, async (user) => {
           if (user) {
@@ -248,7 +248,6 @@
         });
       }
 
-      // Function to get player ranking
       async function obtenerRanking() {
         const rankingList = document.getElementById("rankingList");
         const loadingMessage = document.getElementById("loadingMessage");
@@ -272,20 +271,24 @@
               : {};
 
             users.push({
+              id: userDoc.id,
               gameName: publicData.gameName || "Usuario Anónimo",
               undertangoCoins: userData.undertangoCoins || 0,
             });
           }
 
-          // Hide the loading message
+          // Ocultar el mensaje de carga
           loadingMessage.style.display = "none";
 
-          // Display top 10 users
+          // Mostrar los 10 mejores usuarios
           users.forEach((user, index) => {
             const listItem = document.createElement("li");
             listItem.textContent = `${index + 1}. ${user.gameName} - ${
               user.undertangoCoins
             } monedas`;
+            listItem.addEventListener("click", () => {
+              navegarPerfilUsuario(user.id);
+            });
             rankingList.appendChild(listItem);
           });
         } catch (error) {
@@ -294,10 +297,7 @@
         }
       }
 
-      // Call the function to get user and global data
-      obtenerDatosUsuarioYGlobales();
-
-      // Function to handle navigation with authentication
+      // Navigation functions
       function navegarConAutenticacion(pagina) {
         const user = auth.currentUser;
         if (user) {
@@ -308,7 +308,11 @@
         }
       }
 
-      // Add event listeners to buttons
+      function navegarPerfilUsuario(userId) {
+        navegarConAutenticacion(`visita_perfil_usuario.html?id=${userId}`);
+      }
+
+      // Event listeners
       document.getElementById("adventureMode").addEventListener("click", () => {
         window.location.href = "modo_aventura.html";
       });
@@ -321,12 +325,14 @@
         navegarConAutenticacion("living_room.html");
       });
 
-      // Event for "Edit Profile" link
       document
         .getElementById("editProfileLink")
         .addEventListener("click", () => {
           navegarConAutenticacion("perfil_de_usuario.html");
         });
+
+      // Initialize the page
+      obtenerDatosUsuarioYGlobales();
     </script>
   </body>
 </html>
