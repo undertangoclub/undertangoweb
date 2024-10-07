@@ -1254,14 +1254,38 @@ function goToNextLevel() {
   this.scene.restart();
 }
 
-// Mostrar pantalla final
+function preload() {
+  this.load.image("general", "knight_44.png");
+  this.load.image("lieutenant", "teniente.png");
+  this.load.image("flecha", "flecha.png");
+  // Add these lines to load the logo images
+  this.load.image("logo1", "bartes.jpeg");
+  this.load.image("logo2", "ONG-Bitcoin-Argentina.png");
+  this.load.image("logo3", "under.png");
+}
+
 function showFinalScreen() {
+  // Clear the screen
+  this.children.removeAll();
+
+  // Add background
   this.add.rectangle(400, 300, 800, 600, 0x20232a);
 
-  const finalText = this.add
+  // Add title
+  this.add
+    .text(400, 80, "Juego de los Generales Bizantinos", {
+      fontSize: "32px",
+      fontFamily: "Arial, sans-serif",
+      color: "#ffffff",
+      fontStyle: "bold",
+    })
+    .setOrigin(0.5);
+
+  // Add thank you message
+  const endingText = this.add
     .text(
       400,
-      300,
+      180,
       "Muchas gracias por haber jugado el Juego de los Generales Bizantinos.\n\nEsperamos que este breve juego sume a tu curiosidad por el fantástico mundo de la criptografía.",
       {
         fontSize: "24px",
@@ -1274,8 +1298,26 @@ function showFinalScreen() {
     )
     .setOrigin(0.5);
 
+  // Add contest information
+  const finalText = this.add
+    .text(
+      400,
+      320,
+      "Este juego se enmarca en el concurso del premio B·Artes organizado por la ONG Bitcoin Argentina para difundir el principio de -Descentralización-",
+      {
+        fontSize: "20px",
+        fontFamily: "Arial, sans-serif",
+        color: "#ffffff",
+        align: "center",
+        wordWrap: { width: 700 },
+        lineSpacing: 10,
+      }
+    )
+    .setOrigin(0.5);
+
+  // Add back button
   const backButton = this.add
-    .text(400, 500, "Volver al Inicio", {
+    .text(400, 450, "Volver al Inicio", {
       fontSize: "24px",
       fontFamily: "Arial, sans-serif",
       backgroundColor: "#4a6785",
@@ -1293,4 +1335,11 @@ function showFinalScreen() {
       currentLevel = 0;
       this.scene.restart();
     });
+
+  // Add logos
+  const logoScale = 0.5;
+  const logoY = 550;
+  const logo1 = this.add.image(200, logoY, "logo1").setScale(logoScale);
+  const logo2 = this.add.image(400, logoY, "logo2").setScale(logoScale);
+  const logo3 = this.add.image(600, logoY, "logo3").setScale(logoScale);
 }
