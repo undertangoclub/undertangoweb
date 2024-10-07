@@ -16,6 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let isModaCentered = false;
   let isFDICentered = false;
   let isTallerCentered = false;
+  let isAppsCentered = false;
   let welcomeTextTimeout, subTextTimeout, layoutTimeout;
 
   window.addEventListener("unhandledrejection", function (event) {
@@ -157,6 +158,34 @@ document.addEventListener("DOMContentLoaded", () => {
         name: "Experimentos",
         image: "./img/experimentos.jpg",
         link: "./pages/taller/experimentos.html",
+      },
+    ],
+
+    Apps: [
+      {
+        name: "Red Cripto",
+        image: "./img/red-cripto.jpg",
+        link: "./pages/apps/red-cripto.html",
+      },
+      {
+        name: "Juego Cripto",
+        image: "./img/juego-cripto.jpg",
+        link: "./pages/apps/juego-cripto.html",
+      },
+      {
+        name: "Mainstream",
+        image: "./img/mainstream.jpg",
+        link: "./pages/apps/mainstream.html",
+      },
+      {
+        name: "CV",
+        image: "./img/cv.jpg",
+        link: "./pages/apps/cv.html",
+      },
+      {
+        name: "GitHub",
+        image: "./img/github.jpg",
+        link: "https://github.com/yourusername",
       },
     ],
   };
@@ -358,7 +387,8 @@ document.addEventListener("DOMContentLoaded", () => {
         (isClasesCentered && clickedLogoName === "Clases") ||
         (isModaCentered && clickedLogoName === "Moda") ||
         (isFDICentered && clickedLogoName === "Fondo de Inversión") ||
-        (isTallerCentered && clickedLogoName === "Taller")
+        (isTallerCentered && clickedLogoName === "Taller") ||
+        (isAppsCentered && clickedLogoName === "Apps")
       ) {
         // Reset the page if a centered circle is clicked again
         window.location.href = window.location.pathname + "?skipIntro=true";
@@ -368,7 +398,8 @@ document.addEventListener("DOMContentLoaded", () => {
         clickedLogoName === "Clases" ||
         clickedLogoName === "Moda" ||
         clickedLogoName === "Fondo de Inversión" ||
-        clickedLogoName === "Taller"
+        clickedLogoName === "Taller" ||
+        clickedLogoName === "Apps"
       ) {
         stopAnimation();
         centeredCircle = circle;
@@ -398,6 +429,15 @@ document.addEventListener("DOMContentLoaded", () => {
             isClasesCentered =
             isModaCentered =
             isFDICentered =
+              false;
+        } else if (clickedLogoName === "Apps") {
+          showAppsIntro();
+          isAppsCentered = true;
+          isShowsCentered =
+            isClasesCentered =
+            isModaCentered =
+            isFDICentered =
+            isTallerCentered =
               false;
         }
 
@@ -461,6 +501,11 @@ document.addEventListener("DOMContentLoaded", () => {
   function showTallerIntro() {
     stopAnimation();
     transitionCircleImages(relatedContent["Taller"]);
+  }
+
+  function showAppsIntro() {
+    stopAnimation();
+    transitionCircleImages(relatedContent["Apps"]);
   }
 
   function fadeInOutSequence(
@@ -551,7 +596,7 @@ document.addEventListener("DOMContentLoaded", () => {
       { src: "./img/logo1.gif", alt: "Shows" },
       { src: "./img/logo2.gif", alt: "Clases" },
       { src: "./img/logo3.gif", alt: "Moda" },
-      { src: "./img/logo4.png", alt: "Red Social" },
+      { src: "./img/logo4.png", alt: "Apps" },
       { src: "./img/logo5.jpg", alt: "Taller" },
       { src: "./img/logo6.png", alt: "Fondo de Inversión" },
     ];
@@ -562,7 +607,7 @@ document.addEventListener("DOMContentLoaded", () => {
         let img = circle.querySelector("img");
         if (!img) {
           img = document.createElement("img");
-          circle.appendChild(img);
+          circlse.appendChild(img);
         }
         img.src = logo.src;
         img.alt = logo.alt;

@@ -106,10 +106,6 @@
             <span class="info-label">Nivel:</span>
             <span id="level"></span>
           </div>
-          <div class="info-item">
-            <span class="info-label">Fecha de registro:</span>
-            <span id="registrationDate"></span>
-          </div>
         </div>
       </div>
       <a
@@ -201,17 +197,6 @@
             const level = document.getElementById("level");
             if (level) {
               level.textContent = userData?.level ?? 1;
-            }
-
-            const registrationDate =
-              document.getElementById("registrationDate");
-            if (registrationDate) {
-              const date = userData?.registrationDate
-                ? new Date(
-                    userData.registrationDate.toDate()
-                  ).toLocaleDateString()
-                : "No disponible";
-              registrationDate.textContent = date;
             }
 
             // Hide loading message and show content
