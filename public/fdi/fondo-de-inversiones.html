@@ -77,14 +77,14 @@
         display: block;
         text-align: center;
         margin: 1rem 0;
-        width: 80%; /* O el tamaño deseado */
+        width: 80%;
         background-color: transparent;
         border: 2px solid red;
         color: red;
         font-size: 1.2rem;
         padding: 0.5rem 1rem;
         transition: all 0.3s ease;
-        text-decoration: none; /* Sin subrayado */
+        text-decoration: none;
       }
 
       a.button:hover {
@@ -102,7 +102,7 @@
       }
 
       .central-button:hover {
-        background-color: #39ff14; /* Verde neón */
+        background-color: #39ff14;
         color: black;
       }
 
@@ -234,7 +234,7 @@
           <canvas id="weeklyChart"></canvas>
         </div>
         <div class="chart-box">
-          <div class="chart-title">Evolución Mensual</div>
+          <div class="chart-title">Evolución mensual de la caja neta</div>
           <canvas id="monthlyChart"></canvas>
         </div>
         <div class="chart-box">
@@ -340,11 +340,19 @@
       const monthlyChart = new Chart(monthlyChartCtx, {
         type: "line",
         data: {
-          labels: ["Junio", "Julio", "Agosto"],
+          labels: [
+            "Marzo",
+            "Abril",
+            "Mayo",
+            "Junio",
+            "Julio",
+            "Agosto",
+            "Septiembre",
+          ],
           datasets: [
             {
-              label: "Rendimiento Mensual",
-              data: [40, 30, 35],
+              label: "Caja Neta",
+              data: [37000, 96000, 169322, 273790, 488871, 722539, 951722],
               borderColor: "red",
               backgroundColor: "transparent",
             },
@@ -352,8 +360,41 @@
         },
         options: {
           scales: {
-            x: { display: true },
-            y: { display: true },
+            x: {
+              display: true,
+              title: {
+                display: true,
+                text: "Mes",
+              },
+            },
+            y: {
+              display: true,
+              title: {
+                display: true,
+                text: "AR$",
+              },
+              ticks: {
+                callback: function (value, index, values) {
+                  return "AR$ " + value.toLocaleString();
+                },
+              },
+            },
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  let label = context.dataset.label || "";
+                  if (label) {
+                    label += ": ";
+                  }
+                  if (context.parsed.y !== null) {
+                    label += "AR$ " + context.parsed.y.toLocaleString();
+                  }
+                  return label;
+                },
+              },
+            },
           },
         },
       });
