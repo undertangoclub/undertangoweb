@@ -1,6 +1,7 @@
 // Configuración del juego
 const config = {
   type: Phaser.AUTO,
+  parent: "game-container", // Especificamos el contenedor del juego
   width: 800,
   height: 600,
   scene: {
@@ -29,15 +30,16 @@ let level4Attempts = 0; // Contador de intentos en el Nivel 4
 let failedLines = []; // Para simular fallos en las líneas de comunicación
 let level5Rounds = 0; // Contador de rondas en el Nivel 5
 
-// Añadir los botones de navegación al cargar el juego
-window.onload = function () {
-  createLevelNavigation();
-};
+let backgroundMusic; // Variable global para la música de fondo
 
 function preload() {
   this.load.image("general", "knight_44.png");
   this.load.image("lieutenant", "teniente.png");
   this.load.image("flecha", "flecha.png");
+  this.load.audio("background-music", "rsapaper.mp3");
+  this.load.image("logo1", "bartes.jpeg");
+  this.load.image("logo2", "ONG-Bitcoin-Argentina.png");
+  this.load.image("logo3", "under.png");
 }
 
 function create() {
@@ -47,9 +49,19 @@ function create() {
     return;
   }
 
+  // Reproducir música si está habilitado y no se está reproduciendo ya
+  const audioEnabled = localStorage.getItem("audioEnabled") === "true";
+  if (audioEnabled) {
+    if (!backgroundMusic) {
+      backgroundMusic = this.sound.add("background-music", { loop: true });
+      backgroundMusic.play();
+    }
+  }
+
   createTitle.call(this);
   createLevelText.call(this);
 
+  // Lógica específica de cada nivel
   if (currentLevel === 0) {
     createLevel0.call(this);
   } else if (currentLevel === 1) {
@@ -65,7 +77,7 @@ function create() {
   }
 
   // Asegurar que los botones de navegación siempre estén disponibles
-  createLevelNavigation();
+  createLevelNavigation.call(this);
 }
 
 function createLevelNavigation() {
@@ -190,23 +202,6 @@ function createLevel0() {
 function createLevel1() {
   const gameWidth = 800;
   const gameHeight = 600;
-
-  this.add
-    .text(gameWidth / 2, 50, "Juego de los Generales Bizantinos", {
-      fontSize: "32px",
-      fontFamily: "Arial, sans-serif",
-      color: "#ffffff",
-      fontStyle: "bold",
-    })
-    .setOrigin(0.5);
-
-  this.add
-    .text(gameWidth / 2, 100, "Nivel 1", {
-      fontSize: "24px",
-      fontFamily: "Arial, sans-serif",
-      color: "#ffffff",
-    })
-    .setOrigin(0.5);
 
   const instructionsText = this.add
     .text(
@@ -554,10 +549,10 @@ function createLevel5() {
   const gameWidth = this.scale.width;
   const gameHeight = this.scale.height;
 
-  // Remove all previous text elements to ensure no leftover "Nivel 5" text
+  // Eliminamos elementos previos
   this.children.removeAll();
 
-  // Add the main title
+  // Añadimos el título principal
   this.add
     .text(gameWidth / 2, 50, "Juego de los Generales Bizantinos", {
       fontSize: "32px",
@@ -567,7 +562,7 @@ function createLevel5() {
     })
     .setOrigin(0.5);
 
-  // Add the level description
+  // Añadimos la descripción del nivel
   const instructionsText = this.add
     .text(
       gameWidth / 2,
@@ -583,13 +578,13 @@ function createLevel5() {
     )
     .setOrigin(0.5);
 
-  // Position the commander
+  // Posicionamos al comandante
   const commanderPosition = { x: gameWidth / 2, y: 250 };
 
-  // Adjust lieutenant positions, moving the middle one lower
+  // Ajustamos las posiciones de los tenientes
   const lieutenantPositions = [
     { x: gameWidth / 4, y: 400 },
-    { x: gameWidth / 2, y: 450 }, // Middle lieutenant moved even lower
+    { x: gameWidth / 2, y: 450 }, // Teniente medio más abajo
     { x: (3 * gameWidth) / 4, y: 400 },
   ];
 
@@ -903,7 +898,7 @@ function checkLieutenantOrder(index) {
         .text(
           400,
           300,
-          "El teniente dice: \n\n¡Yo no tengo la culpa, el teniente me dio esa orden!",
+          "El teniente dice: \n\n¡Yo no tengo la culpa, el comandante me dio esa orden!",
           {
             fontSize: "18px",
             fontFamily: "Arial, sans-serif",
@@ -1254,24 +1249,14 @@ function goToNextLevel() {
   this.scene.restart();
 }
 
-function preload() {
-  this.load.image("general", "knight_44.png");
-  this.load.image("lieutenant", "teniente.png");
-  this.load.image("flecha", "flecha.png");
-  // Add these lines to load the logo images
-  this.load.image("logo1", "bartes.jpeg");
-  this.load.image("logo2", "ONG-Bitcoin-Argentina.png");
-  this.load.image("logo3", "under.png");
-}
-
 function showFinalScreen() {
-  // Clear the screen
+  // Limpiar la pantalla
   this.children.removeAll();
 
-  // Add background
+  // Añadir fondo
   this.add.rectangle(400, 300, 800, 600, 0x20232a);
 
-  // Add title
+  // Añadir título
   this.add
     .text(400, 80, "Juego de los Generales Bizantinos", {
       fontSize: "32px",
@@ -1281,7 +1266,7 @@ function showFinalScreen() {
     })
     .setOrigin(0.5);
 
-  // Add thank you message
+  // Añadir mensaje de agradecimiento
   const endingText = this.add
     .text(
       400,
@@ -1298,12 +1283,12 @@ function showFinalScreen() {
     )
     .setOrigin(0.5);
 
-  // Add contest information
+  // Añadir información del concurso
   const finalText = this.add
     .text(
       400,
       320,
-      "Este juego se enmarca en el concurso del premio B·Artes organizado por la ONG Bitcoin Argentina para difundir el principio de -Descentralización-",
+      "Este juego se enmarca en el concurso del premio B·Artes organizado por la ONG Bitcoin Argentina para difundir el principio de -Verificar vs Confiar-",
       {
         fontSize: "20px",
         fontFamily: "Arial, sans-serif",
@@ -1315,7 +1300,7 @@ function showFinalScreen() {
     )
     .setOrigin(0.5);
 
-  // Add back button
+  // Añadir botón para volver al inicio
   const backButton = this.add
     .text(400, 450, "Volver al Inicio", {
       fontSize: "24px",
@@ -1336,7 +1321,7 @@ function showFinalScreen() {
       this.scene.restart();
     });
 
-  // Add logos
+  // Añadir logos
   const logoScale = 0.5;
   const logoY = 550;
   const logo1 = this.add.image(200, logoY, "logo1").setScale(logoScale);

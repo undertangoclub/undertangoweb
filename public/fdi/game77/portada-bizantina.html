@@ -59,6 +59,28 @@
         background-repeat: no-repeat;
         background-position: center;
       }
+      .start-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-top: 20px;
+      }
+      .start-button {
+        padding: 10px 20px;
+        font-size: 18px;
+        cursor: pointer;
+        background-color: #4a6785;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .start-button img {
+        width: 24px;
+        height: 24px;
+      }
     </style>
   </head>
   <body>
@@ -71,28 +93,89 @@
         <div
           class="character"
           style="background-image: url('knight_44.png')"
+          role="img"
+          aria-label="Caballero 44"
         ></div>
         <div
           class="character"
           style="background-image: url('knight_4.png')"
+          role="img"
+          aria-label="Caballero 4"
         ></div>
-        <div class="character" style="background-image: url('node.png')"></div>
+        <div
+          class="character"
+          style="background-image: url('node.png')"
+          role="img"
+          aria-label="Nodo"
+        ></div>
       </div>
       <div class="logos">
         <div
           class="logo"
           style="background-image: url('ONG-Bitcoin-Argentina.png')"
+          role="img"
+          aria-label="Logo ONG Bitcoin Argentina"
         ></div>
-        <div class="logo" style="background-image: url('bartes.jpeg')"></div>
-        <div class="logo" style="background-image: url('under.png')"></div>
+        <div
+          class="logo"
+          style="background-image: url('bartes.jpeg')"
+          role="img"
+          aria-label="Logo Bartes"
+        ></div>
+        <div
+          class="logo"
+          style="background-image: url('under.png')"
+          role="img"
+          aria-label="Logo Under"
+        ></div>
+      </div>
+      <div class="start-buttons">
+        <button id="start-with-sound" class="start-button">
+          <img
+            src="sound-on.png"
+            alt="Sonido activado"
+            width="24"
+            height="24"
+          />
+          Empezar juego con sonido
+        </button>
+        <button id="start-without-sound" class="start-button">
+          <img
+            src="sound-off.png"
+            alt="Sonido desactivado"
+            width="24"
+            height="24"
+          />
+          Empezar juego sin sonido
+        </button>
       </div>
     </div>
+    <audio id="background-music" loop>
+      <source src="rsapaper.mp3" type="audio/mpeg" />
+      Tu navegador no soporta el elemento de audio.
+    </audio>
     <script>
-      document.addEventListener("click", () => {
-        window.location.href = "verificacion-de-nodos.html";
-      });
-      document.addEventListener("keydown", () => {
-        window.location.href = "verificacion-de-nodos.html";
+      document.addEventListener("DOMContentLoaded", function () {
+        const startWithSoundBtn = document.getElementById("start-with-sound");
+        const startWithoutSoundBtn = document.getElementById(
+          "start-without-sound"
+        );
+        const backgroundMusic = document.getElementById("background-music");
+
+        startWithSoundBtn.addEventListener("click", function () {
+          localStorage.setItem("audioEnabled", "true");
+          backgroundMusic.play();
+          startGame();
+        });
+
+        startWithoutSoundBtn.addEventListener("click", function () {
+          localStorage.setItem("audioEnabled", "false");
+          startGame();
+        });
+
+        function startGame() {
+          window.location.href = "verificacion-de-nodos.html";
+        }
       });
     </script>
   </body>
