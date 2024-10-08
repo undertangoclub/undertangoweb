@@ -165,12 +165,12 @@ document.addEventListener("DOMContentLoaded", () => {
       {
         name: "Red Cripto",
         image: "./img/red-cripto.jpg",
-        link: "./pages/apps/red-cripto.html",
+        link: "./ut-coin/index.html",
       },
       {
         name: "Juego Cripto",
         image: "./img/juego-cripto.jpg",
-        link: "./pages/apps/juego-cripto.html",
+        link: "./fdi/game77/portada-bizantina.html",
       },
       {
         name: "Mainstream",
