@@ -150,6 +150,7 @@
       const db = getFirestore(app);
 
       let currentUser;
+      let completedChallenges = {}; // Variable global para desafíos completados
 
       onAuthStateChanged(auth, async function (user) {
         if (user) {
@@ -197,6 +198,7 @@
       // Cargar desafíos completados
       async function loadCompletedChallenges(userId) {
         try {
+          completedChallenges = {}; // Reiniciar el objeto de desafíos completados
           const completedChallengesList = document.getElementById(
             "completedChallengesList"
           );
@@ -211,14 +213,34 @@
           querySnapshot.forEach(function (doc) {
             const challengeData = doc.data();
             if (challengeData.completed) {
+              completedChallenges[doc.id] = true; // Marcar el desafío como completado
               const listItem = document.createElement("li");
               listItem.textContent = `${doc.id}: Completado`;
               completedChallengesList.appendChild(listItem);
             }
           });
+
+          // Actualizar la UI de la lista de desafíos
+          updateChallengeListUI();
         } catch (error) {
           console.error("Error al cargar los desafíos completados:", error);
         }
+      }
+
+      function updateChallengeListUI() {
+        // Seleccionar todos los elementos de la lista de desafíos
+        const challengeListItems =
+          document.querySelectorAll(".challenge-list li");
+        challengeListItems.forEach(function (item) {
+          const challengeId = item.id; // Por ejemplo, "challenge0"
+          if (completedChallenges[challengeId]) {
+            // Aplicar estilos para indicar que el desafío está completado
+            item.style.textDecoration = "line-through";
+            item.style.color = "gray";
+            // Deshabilitar el elemento para que no sea clickeable
+            item.style.pointerEvents = "none";
+          }
+        });
       }
 
       // Cargar ranking de jugadores
@@ -250,11 +272,26 @@
         }
       }
 
-      // Event listener for Challenge 0
+      // Event listener para Desafío 0
       document
         .getElementById("challenge0")
         .addEventListener("click", async function () {
           try {
+            // Verificar si el desafío ya fue completado
+            const completedChallengeRef = doc(
+              db,
+              `usuarios/${currentUser.uid}/completedChallenges/challenge0`
+            );
+            const completedChallengeDoc = await getDoc(completedChallengeRef);
+
+            if (
+              completedChallengeDoc.exists() &&
+              completedChallengeDoc.data().completed
+            ) {
+              alert("Ya has completado este desafío.");
+              return; // Salir de la función si el desafío ya fue completado
+            }
+
             const globalesRef = doc(db, "globales", "contadores");
             const userDocRef = doc(db, "usuarios", currentUser.uid);
             const publicDataRef = doc(
@@ -291,7 +328,7 @@
                 undertangoCoins: currentCoins + reward,
               });
 
-              // Update undertangoCoins in publicData
+              // Actualizar undertangoCoins en publicData
               const publicData = publicDataDoc.data() || {};
               const currentPublicCoins = publicData.undertangoCoins || 0;
 
@@ -302,11 +339,7 @@
               return { newCount, reward };
             });
 
-            // Mark the challenge as completed
-            const completedChallengeRef = doc(
-              db,
-              `usuarios/${currentUser.uid}/completedChallenges/challenge0`
-            );
+            // Marcar el desafío como completado
             await setDoc(completedChallengeRef, { completed: true });
 
             alert(
@@ -326,49 +359,68 @@
       document
         .getElementById("challenge1")
         .addEventListener("click", async function () {
-          document.getElementById("userListContainer").style.display = "block";
-          const userList = document.getElementById("userList");
-          userList.innerHTML = ""; // Limpiar la lista antes de agregar usuarios
-
           try {
-            const querySnapshot = await getDocs(collection(db, "usuarios"));
-            for (const userDoc of querySnapshot.docs) {
-              const userData = userDoc.data();
+            // Verificar si el desafío ya fue completado
+            const completedChallengeRef = doc(
+              db,
+              `usuarios/${currentUser.uid}/completedChallenges/challenge1`
+            );
+            const completedChallengeDoc = await getDoc(completedChallengeRef);
 
-              // Obtener datos públicos
-              const publicDataDoc = await getDoc(
-                doc(db, `usuarios/${userDoc.id}/publicData/perfilPublico`)
-              );
-              const publicData = publicDataDoc.exists()
-                ? publicDataDoc.data()
-                : {};
+            if (
+              completedChallengeDoc.exists() &&
+              completedChallengeDoc.data().completed
+            ) {
+              alert("Ya has completado este desafío.");
+              return; // Salir de la función si el desafío ya fue completado
+            }
 
-              if (userDoc.id !== currentUser.uid) {
-                // Evitar mostrar al usuario actual en la lista
-                const listItem = document.createElement("li");
-                listItem.textContent = publicData.gameName || "Usuario Anónimo";
-                listItem.addEventListener("click", function () {
-                  sendCoin(userDoc.id);
-                });
-                userList.appendChild(listItem);
+            document.getElementById("userListContainer").style.display =
+              "block";
+            const userList = document.getElementById("userList");
+            userList.innerHTML = ""; // Limpiar la lista antes de agregar usuarios
+
+            try {
+              const querySnapshot = await getDocs(collection(db, "usuarios"));
+              for (const userDoc of querySnapshot.docs) {
+                const userData = userDoc.data();
+
+                // Obtener datos públicos
+                const publicDataDoc = await getDoc(
+                  doc(db, `usuarios/${userDoc.id}/publicData/perfilPublico`)
+                );
+                const publicData = publicDataDoc.exists()
+                  ? publicDataDoc.data()
+                  : {};
+
+                if (userDoc.id !== currentUser.uid) {
+                  // Evitar mostrar al usuario actual en la lista
+                  const listItem = document.createElement("li");
+                  listItem.textContent =
+                    publicData.gameName || "Usuario Anónimo";
+                  listItem.addEventListener("click", function () {
+                    sendCoin(userDoc.id);
+                  });
+                  userList.appendChild(listItem);
+                }
               }
+            } catch (error) {
+              console.error("Error al cargar la lista de usuarios:", error);
             }
           } catch (error) {
-            console.error("Error al cargar la lista de usuarios:", error);
+            console.error("Error al verificar el estado del desafío:", error);
           }
         });
 
       // Enviar moneda a otro usuario
       async function sendCoin(recipientId) {
         try {
-          // Restar una moneda al usuario actual
           const senderUserDocRef = doc(db, "usuarios", currentUser.uid);
           const senderPublicDataRef = doc(
             db,
             `usuarios/${currentUser.uid}/publicData/perfilPublico`
           );
 
-          // Sumar una moneda al destinatario
           const recipientUserDocRef = doc(db, "usuarios", recipientId);
           const recipientPublicDataRef = doc(
             db,
@@ -376,7 +428,7 @@
           );
 
           await runTransaction(db, async (transaction) => {
-            // Update sender's coins
+            // Actualizar las monedas del remitente
             transaction.update(senderUserDocRef, {
               undertangoCoins: increment(-1),
             });
@@ -384,7 +436,7 @@
               undertangoCoins: increment(-1),
             });
 
-            // Update recipient's coins
+            // Actualizar las monedas del destinatario
             transaction.update(recipientUserDocRef, {
               undertangoCoins: increment(1),
             });
