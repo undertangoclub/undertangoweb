@@ -4,30 +4,161 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Past Performances - UnderTango Club</title>
-    <link rel="stylesheet" href="style.css" />
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Poiret+One&display=swap");
+
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+      }
+
+      body {
+        font-family: "Poiret One", cursive;
+        background-color: #1a1a1a;
+        color: white;
+      }
+
+      header,
+      footer {
+        background-color: rgba(0, 0, 0, 0.5);
+        padding: 1em;
+        text-align: center;
+      }
+
+      h1,
+      h2,
+      h3 {
+        text-shadow: 3px 3px 12px rgba(0, 0, 0, 1);
+        margin: 0;
+      }
+
+      nav {
+        margin-top: 10px;
+      }
+
+      nav a {
+        color: white;
+        text-decoration: none;
+        padding: 0.5em 1em;
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.1);
+        transition: background-color 0.3s ease;
+      }
+
+      nav a:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+      }
+
+      main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 2em;
+        overflow-y: auto;
+      }
+
+      section {
+        width: 100%;
+        max-width: 800px;
+      }
+
+      ul {
+        list-style-type: none;
+        padding: 0;
+      }
+
+      li {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        padding: 1em;
+        margin-bottom: 1em;
+        transition: transform 0.3s ease;
+      }
+
+      li:hover {
+        transform: scale(1.02);
+      }
+
+      .highlight {
+        border: 2px solid #00c8ff;
+        box-shadow: 0 0 10px #00c8ff;
+      }
+
+      footer {
+        font-size: 0.8em;
+      }
+
+      a {
+        color: #00c8ff;
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+    </style>
   </head>
   <body>
     <header>
       <h1>Past Performances</h1>
       <nav>
-        <a href="index.html">Home</a>
+        <a href="../index.html">Home</a>
       </nav>
     </header>
     <main>
       <section>
         <h2>Actuaciones Pasadas</h2>
         <ul>
-          <li>
-            <h3>Gala de Tango 2023</h3>
-            <p>Fecha: 10 de Diciembre, 2023</p>
-            <p>Lugar: Teatro Municipal</p>
+          <li class="highlight">
+            <h3>UnderTango en Misiones Fashion Week</h3>
+            <p><strong>Fecha:</strong> 4 y 5 de Octubre, 2024</p>
+            <p><strong>Lugar:</strong> Centro del Conocimiento, Posadas</p>
+            <p>
+              <strong>Evento:</strong> Misiones Fashion Week organizado por
+              Misiones Diseña
+            </p>
+            <p>
+              <strong>Detalles:</strong> Lanzamiento de nuestra línea de moda y
+              presentación especial de tango con modelos y bailarines.
+            </p>
+            <p>
+              <a href="https://www.instagram.com/p/DA6qCUTvn2_/" target="_blank"
+                >Ver en Instagram</a
+              >
+            </p>
           </li>
           <li>
-            <h3>Festival de Verano</h3>
-            <p>Fecha: 5 de Agosto, 2023</p>
-            <p>Lugar: Parque Central</p>
+            <h3>Presentación de Tango en Andresito</h3>
+            <p><strong>Fecha:</strong> 30 de Septiembre, 2024</p>
+            <p><strong>Lugar:</strong> Andresito</p>
+            <p>
+              <strong>Evento:</strong> Presentación junto a alumnos de tango de
+              la academia
+            </p>
+            <p>
+              <a href="https://www.instagram.com/p/DAjXjCeycZZ/" target="_blank"
+                >Ver en Instagram</a
+              >
+            </p>
           </li>
-          <!-- Agrega más performances pasadas según sea necesario -->
+          <li>
+            <h3>Mega Presentación en Bernardo de Irigoyen</h3>
+            <p><strong>Fecha:</strong> 6 de Septiembre, 2024</p>
+            <p><strong>Lugar:</strong> Bernardo de Irigoyen</p>
+            <p>
+              <strong>Evento:</strong> Espectáculo con 14 artistas en escena
+            </p>
+            <p>
+              <a href="https://www.instagram.com/p/C_l0Ik_vdjw/" target="_blank"
+                >Ver en Instagram</a
+              >
+            </p>
+          </li>
         </ul>
       </section>
     </main>
