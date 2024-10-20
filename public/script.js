@@ -91,14 +91,14 @@ document.addEventListener("DOMContentLoaded", () => {
         link: "./pages/moda-taller.html",
       },
       {
-        name: "Catálogo Primavera-Otoño",
-        image: "./img/catalogo-primavera-otono.png",
-        link: "./pages/catalogo-primavera-otono.html",
+        name: "Catálogo Primavera-Verano",
+        image: "./img/catalogo-primavera-otonio.jpg",
+        link: "./pages/primavera-verano-2024.pdf",
       },
       {
         name: "Catálogo Otoño-Invierno",
-        image: "./img/catalogo-otono-invierno.jpg",
-        link: "./pages/catalogo-otono-invierno.html",
+        image: "./img/catalogo-otono-invierno.png",
+        link: "./pages/otonio-invierno-2025.pdf",
       },
       {
         name: "Tienda",
