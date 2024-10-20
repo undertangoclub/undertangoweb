@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UnderTango - Tienda de Moda</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Poiret+One&display=swap");
+
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        background-color: #1a1a1a;
+        color: white;
+        font-family: "Poiret One", cursive;
+      }
+
+      header,
+      footer {
+        background-color: rgba(0, 0, 0, 0.5);
+        padding: 1em;
+        text-align: center;
+      }
+
+      h1,
+      h2 {
+        text-shadow: 3px 3px 12px rgba(0, 0, 0, 1);
+        margin: 0;
+      }
+
+      main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 2em;
+        gap: 2em;
+      }
+
+      .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1.5em;
+        max-width: 1200px;
+        width: 100%;
+      }
+
+      .product-item {
+        background-color: rgba(255, 255, 255, 0.1);
+        padding: 1.5em;
+        border-radius: 10px;
+        text-align: center;
+        box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5);
+      }
+
+      .product-item img {
+        width: 100%;
+        height: auto;
+        max-height: 200px;
+        object-fit: cover;
+        border-radius: 10px;
+      }
+
+      footer {
+        font-size: 0.8em;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>UnderTango - Tienda de Moda</h1>
+    </header>
+
+    <main>
+      <h2>Descubre Nuestros Productos</h2>
+      <div class="product-grid">
+        <!-- Brilliant Dresses -->
+        <div class="product-item">
+          <img
+            src="/placeholder-dress.svg?height=200&width=200"
+            alt="Vestidos brillantes"
+          />
+          <h3>Vestidos Brillantes</h3>
+          <p>
+            Confeccionados para lucir en las milongas. ¡Elige tu estilo
+            favorito!
+          </p>
+        </div>
+
+        <!-- Hanging Roses -->
+        <div class="product-item">
+          <img
+            src="/placeholder-roses.svg?height=200&width=200"
+            alt="Rosas Colgantes"
+          />
+          <h3>Rosas Colgantes</h3>
+          <p>Accesorios que realzan la elegancia del tango.</p>
+        </div>
+
+        <!-- UnderTango T-Shirts -->
+        <div class="product-item">
+          <img
+            src="/placeholder-shirt.svg?height=200&width=200"
+            alt="Remeras UnderTango"
+          />
+          <h3>Remeras de UnderTango</h3>
+          <p>Casuales, cómodas y con estilo tanguero único.</p>
+        </div>
+
+        <!-- Dance Shoes -->
+        <div class="product-item">
+          <img
+            src="/placeholder-shoes.svg?height=200&width=200"
+            alt="Zapatos de danza"
+          />
+          <h3>Zapatos de Danza</h3>
+          <p>Perfectos para bailar con gracia y seguridad.</p>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <p>&copy; 2024 UnderTango Club. Todos los derechos reservados.</p>
+    </footer>
+  </body>
+</html>
