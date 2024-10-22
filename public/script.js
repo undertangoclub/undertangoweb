@@ -175,17 +175,17 @@ document.addEventListener("DOMContentLoaded", () => {
       {
         name: "Mainstream",
         image: "./img/mainstream.jpg",
-        link: "./pages/apps/mainstream.html",
+        link: "./pages/redes.html",
       },
       {
         name: "CV",
         image: "./img/cv.jpg",
-        link: "./pages/apps/cv.html",
+        link: "./pages/cv.html",
       },
       {
         name: "GitHub",
         image: "./img/github.jpg",
-        link: "https://github.com/yourusername",
+        link: "https://github.com/undertangoclub",
       },
     ],
   };
