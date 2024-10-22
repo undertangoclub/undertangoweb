@@ -137,7 +137,7 @@ document.addEventListener("DOMContentLoaded", () => {
       {
         name: "Impresiones 3D",
         image: "./img/impresiones-3d.jpg",
-        link: "./pages/taller/impresiones-3d.html",
+        link: "./pages/modelado-3d.html",
       },
       {
         name: "Cortado Laser",
