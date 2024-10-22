@@ -128,6 +128,40 @@
         </svg>
       );
 
+      const ChevronsUp = ({ size = 16 }) => (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width={size}
+          height={size}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <polyline points="17 11 12 6 7 11"></polyline>
+          <polyline points="17 18 12 13 7 18"></polyline>
+        </svg>
+      );
+
+      const ChevronsDown = ({ size = 16 }) => (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width={size}
+          height={size}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <polyline points="7 6 12 11 17 6"></polyline>
+          <polyline points="7 13 12 18 17 13"></polyline>
+        </svg>
+      );
+
       const LinkIcon = ({ size = 16 }) => (
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -154,7 +188,7 @@
         const [expandedArchivedTasks, setExpandedArchivedTasks] = useState({});
         const [hoveredTaskId, setHoveredTaskId] = useState(null);
         const [isColorPickerVisible, setIsColorPickerVisible] = useState(false);
-        const colorPickerTimeoutRef = React.useRef(null);
+        const colorPickerTimeoutRef = useRef(null);
 
         // Definir las claves de almacenamiento
         const taskKey = storagePrefix ? `${storagePrefix}Tasks` : "tasks";
@@ -162,7 +196,7 @@
           ? `${storagePrefix}ArchivedTasks`
           : "archivedTasks";
 
-        React.useEffect(() => {
+        useEffect(() => {
           const storedTasks = localStorage.getItem(taskKey);
           const storedArchivedTasks = localStorage.getItem(archivedTaskKey);
           if (storedTasks) setTasks(JSON.parse(storedTasks));
@@ -170,12 +204,12 @@
             setArchivedTasks(JSON.parse(storedArchivedTasks));
         }, [taskKey, archivedTaskKey]);
 
-        React.useEffect(() => {
+        useEffect(() => {
           localStorage.setItem(taskKey, JSON.stringify(tasks));
           localStorage.setItem(archivedTaskKey, JSON.stringify(archivedTasks));
         }, [tasks, archivedTasks, taskKey, archivedTaskKey]);
 
-        React.useEffect(() => {
+        useEffect(() => {
           return () => {
             if (colorPickerTimeoutRef.current) {
               clearTimeout(colorPickerTimeoutRef.current);
@@ -195,7 +229,7 @@
               checked: false,
               color: "#000000",
             };
-            setTasks([...tasks, newTask]);
+            setTasks([newTask, ...tasks]);
             setNewTaskName("");
           }
         };
@@ -359,9 +393,9 @@
         };
 
         const toggleExpandArchivedTask = (taskId) => {
-          setExpandedArchivedTasks((previousExpandedArchivedTasks) => ({
-            ...previousExpandedArchivedTasks,
-            [taskId]: !previousExpandedArchivedTasks[taskId],
+          setExpandedArchivedTasks((prev) => ({
+            ...prev,
+            [taskId]: !prev[taskId],
           }));
         };
 
@@ -370,7 +404,7 @@
             tasks.map((task) => ({
               ...task,
               checked: false,
-              subTasks: task.subTasks.map((subTask) => ({
+              subTasks: (task.subTasks || []).map((subTask) => ({
                 ...subTask,
                 completed: false,
               })),
@@ -385,14 +419,30 @@
                 ? {
                     ...task,
                     checked: !task.checked,
-                    subTasks: task.subTasks.map((subTask) => ({
+                    subTasks: (task.subTasks || []).map((subTask) => ({
                       ...subTask,
-                      completed: task.checked ? subTask.completed : false,
+                      completed: !task.checked ? false : subTask.completed,
                     })),
                   }
                 : task
             )
           );
+        };
+
+        const moveTaskToTop = (id) => {
+          const taskToMove = tasks.find((task) => task.id === id);
+          if (taskToMove) {
+            setTasks([taskToMove, ...tasks.filter((task) => task.id !== id)]);
+            setOpenMenuId(null);
+          }
+        };
+
+        const moveTaskToBottom = (id) => {
+          const taskToMove = tasks.find((task) => task.id === id);
+          if (taskToMove) {
+            setTasks([...tasks.filter((task) => task.id !== id), taskToMove]);
+            setOpenMenuId(null);
+          }
         };
 
         const changeTaskColor = (taskId, color) => {
@@ -419,7 +469,7 @@
             const taskId = source.droppableId;
             const task = tasks.find((t) => t.id === taskId);
             if (task) {
-              const newSubTasks = Array.from(task.subTasks);
+              const newSubTasks = Array.from(task.subTasks || []);
               const [reorderedItem] = newSubTasks.splice(source.index, 1);
               newSubTasks.splice(destination.index, 0, reorderedItem);
               setTasks(
@@ -453,11 +503,11 @@
         };
 
         const SubTaskItem = ({ taskId, subTask }) => {
-          const [isEditing, setIsEditing] = React.useState(false);
-          const [editedName, setEditedName] = React.useState(subTask.name);
-          const inputRef = React.useRef(null);
+          const [isEditing, setIsEditing] = useState(false);
+          const [editedName, setEditedName] = useState(subTask.name);
+          const inputRef = useRef(null);
 
-          React.useEffect(() => {
+          useEffect(() => {
             if (isEditing) {
               inputRef.current.focus();
             }
@@ -560,7 +610,7 @@
                 className="w-12 h-12 bg-gray-500 text-white rounded-full flex items-center justify-center text-2xl font-bold hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
                 aria-label="Resetear todas las tareas"
               >
-                Ø
+                ⟳
               </button>
             </div>
 
@@ -625,7 +675,7 @@
                                   }`}
                                   aria-label="Marcar tarea"
                                 >
-                                  Ø
+                                  ✓
                                 </button>
                                 <h2 className="text-xl font-semibold">
                                   {task.name}
@@ -667,9 +717,33 @@
                                 {openMenuId === task.id && (
                                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
                                     <button
+                                      onClick={() => moveTaskToTop(task.id)}
+                                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                    >
+                                      <ChevronsUp
+                                        className="inline mr-2"
+                                        size={16}
+                                      />
+                                      Mover al principio
+                                    </button>
+                                    <button
+                                      onClick={() => moveTaskToBottom(task.id)}
+                                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                    >
+                                      <ChevronsDown
+                                        className="inline mr-2"
+                                        size={16}
+                                      />
+                                      Mover al final
+                                    </button>
+                                    <button
                                       onClick={() => archiveTask(task.id)}
                                       className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                     >
+                                      <Archive
+                                        className="inline mr-2"
+                                        size={16}
+                                      />
                                       Archivar
                                     </button>
                                   </div>
@@ -839,6 +913,7 @@
           </div>
         );
       }
+
       function App() {
         return (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
