@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pablo Cieslik - Currículum</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Poiret+One&display=swap");
+
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        background-color: #1a1a1a;
+        color: white;
+        font-family: "Poiret One", cursive;
+      }
+
+      header,
+      footer {
+        background-color: rgba(0, 0, 0, 0.5);
+        padding: 1em;
+        text-align: center;
+      }
+
+      h1,
+      h2 {
+        text-shadow: 3px 3px 12px rgba(0, 0, 0, 1);
+        margin: 0;
+      }
+
+      main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        padding: 2em;
+        gap: 2em;
+      }
+
+      .section {
+        max-width: 800px;
+        width: 100%;
+      }
+
+      .section h2 {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        padding-bottom: 0.5em;
+      }
+
+      .info {
+        display: flex;
+        flex-direction: column;
+        gap: 1em;
+      }
+
+      .info-item {
+        background-color: rgba(255, 255, 255, 0.1);
+        padding: 1.5em;
+        border-radius: 10px;
+        box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5);
+      }
+
+      .info-item h3 {
+        margin-top: 0;
+      }
+
+      footer {
+        font-size: 0.8em;
+      }
+
+      a {
+        color: #1e90ff;
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Pablo Cieslik</h1>
+      <p>Desarrollador de Software</p>
+    </header>
+
+    <main>
+      <!-- Perfil -->
+      <div class="section">
+        <h2>Perfil</h2>
+        <div class="info">
+          <p>
+            Soy un desarrollador de software apasionado con experiencia en
+            diversas tecnologías y lenguajes de programación. Me especializo en
+            crear soluciones eficientes y escalables para problemas complejos.
+          </p>
+        </div>
+      </div>
+
+      <!-- Experiencia -->
+      <div class="section">
+        <h2>Experiencia</h2>
+        <div class="info">
+          <!-- Trabajo 1 -->
+          <div class="info-item">
+            <h3>Desarrollador Full Stack - Ø UnderTango Club</h3>
+            <p><em>Junio 2020 - Presente</em></p>
+            <ul>
+              <li>
+                Desarrollo y mantenimiento de aplicaciones web utilizando
+                JavaScript, React y Node.js.
+              </li>
+              <li>
+                Colaboración con equipos multidisciplinarios para mejorar la
+                experiencia del usuario.
+              </li>
+              <li>
+                Implementación de APIs RESTful y servicios backend escalables.
+              </li>
+            </ul>
+          </div>
+
+          <!-- Trabajo 2 -->
+          <div class="info-item">
+            <h3>Ingeniero de Software - Empresa Heráclito</h3>
+            <p><em>Enero 2018 - Mayo 2020</em></p>
+            <ul>
+              <li>
+                Desarrollo de aplicaciones móviles nativas para Android e iOS.
+              </li>
+              <li>
+                Optimización de bases de datos y consultas SQL para mejorar el
+                rendimiento.
+              </li>
+              <li>
+                Participación en revisiones de código y mentoría a nuevos
+                miembros del equipo.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Educación -->
+      <div class="section">
+        <h2>Educación</h2>
+        <div class="info">
+          <div class="info-item">
+            <h3>Licenciatura en Ingeniería Informática</h3>
+            <p><em>Universidad Nacional - 2014 - 2018</em></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Habilidades -->
+      <div class="section">
+        <h2>Habilidades</h2>
+        <div class="info">
+          <div class="info-item">
+            <ul>
+              <li>Lenguajes: JavaScript, Python, Java, C#</li>
+              <li>Frameworks: React, Angular, Node.js, .NET</li>
+              <li>Bases de Datos: MySQL, PostgreSQL, MongoDB</li>
+              <li>Control de Versiones: Git, GitHub, GitLab</li>
+              <li>Metodologías Ágiles: Scrum, Kanban</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Proyectos -->
+      <div class="section">
+        <h2>Proyectos Destacados</h2>
+        <div class="info">
+          <!-- Proyecto 1 -->
+          <div class="info-item">
+            <h3>Sistema de Gestión de Inventario</h3>
+            <p>
+              Desarrollo de una aplicación web para la gestión de inventarios,
+              permitiendo a las empresas rastrear y administrar sus productos en
+              tiempo real.
+            </p>
+          </div>
+
+          <!-- Proyecto 2 -->
+          <div class="info-item">
+            <h3>Aplicación Móvil de Comercio Electrónico</h3>
+            <p>
+              Creación de una app móvil que facilita las compras en línea,
+              integrando pasarelas de pago seguras y notificaciones push.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contacto -->
+      <div class="section">
+        <h2>Contacto</h2>
+        <div class="info">
+          <div class="info-item">
+            <p>
+              Email:
+              <a href="mailto:pablo.cieslik@example.com"
+                >pablocieslik@gmail.com</a
+              >
+            </p>
+            <p>Teléfono: +54 9 3757 618270</p>
+            <p>
+              LinkedIn:
+              <a
+                href="https://www.linkedin.com/in/pablo-cieslik/"
+                target="_blank"
+              >
+                linkedin.com/in/pablo-cieslik
+              </a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <p>&copy; 2024 Pablo Cieslik. Todos los derechos reservados.</p>
+    </footer>
+  </body>
+</html>
