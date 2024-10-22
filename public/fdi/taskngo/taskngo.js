@@ -37,7 +37,7 @@ export default function TaskManager() {
         subTasks: [],
         archivedSubTasks: [],
       };
-      setTasks([...tasks, newTask]);
+      setTasks([newTask, ...tasks]);
       setNewTaskName("");
     }
   };

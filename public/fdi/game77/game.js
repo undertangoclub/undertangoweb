@@ -667,7 +667,8 @@ function createLevel5() {
 
   failedLines = [];
   for (let i = 0; i < 3; i++) {
-    if (Phaser.Math.Between(0, 1) === 0) {
+    if (Phaser.Math.Between(1, 5) === 1) {
+      // 20% de probabilidad de fallo
       failedLines.push(i);
     }
   }
@@ -868,13 +869,11 @@ function distributeOrdersLevel5(order) {
   const commanderSignature = `FirmaComandante(${order})`;
 
   if (traitorIndex === "commander") {
-    lieutenantOrders = lieutenants.map(() => {
-      const fakeOrder = Phaser.Utils.Array.GetRandom([order, oppositeOrder]);
-      return {
-        order: fakeOrder,
-        signature: `FirmaFalsa(${fakeOrder})`,
-      };
-    });
+    // El comandante traidor envía órdenes incorrectas con firmas válidas
+    lieutenantOrders = lieutenants.map(() => ({
+      order: oppositeOrder,
+      signature: `FirmaComandante(${oppositeOrder})`,
+    }));
   } else {
     lieutenantOrders = lieutenants.map(() => ({
       order: order,
@@ -988,8 +987,9 @@ function checkLieutenantOrderLevel5(index) {
       this.lieutenantStatusTexts[index].setText("No se recibió ninguna orden.");
       orderText.setText(`La línea al teniente ${index + 1} ha fallado.`);
 
-      this.lieutenantStatusTexts[index].setText("Orden por defecto: Avanzar");
-      lieutenantDecisions[index] = "Avanzar";
+      // Asumir una orden por defecto
+      this.lieutenantStatusTexts[index].setText("Orden por defecto: Retirarse");
+      lieutenantDecisions[index] = "Retirarse";
     } else {
       const receivedMessage = lieutenantOrders[index];
       const expectedSignature = `FirmaComandante(${receivedMessage.order})`;
@@ -1004,8 +1004,11 @@ function checkLieutenantOrderLevel5(index) {
           } ha detectado una firma inválida y rechazó el mensaje.`
         );
 
-        this.lieutenantStatusTexts[index].setText("Orden por defecto: Avanzar");
-        lieutenantDecisions[index] = "Avanzar";
+        // Asumir una orden por defecto
+        this.lieutenantStatusTexts[index].setText(
+          "Orden por defecto: Retirarse"
+        );
+        lieutenantDecisions[index] = "Retirarse";
       } else {
         this.lieutenantStatusTexts[index].setText(
           `Orden recibida: ${receivedMessage.order}`
@@ -1017,6 +1020,7 @@ function checkLieutenantOrderLevel5(index) {
       }
     }
 
+    // Una vez que todos los tenientes hayan tomado una decisión
     if (lieutenantDecisions.filter((d) => d !== undefined).length === 3) {
       verifyConsensusLevel5.call(this);
     }
@@ -1129,9 +1133,24 @@ function verifyConsensusLevel5() {
   if (level5Rounds >= 3) {
     this.time.delayedCall(2000, showFinalScreen.bind(this));
   } else {
-    this.time.delayedCall(2000, () => {
-      this.scene.restart();
-    });
+    const retryButton = this.add
+      .text(400, 500, "Intentar de nuevo", {
+        fontSize: "20px",
+        fontFamily: "Arial, sans-serif",
+        backgroundColor: "#4a6785",
+        padding: {
+          left: 20,
+          right: 20,
+          top: 10,
+          bottom: 10,
+        },
+        color: "#ffffff",
+      })
+      .setOrigin(0.5)
+      .setInteractive()
+      .on("pointerdown", () => {
+        this.scene.restart();
+      });
   }
 }
 
