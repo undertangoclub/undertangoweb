@@ -147,12 +147,12 @@ document.addEventListener("DOMContentLoaded", () => {
       {
         name: "Diseño Textil",
         image: "./img/diseno-textil.jpg",
-        link: "./pages/taller/diseno-textil.html",
+        link: "./pages/moda-taller.html",
       },
       {
         name: "Muebles a Medida",
         image: "./img/muebles-a-medida.jpg",
-        link: "./pages/taller/muebles-a-medida.html",
+        link: "./pages/muebles-a-medida.html",
       },
       {
         name: "Experimentos",

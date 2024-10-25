@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UnderTango - Muebles a Medida</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Poiret+One&display=swap");
+
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        background-color: #1a1a1a;
+        color: white;
+        font-family: "Poiret One", cursive;
+      }
+
+      header,
+      footer {
+        background-color: rgba(0, 0, 0, 0.5);
+        padding: 1em;
+        text-align: center;
+      }
+
+      h1,
+      h2 {
+        text-shadow: 3px 3px 12px rgba(0, 0, 0, 1);
+        margin: 0;
+      }
+
+      main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 2em;
+        gap: 2em;
+      }
+
+      .workshop-info {
+        max-width: 800px;
+        text-align: center;
+      }
+
+      .workshop-image {
+        width: 100%;
+        max-width: 600px;
+        height: auto;
+        border-radius: 10px;
+        box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5);
+      }
+
+      .team-section {
+        display: flex;
+        justify-content: space-around;
+        flex-wrap: wrap;
+        gap: 2em;
+      }
+
+      .team-member {
+        text-align: center;
+      }
+
+      .team-member img {
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 50%;
+        box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5);
+      }
+
+      footer {
+        font-size: 0.8em;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>UnderTango - Muebles a Medida</h1>
+    </header>
+
+    <main>
+      <div class="workshop-info">
+        <h2>Creación de Muebles a Medida</h2>
+        <p>
+          En UnderTango, ofrecemos un servicio especializado en la fabricación
+          de muebles a medida, diseñados para adaptarse a los gustos y
+          necesidades de cada cliente. Nos esforzamos por crear piezas únicas
+          que combinen funcionalidad, estilo y artesanía de alta calidad.
+        </p>
+        <img
+          src="/placeholder.svg?height=400&width=600"
+          alt="Muebles a medida en UnderTango"
+          class="workshop-image"
+        />
+        <p>
+          Trabajamos con una variedad de materiales, incluyendo madera, metal y
+          otros acabados personalizados, para lograr resultados excepcionales.
+          Desde muebles para el hogar hasta piezas únicas para locales
+          comerciales, nos comprometemos a ofrecer soluciones creativas que
+          realcen cualquier espacio.
+        </p>
+      </div>
+
+      <div class="team-section">
+        <div class="team-member">
+          <img
+            src="/placeholder.svg?height=150&width=150"
+            alt="Diseñadores de muebles"
+          />
+          <h3>Diseñadores de Muebles</h3>
+        </div>
+        <div class="team-member">
+          <img src="/placeholder.svg?height=150&width=150" alt="Carpinteros" />
+          <h3>Carpinteros</h3>
+        </div>
+        <div class="team-member">
+          <img
+            src="/placeholder.svg?height=150&width=150"
+            alt="Equipo de Instalación"
+          />
+          <h3>Equipo de Instalación</h3>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <p>&copy; 2024 UnderTango Club. Todos los derechos reservados.</p>
+    </footer>
+  </body>
+</html>
