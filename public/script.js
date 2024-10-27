@@ -120,12 +120,12 @@ document.addEventListener("DOMContentLoaded", () => {
       {
         name: "Docs sobre tokenización y web3",
         image: "./img/docs-tokenizacion-web3.jpg",
-        link: "./pages/fdi/docs-tokenizacion-web3.html",
+        link: "https://docs.google.com/document/d/1rCgUb3v3itWcKdjJa9i9bhOh7rKuSyu7ERddTl04hvY",
       },
       {
         name: "Cursos sobre criptografía y blockchains",
         image: "./img/cursos-cripto-blockchain.jpg",
-        link: "./pages/fdi/cursos-cripto-blockchain.html",
+        link: "https://www.tiktok.com/@undertangoclub/video/7321892037643570437",
       },
       {
         name: "Whitepaper",
