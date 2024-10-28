@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestor de Tareas Avanzado</title>
+    <link rel="icon" href="gestor-favicon.png" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/react-beautiful-dnd@13.1.0/dist/react-beautiful-dnd.js"></script>
+    <style>
+      body {
+        font-family: "Arial", sans-serif;
+        background-color: #f0f4f8;
+      }
+      #root {
+        margin: 0 auto;
+        padding: 20px;
+        background-color: white;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel">
+      const { useState, useEffect, useRef } = React;
+      const { DragDropContext, Droppable, Draggable } =
+        window.ReactBeautifulDnd;
+
+      function TaskManager({ storagePrefix }) {
+        const [tasks, setTasks] = useState([]);
+        const [newTaskName, setNewTaskName] = useState("");
+
+        const taskKey = storagePrefix ? `${storagePrefix}Tasks` : "tasks";
+
+        useEffect(() => {
+          const storedTasks = localStorage.getItem(taskKey);
+          if (storedTasks) setTasks(JSON.parse(storedTasks));
+        }, [taskKey]);
+
+        useEffect(() => {
+          localStorage.setItem(taskKey, JSON.stringify(tasks));
+        }, [tasks, taskKey]);
+
+        const addTask = () => {
+          if (newTaskName.trim()) {
+            const newTask = {
+              id: `${Date.now().toString()}`,
+              name: newTaskName,
+              subTasks: [],
+              color: "#000000",
+            };
+            setTasks([newTask, ...tasks]);
+            setNewTaskName("");
+          }
+        };
+
+        const addSubTask = (taskId, subTaskName) => {
+          if (subTaskName.trim()) {
+            setTasks(
+              tasks.map((task) =>
+                task.id === taskId
+                  ? {
+                      ...task,
+                      subTasks: [
+                        ...(task.subTasks || []),
+                        {
+                          id: `sub-${Date.now().toString()}`,
+                          name: subTaskName.trim(),
+                          level: 0,
+                        },
+                      ],
+                    }
+                  : task
+              )
+            );
+          }
+        };
+
+        const changeSubTaskLevel = (taskId, subTaskId, levelChange) => {
+          setTasks((prevTasks) =>
+            prevTasks.map((task) =>
+              task.id === taskId
+                ? {
+                    ...task,
+                    subTasks: task.subTasks.map((subTask) =>
+                      subTask.id === subTaskId
+                        ? {
+                            ...subTask,
+                            level: Math.max(
+                              0,
+                              (subTask.level || 0) + levelChange
+                            ),
+                          }
+                        : subTask
+                    ),
+                  }
+                : task
+            )
+          );
+        };
+
+        const SubTaskItem = ({ taskId, subTask }) => {
+          const [newSubSubTaskName, setNewSubSubTaskName] = useState("");
+
+          const handleKeyDown = (e) => {
+            if (e.key === "Tab") {
+              e.preventDefault();
+              changeSubTaskLevel(taskId, subTask.id, e.shiftKey ? -1 : 1);
+            }
+          };
+
+          return (
+            <div
+              className="flex items-center mb-1"
+              style={{
+                paddingLeft: `${subTask.level * 20}px`,
+                fontWeight: subTask.level === 0 ? "bold" : "normal",
+              }}
+            >
+              <input type="checkbox" className="mr-2" />
+              <span onKeyDown={handleKeyDown} tabIndex={0}>
+                {subTask.name}
+              </span>
+              <input
+                type="text"
+                placeholder="Nueva subsubtarea"
+                value={newSubSubTaskName}
+                onChange={(e) => setNewSubSubTaskName(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === "Enter") {
+                    addSubTask(taskId, newSubSubTaskName);
+                    setNewSubSubTaskName("");
+                  }
+                }}
+                className="border p-2 mr-2 flex-grow ml-2"
+              />
+            </div>
+          );
+        };
+
+        return (
+          <div className="container mx-auto p-4">
+            <h1 className="text-2xl font-bold mb-4">
+              Gestor de Tareas Avanzado
+            </h1>
+
+            <div className="flex mb-4">
+              <input
+                type="text"
+                value={newTaskName}
+                onChange={(e) => setNewTaskName(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === "Enter") addTask();
+                }}
+                placeholder="Nueva tarea"
+                className="border p-2 mr-2 flex-grow"
+              />
+              <button
+                onClick={addTask}
+                className="bg-blue-500 text-white px-4 py-2 rounded"
+              >
+                Agregar Tarea
+              </button>
+            </div>
+
+            <DragDropContext onDragEnd={() => {}}>
+              <Droppable droppableId={taskKey} type="task">
+                {(provided) => (
+                  <div
+                    {...provided.droppableProps}
+                    ref={provided.innerRef}
+                    className="space-y-4"
+                  >
+                    {tasks.map((task) => (
+                      <Draggable key={task.id} draggableId={task.id} index={0}>
+                        {(provided) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            className="border p-4 rounded flex flex-col relative"
+                            style={{
+                              borderLeft: `4px solid ${task.color}`,
+                              ...provided.draggableProps.style,
+                            }}
+                          >
+                            <div className="flex justify-between items-center mb-2">
+                              <h2 className="text-xl font-semibold">
+                                {task.name}
+                              </h2>
+                            </div>
+                            <Droppable droppableId={task.id} type="subTask">
+                              {(provided) => (
+                                <div
+                                  {...provided.droppableProps}
+                                  ref={provided.innerRef}
+                                >
+                                  {task.subTasks.map((subTask) => (
+                                    <Draggable
+                                      key={subTask.id}
+                                      draggableId={subTask.id}
+                                      index={0}
+                                    >
+                                      {(provided) => (
+                                        <div
+                                          ref={provided.innerRef}
+                                          {...provided.draggableProps}
+                                          {...provided.dragHandleProps}
+                                        >
+                                          <SubTaskItem
+                                            taskId={task.id}
+                                            subTask={subTask}
+                                          />
+                                        </div>
+                                      )}
+                                    </Draggable>
+                                  ))}
+                                  {provided.placeholder}
+                                </div>
+                              )}
+                            </Droppable>
+                          </div>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            </DragDropContext>
+          </div>
+        );
+      }
+
+      function App() {
+        return <TaskManager storagePrefix="" />;
+      }
+
+      ReactDOM.render(
+        <React.StrictMode>
+          <App />
+        </React.StrictMode>,
+        document.getElementById("root")
+      );
+    </script>
+  </body>
+</html>
