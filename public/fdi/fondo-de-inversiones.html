@@ -252,268 +252,225 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-    // Datos del boletín 21
-const boletin21CajaNeta = 1027241;
-const boletin21ValorAccion = 1635.99;
-const boletin21Acciones = 628;
-const boletin21Dividendos = 26.69;
+      // Datos del boletín 21
+      const boletin21CajaNeta = 1027241;
+      const boletin21ValorAccion = 1635.99;
+      const boletin21Acciones = 628;
+      const boletin21Dividendos = 26.69;
 
-// Actualización de los gráficos
+      // Datos del boletín 22
+      const boletin22CajaNeta = 1027241;
+      const boletin22ValorAccion = 1635.99;
+      const boletin22Acciones = 628;
+      const boletin22Dividendos = 0;
 
-// Gráfico de "Evolución Semanal del valor de las acciones"
-const boletinValues = [
-  1120, 1380, 1693, 2203, 2923, 3234, 1006, 1934, 1096, 1215, 1126, 1177,
-  1177, 1177, 1234, 1384, 1440, 1554, 1547, 1600, boletin21ValorAccion,
-];
+      // Actualización de los gráficos
 
-// Etiquetas de boletines
-const boletinLabels = [];
-for (let i = 1; i <= boletinValues.length; i++) {
-  boletinLabels.push(i.toString());
-}
+      // Valores del boletín para "Evolución Semanal del valor de las acciones"
+      const boletinValues = [
+        1120,
+        1380,
+        1693,
+        2203,
+        2923,
+        3234,
+        1006,
+        1934,
+        1096,
+        1215,
+        1126,
+        1177,
+        1177,
+        1177,
+        1234,
+        1384,
+        1440,
+        1554,
+        1547,
+        1600,
+        boletin21ValorAccion,
+        boletin22ValorAccion,
+      ];
 
-// Datos para "Cantidad de Acciones"
-const cantidadAcciones = [
-  141, 171, 177, 251, 256, 261, 277, 293, 333, 350, 449, 473, 505, 531, 554,
-  572, 587, 602, 616, 622, boletin21Acciones,
-];
+      // Etiquetas de boletines
+      const boletinLabels = Array.from(
+        { length: boletinValues.length },
+        (_, i) => (i + 1).toString()
+      );
 
-// Datos para "Evolución de los Dividendos"
-const dividendData = [
-  0, 13.4, 16.9, 22, 29.3, 32.43, 98.84, 94.08, 108.4, 121.56, 40.57, 171.24,
-  115.23, 123.47, 118.06, 13.11, 137.08, 79.44, 19.97, 57.5, boletin21Dividendos,
-];
+      // Datos para "Cantidad de Acciones"
+      const cantidadAcciones = [
+        141,
+        171,
+        177,
+        251,
+        256,
+        261,
+        277,
+        293,
+        333,
+        350,
+        449,
+        473,
+        505,
+        531,
+        554,
+        572,
+        587,
+        602,
+        616,
+        622,
+        boletin21Acciones,
+        boletin22Acciones,
+      ];
 
-// Datos para "Evolución mensual de la caja neta"
-const monthlyCajaNeta = [
-  37000, 96000, 169322, 273790, 488871, 722539, 951721, boletin21CajaNeta,
-];
+      // Datos para "Evolución de los Dividendos"
+      const dividendData = [
+        0,
+        13.4,
+        16.9,
+        22,
+        29.3,
+        32.43,
+        98.84,
+        94.08,
+        108.4,
+        121.56,
+        40.57,
+        171.24,
+        115.23,
+        123.47,
+        118.06,
+        13.11,
+        137.08,
+        79.44,
+        19.97,
+        57.5,
+        boletin21Dividendos,
+        boletin22Dividendos,
+      ];
 
-// Actualiza el gráfico semanal
-const weeklyChartCtx = document.getElementById("weeklyChart").getContext("2d");
-const weeklyChart = new Chart(weeklyChartCtx, {
-  type: "line",
-  data: {
-    labels: boletinLabels,
-    datasets: [
-      {
-        label: "Valor de las Acciones",
-        data: boletinValues,
-        borderColor: "red",
-        backgroundColor: "transparent",
-      },
-    ],
-  },
-  options: {
-    scales: {
-      x: {
-        display: true,
-        title: {
-          display: true,
-          text: "Número de Boletín",
+      // Datos para "Evolución mensual de la caja neta"
+      const monthlyCajaNeta = [
+        37000,
+        96000,
+        169322,
+        273790,
+        488871,
+        722539,
+        951721,
+        boletin21CajaNeta,
+        boletin22CajaNeta,
+      ];
+
+      // Actualiza el gráfico semanal
+      const weeklyChartCtx = document
+        .getElementById("weeklyChart")
+        .getContext("2d");
+      new Chart(weeklyChartCtx, {
+        type: "line",
+        data: {
+          labels: boletinLabels,
+          datasets: [
+            {
+              label: "Valor de las Acciones",
+              data: boletinValues,
+              borderColor: "red",
+              backgroundColor: "transparent",
+            },
+          ],
         },
-      },
-      y: {
-        display: true,
-        title: {
-          display: true,
-          text: "Valor en Pesos",
-        },
-        ticks: {
-          callback: function (value) {
-            return "$ " + value.toLocaleString();
+        options: {
+          scales: {
+            x: { title: { display: true, text: "Número de Boletín" } },
+            y: { title: { display: true, text: "Valor en Pesos" } },
           },
         },
-      },
-    },
-    plugins: {
-      tooltip: {
-        callbacks: {
-          label: function (context) {
-            let label = context.dataset.label || "";
-            if (label) {
-              label += ": ";
-            }
-            if (context.parsed.y !== null) {
-              label += "$ " + context.parsed.y.toLocaleString();
-            }
-            return label;
-          },
-        },
-      },
-    },
-  },
-});
+      });
 
-// Actualiza el gráfico mensual de caja neta
-const monthlyChartCtx = document
-  .getElementById("monthlyChart")
-  .getContext("2d");
-const monthlyChart = new Chart(monthlyChartCtx, {
-  type: "line",
-  data: {
-    labels: ["Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre"],
-    datasets: [
-      {
-        label: "Caja Neta",
-        data: monthlyCajaNeta,
-        borderColor: "red",
-        backgroundColor: "transparent",
-      },
-    ],
-  },
-  options: {
-    scales: {
-      x: {
-        display: true,
-        title: {
-          display: true,
-          text: "Mes",
+      // Actualiza el gráfico mensual de caja neta
+      const monthlyChartCtx = document
+        .getElementById("monthlyChart")
+        .getContext("2d");
+      new Chart(monthlyChartCtx, {
+        type: "line",
+        data: {
+          labels: [
+            "Marzo",
+            "Abril",
+            "Mayo",
+            "Junio",
+            "Julio",
+            "Agosto",
+            "Septiembre",
+            "Octubre",
+          ],
+          datasets: [
+            {
+              label: "Caja Neta",
+              data: monthlyCajaNeta,
+              borderColor: "red",
+              backgroundColor: "transparent",
+            },
+          ],
         },
-      },
-      y: {
-        display: true,
-        title: {
-          display: true,
-          text: "AR$",
-        },
-        ticks: {
-          callback: function (value) {
-            return "AR$ " + value.toLocaleString();
+        options: {
+          scales: {
+            x: { title: { display: true, text: "Mes" } },
+            y: { title: { display: true, text: "AR$" } },
           },
         },
-      },
-    },
-    plugins: {
-      tooltip: {
-        callbacks: {
-          label: function (context) {
-            let label = context.dataset.label || "";
-            if (label) {
-              label += ": ";
-            }
-            if (context.parsed.y !== null) {
-              label += "AR$ " + context.parsed.y.toLocaleString();
-            }
-            return label;
-          },
-        },
-      },
-    },
-  },
-});
+      });
 
-// Actualiza el gráfico de "Cantidad de Acciones"
-const stockValueChartCtx = document
-  .getElementById("stockValueChart")
-  .getContext("2d");
-const stockValueChart = new Chart(stockValueChartCtx, {
-  type: "line",
-  data: {
-    labels: boletinLabels,
-    datasets: [
-      {
-        label: "Cantidad de Acciones",
-        data: cantidadAcciones,
-        borderColor: "red",
-        backgroundColor: "transparent",
-      },
-    ],
-  },
-  options: {
-    scales: {
-      x: {
-        display: true,
-        title: {
-          display: true,
-          text: "Boletines",
+      // Actualiza el gráfico de "Cantidad de Acciones"
+      const stockValueChartCtx = document
+        .getElementById("stockValueChart")
+        .getContext("2d");
+      new Chart(stockValueChartCtx, {
+        type: "line",
+        data: {
+          labels: boletinLabels,
+          datasets: [
+            {
+              label: "Cantidad de Acciones",
+              data: cantidadAcciones,
+              borderColor: "red",
+              backgroundColor: "transparent",
+            },
+          ],
         },
-      },
-      y: {
-        display: true,
-        title: {
-          display: true,
-          text: "Cantidad",
-        },
-      },
-    },
-    plugins: {
-      tooltip: {
-        callbacks: {
-          label: function (context) {
-            let label = context.dataset.label || "";
-            if (label) {
-              label += ": ";
-            }
-            if (context.parsed.y !== null) {
-              label += context.parsed.y;
-            }
-            return label;
+        options: {
+          scales: {
+            x: { title: { display: true, text: "Boletines" } },
+            y: { title: { display: true, text: "Cantidad" } },
           },
         },
-      },
-    },
-  },
-});
+      });
 
-// Actualiza el gráfico de "Evolución de los Dividendos"
-const dividendChartCtx = document
-  .getElementById("dividendChart")
-  .getContext("2d");
-const dividendChart = new Chart(dividendChartCtx, {
-  type: "line",
-  data: {
-    labels: boletinLabels,
-    datasets: [
-      {
-        label: "Retribución por Acción",
-        data: dividendData,
-        borderColor: "red",
-        backgroundColor: "transparent",
-      },
-    ],
-  },
-  options: {
-    scales: {
-      x: {
-        display: true,
-        title: {
-          display: true,
-          text: "Número de Boletín",
+      // Actualiza el gráfico de "Evolución de los Dividendos"
+      const dividendChartCtx = document
+        .getElementById("dividendChart")
+        .getContext("2d");
+      new Chart(dividendChartCtx, {
+        type: "line",
+        data: {
+          labels: boletinLabels,
+          datasets: [
+            {
+              label: "Retribución por Acción",
+              data: dividendData,
+              borderColor: "red",
+              backgroundColor: "transparent",
+            },
+          ],
         },
-      },
-      y: {
-        display: true,
-        title: {
-          display: true,
-          text: "retrib. por acción",
-        },
-        ticks: {
-          callback: function (value) {
-            return "$ " + value.toLocaleString();
+        options: {
+          scales: {
+            x: { title: { display: true, text: "Número de Boletín" } },
+            y: { title: { display: true, text: "Retrib. por acción" } },
           },
         },
-      },
-    },
-    plugins: {
-      tooltip: {
-        callbacks: {
-          label: function (context) {
-            let label = context.dataset.label || "";
-            if (label) {
-              label += ": ";
-            }
-            if (context.parsed.y !== null) {
-              label += "$ " + context.parsed.y.toLocaleString();
-            }
-            return label;
-          },
-        },
-      },
-    },
-  },
-});
-
+      });
     </script>
   </body>
 </html>

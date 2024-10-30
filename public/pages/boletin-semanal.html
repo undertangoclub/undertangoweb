@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Boletín No. 22 - UnderTango Fondo de Inversión 21/10/2024</title>
+    <title>Boletín No. 23 - UnderTango Fondo de Inversión 28/10/2024</title>
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -115,23 +115,23 @@
   </head>
   <body>
     <header>
-      <h1>Boletín No. 22 - UnderTango Fondo de Inversión 21/10/2024</h1>
+      <h1>Boletín No. 23 - UnderTango Fondo de Inversión 28/10/2024</h1>
     </header>
     <div class="container">
       <div class="main">
         <div class="info-box">
           <div>
             <h2>CAJA NETA</h2>
-            <p class="large-text">AR$ 1,027,241.00</p>
-            <p class="bold-text">Variación Semanal de la Caja: 0%</p>
+            <p class="large-text">AR$ 1,028,144.00</p>
+            <p class="bold-text">Variación Semanal de la Caja: +0.09%</p>
             <p class="bold-text green-text">
-              Variación mensual entre septiembre y octubre: +7.92%
+              Variación mensual entre septiembre y octubre: +8.05%
             </p>
           </div>
           <div>
             <h2>VALOR DE LA ACCIÓN p/u</h2>
-            <p class="large-text">AR$ 1,635.99</p>
-            <p class="bold-text">Variación de la acción: 0%</p>
+            <p class="large-text">AR$ 1,637.37</p>
+            <p class="bold-text">Variación de la acción: +0.08%</p>
           </div>
         </div>
         <div class="chart">
@@ -158,9 +158,9 @@
         <div class="info-box">
           <div>
             <h2>RETRIBUCIÓN SEMANAL</h2>
-            <p class="large-text">Monto a retribuir: AR$ 0.00</p>
-            <p class="large-text">AR$ 0.00 por acción</p>
-            <p class="bold-text">Variación por acción: -100%</p>
+            <p class="large-text">Monto a retribuir: AR$ 27,072.00</p>
+            <p class="large-text">AR$ 43.11 por acción</p>
+            <p class="bold-text green-text">Variación por acción: +100%</p>
           </div>
         </div>
       </div>
@@ -179,14 +179,14 @@
             ["1era semana", "de octubre"],
             ["2da semana", "de octubre"],
             ["3era semana", "de octubre"],
+            ["4ta semana", "de octubre"],
           ],
           datasets: [
             {
-              label:
-                "Montos mensuales mayo-agosto, cuarta semana de septiembre y octubre",
+              label: "Montos mensuales mayo-agosto, septiembre y octubre",
               data: [
                 169322, 273790, 488871, 722539, 951721.6, 1001681, 1027241,
-                1027241,
+                1027241, 1028144,
               ],
               backgroundColor: [
                 "rgba(255, 159, 64, 0.8)",
@@ -197,6 +197,7 @@
                 "rgba(54, 162, 235, 0.8)",
                 "rgba(54, 162, 235, 0.8)",
                 "rgba(54, 162, 235, 1)",
+                "rgba(75, 192, 192, 0.8)",
               ],
               borderColor: [
                 "rgba(255, 159, 64, 1)",
@@ -207,6 +208,7 @@
                 "rgba(54, 162, 235, 1)",
                 "rgba(54, 162, 235, 1)",
                 "rgba(54, 162, 235, 1)",
+                "rgba(75, 192, 192, 1)",
               ],
               borderWidth: 1,
             },
@@ -216,16 +218,12 @@
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: {
-              display: false,
-            },
+            legend: { display: false },
             tooltip: {
               callbacks: {
                 label: function (context) {
                   let label = context.dataset.label || "";
-                  if (label) {
-                    label += ": ";
-                  }
+                  if (label) label += ": ";
                   if (context.parsed.y !== null) {
                     label += new Intl.NumberFormat("es-AR", {
                       style: "currency",
@@ -240,17 +238,14 @@
               anchor: "end",
               align: "top",
               offset: 10,
-              formatter: function (value, context) {
+              formatter: function (value) {
                 return new Intl.NumberFormat("es-AR", {
                   style: "currency",
                   currency: "ARS",
                   maximumFractionDigits: 0,
                 }).format(value);
               },
-              font: {
-                weight: "bold",
-                size: 16,
-              },
+              font: { weight: "bold", size: 16 },
               color: "black",
             },
           },
@@ -260,17 +255,14 @@
                 autoSkip: false,
                 maxRotation: 0,
                 minRotation: 0,
-                font: {
-                  weight: "bold",
-                  size: 14,
-                },
+                font: { weight: "bold", size: 14 },
               },
             },
             y: {
               beginAtZero: true,
               max: 1100000,
               ticks: {
-                callback: function (value, index, values) {
+                callback: function (value) {
                   return new Intl.NumberFormat("es-AR", {
                     style: "currency",
                     currency: "ARS",
@@ -285,7 +277,7 @@
       });
 
       // Cálculo de la retribución para cada inversor
-      const retribucionPorAccion = 0;
+      const retribucionPorAccion = 43.11;
       const accionesPablo = 340;
       const accionesBianca = 248;
       const accionesLuciano = 40;

@@ -142,7 +142,7 @@ document.addEventListener("DOMContentLoaded", () => {
       {
         name: "Cortado Laser",
         image: "./img/cortado-laser.jpg",
-        link: "./pages/taller/cortado-laser.html",
+        link: "./pages/cortado-laser.html",
       },
       {
         name: "Diseño Textil",
@@ -157,7 +157,7 @@ document.addEventListener("DOMContentLoaded", () => {
       {
         name: "Experimentos",
         image: "./img/experimentos.jpg",
-        link: "./pages/taller/experimentos.html",
+        link: "./pages/experimentos.html",
       },
     ],
 

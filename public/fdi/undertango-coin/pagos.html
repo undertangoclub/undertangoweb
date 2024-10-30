@@ -11,11 +11,22 @@
         margin: 0 auto;
         padding: 20px;
       }
+      .container {
+        display: flex;
+      }
+      .left-panel {
+        width: 200px;
+        padding-right: 20px;
+      }
+      .right-panel {
+        flex-grow: 1;
+      }
       .artist-input,
       .show-input,
       .date-input,
       .payment-input,
-      .reason-input {
+      .reason-input,
+      .net-balance {
         margin-bottom: 10px;
       }
       .record {
@@ -37,45 +48,58 @@
   <body>
     <h1>Gestor de Pagos para Artistas</h1>
 
-    <div class="artist-input">
-      <label for="artistName">Nombre del Artista:</label>
-      <input type="text" id="artistName" />
-    </div>
-    <div class="show-input">
-      <label for="showLocation">Lugar del Show:</label>
-      <input type="text" id="showLocation" />
-    </div>
-    <div class="date-input">
-      <label for="showDate">Fecha del Show:</label>
-      <input type="date" id="showDate" />
-    </div>
-    <div class="payment-input">
-      <label for="amount">Cantidad a Pagar:</label>
-      <input type="number" id="amount" />
-    </div>
-    <button onclick="addPaymentRecord()">Agregar Pago</button>
+    <div class="container">
+      <div class="left-panel">
+        <div class="net-balance">
+          <label for="netBalance">Caja Neta de Undertango:</label>
+          <input type="number" id="netBalance" value="0" readonly />
+        </div>
+      </div>
 
-    <h2>Pagos Pendientes</h2>
-    <div id="paymentRecords"></div>
+      <div class="right-panel">
+        <div class="artist-input">
+          <label for="artistName">Nombre del Artista:</label>
+          <input type="text" id="artistName" />
+        </div>
+        <div class="show-input">
+          <label for="showLocation">Lugar del Show:</label>
+          <input type="text" id="showLocation" />
+        </div>
+        <div class="date-input">
+          <label for="showDate">Fecha del Show:</label>
+          <input type="date" id="showDate" />
+        </div>
+        <div class="payment-input">
+          <label for="amount">Cantidad a Pagar:</label>
+          <input type="number" id="amount" />
+        </div>
+        <button onclick="addPaymentRecord()">Agregar Pago</button>
 
-    <h2>Pagos que Me Deben</h2>
-    <div class="reason-input">
-      <label for="reason">Motivo del Pago:</label>
-      <input type="text" id="reason" />
-    </div>
-    <div class="payment-input">
-      <label for="owedAmount">Cantidad que Me Deben:</label>
-      <input type="number" id="owedAmount" />
-    </div>
-    <button onclick="addOwedRecord()">Agregar Deuda</button>
+        <h2>Pagos Pendientes</h2>
+        <div id="paymentRecords"></div>
 
-    <div id="owedRecords"></div>
+        <h2>Pagos que Me Deben</h2>
+        <div class="reason-input">
+          <label for="reason">Motivo del Pago:</label>
+          <input type="text" id="reason" />
+        </div>
+        <div class="payment-input">
+          <label for="owedAmount">Cantidad que Me Deben:</label>
+          <input type="number" id="owedAmount" />
+        </div>
+        <button onclick="addOwedRecord()">Agregar Deuda</button>
+
+        <div id="owedRecords"></div>
+      </div>
+    </div>
 
     <script>
       // Load stored data on page load
       document.addEventListener("DOMContentLoaded", function () {
         const savedRecords = localStorage.getItem("paymentRecords");
         const savedOwedRecords = localStorage.getItem("owedRecords");
+        const savedNetBalance = localStorage.getItem("netBalance");
+
         if (savedRecords) {
           paymentRecords = JSON.parse(savedRecords);
           renderRecords();
@@ -84,10 +108,15 @@
           owedRecords = JSON.parse(savedOwedRecords);
           renderOwedRecords();
         }
+        if (savedNetBalance) {
+          netBalance = parseFloat(savedNetBalance);
+          document.getElementById("netBalance").value = netBalance;
+        }
       });
 
       let paymentRecords = [];
       let owedRecords = [];
+      let netBalance = 1027241;
 
       function addPaymentRecord() {
         const artistName = document.getElementById("artistName").value.trim();
@@ -95,7 +124,9 @@
           .getElementById("showLocation")
           .value.trim();
         const showDate = document.getElementById("showDate").value;
-        const amount = document.getElementById("amount").value.trim();
+        const amount = parseFloat(
+          document.getElementById("amount").value.trim()
+        );
 
         if (artistName && showLocation && showDate && amount) {
           const newRecord = {
@@ -116,7 +147,9 @@
 
       function addOwedRecord() {
         const reason = document.getElementById("reason").value.trim();
-        const owedAmount = document.getElementById("owedAmount").value.trim();
+        const owedAmount = parseFloat(
+          document.getElementById("owedAmount").value.trim()
+        );
 
         if (reason && owedAmount) {
           const newRecord = {
@@ -194,23 +227,29 @@
       function markAsPaid(id) {
         paymentRecords = paymentRecords.map((record) => {
           if (record.id === id) {
+            netBalance -= parseFloat(record.amount);
+            saveNetBalance();
             return { ...record, paid: true };
           }
           return record;
         });
         saveRecords();
         renderRecords();
+        updateNetBalanceDisplay();
       }
 
       function markOwedAsPaid(id) {
         owedRecords = owedRecords.map((record) => {
           if (record.id === id) {
+            netBalance += parseFloat(record.owedAmount);
+            saveNetBalance();
             return { ...record, paid: true };
           }
           return record;
         });
         saveOwedRecords();
         renderOwedRecords();
+        updateNetBalanceDisplay();
       }
 
       function editPaymentRecord(id) {
@@ -251,6 +290,14 @@
 
       function saveOwedRecords() {
         localStorage.setItem("owedRecords", JSON.stringify(owedRecords));
+      }
+
+      function saveNetBalance() {
+        localStorage.setItem("netBalance", netBalance.toString());
+      }
+
+      function updateNetBalanceDisplay() {
+        document.getElementById("netBalance").value = netBalance;
       }
 
       function clearInputs() {
