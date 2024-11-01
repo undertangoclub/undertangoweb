@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestor Financiero</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .container {
+        display: flex;
+      }
+      .left-panel {
+        width: 200px;
+        padding-right: 20px;
+      }
+      .right-panel {
+        flex-grow: 1;
+      }
+      .category-input,
+      .name-input,
+      .date-input,
+      .amount-input,
+      .net-balance {
+        margin-bottom: 10px;
+      }
+      .record {
+        display: flex;
+        justify-content: space-between;
+        background-color: #f9f9f9;
+        padding: 10px;
+        margin: 5px 0;
+        border-radius: 5px;
+        cursor: move;
+      }
+      .completed {
+        text-decoration: line-through;
+      }
+      button {
+        cursor: pointer;
+      }
+      .sortable-chosen {
+        background-color: #e0e0e0;
+      }
+      .sortable-drag {
+        opacity: 0.5;
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
+  </head>
+  <body>
+    <h1>Gestor Financiero</h1>
+
+    <div class="container">
+      <div class="left-panel">
+        <div class="net-balance">
+          <label for="netBalance">Caja Neta de Undertango:</label>
+          <input type="number" id="netBalance" value="1027241" />
+        </div>
+      </div>
+
+      <div class="right-panel">
+        <div class="category-input">
+          <label for="category">Categoría:</label>
+          <select id="category">
+            <option value="">Seleccione una categoría</option>
+          </select>
+          <input type="text" id="newCategory" placeholder="Nueva Categoría" />
+          <button onclick="addCategory()">Agregar Categoría</button>
+        </div>
+        <div class="name-input">
+          <label for="name">Nombre del Ingreso/Egreso:</label>
+          <input type="text" id="name" />
+        </div>
+        <div class="date-input">
+          <label for="date">Fecha:</label>
+          <input type="date" id="date" />
+        </div>
+        <div class="amount-input">
+          <label for="amount">Cantidad:</label>
+          <input type="number" id="amount" />
+        </div>
+        <button onclick="addRecord('egresos')">Agregar Egreso</button>
+        <button onclick="addRecord('ingresos')">Agregar Ingreso</button>
+
+        <h2>Egresos</h2>
+        <div id="egresosRecords" class="records"></div>
+
+        <h2>Ingresos</h2>
+        <div id="ingresosRecords" class="records"></div>
+      </div>
+    </div>
+
+    <script>
+      let egresosRecords = [];
+      let ingresosRecords = [];
+      let categories = [];
+      let netBalance = 1027241;
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const savedEgresos = localStorage.getItem("egresosRecords");
+        const savedIngresos = localStorage.getItem("ingresosRecords");
+        const savedNetBalance = localStorage.getItem("netBalance");
+        const savedCategories = localStorage.getItem("categories");
+
+        if (savedEgresos) {
+          egresosRecords = JSON.parse(savedEgresos);
+        }
+        if (savedIngresos) {
+          ingresosRecords = JSON.parse(savedIngresos);
+        }
+        if (savedNetBalance) {
+          netBalance = parseFloat(savedNetBalance);
+          document.getElementById("netBalance").value = netBalance;
+        }
+        if (savedCategories) {
+          categories = JSON.parse(savedCategories);
+          updateCategoryDropdown();
+        }
+
+        renderRecords("egresos");
+        renderRecords("ingresos");
+        initializeSortable();
+      });
+
+      function addCategory() {
+        const newCategory = document.getElementById("newCategory").value.trim();
+        if (newCategory && !categories.includes(newCategory)) {
+          categories.push(newCategory);
+          saveCategories();
+          updateCategoryDropdown();
+          document.getElementById("newCategory").value = "";
+        }
+      }
+
+      function updateCategoryDropdown() {
+        const categoryDropdown = document.getElementById("category");
+        categoryDropdown.innerHTML =
+          '<option value="">Seleccione una categoría</option>';
+        categories.forEach((category) => {
+          const option = document.createElement("option");
+          option.value = category;
+          option.textContent = category;
+          categoryDropdown.appendChild(option);
+        });
+      }
+
+      function addRecord(type) {
+        const category = document.getElementById("category").value.trim();
+        const name = document.getElementById("name").value.trim();
+        const date = document.getElementById("date").value;
+        const amount = parseFloat(
+          document.getElementById("amount").value.trim()
+        );
+
+        if (category && name && date && amount) {
+          const newRecord = {
+            id: Date.now().toString(),
+            category,
+            name,
+            date,
+            amount,
+            paid: false,
+          };
+
+          if (type === "egresos") {
+            egresosRecords.push(newRecord);
+            netBalance -= amount;
+            saveRecords("egresos");
+          } else {
+            ingresosRecords.push(newRecord);
+            netBalance += amount;
+            saveRecords("ingresos");
+          }
+          saveNetBalance();
+          renderRecords(type);
+          updateNetBalanceDisplay();
+          clearInputs();
+        }
+      }
+
+      function renderRecords(type) {
+        const recordsContainer = document.getElementById(
+          type === "egresos" ? "egresosRecords" : "ingresosRecords"
+        );
+        recordsContainer.innerHTML = "";
+
+        const records = type === "egresos" ? egresosRecords : ingresosRecords;
+        records.forEach((record) => {
+          const recordElement = document.createElement("div");
+          recordElement.classList.add("record");
+          recordElement.setAttribute("data-id", record.id);
+          if (record.paid) {
+            recordElement.classList.add("completed");
+          }
+
+          recordElement.innerHTML = `
+            <div>
+              <strong>Categoría:</strong> ${record.category} - 
+              <strong>Nombre:</strong> ${record.name} - 
+              <strong>Fecha:</strong> ${record.date} - 
+              <strong>Cantidad:</strong> $${record.amount}
+            </div>
+            <button onclick="editRecord('${
+              record.id
+            }', '${type}')">Editar</button>
+            <button onclick="markAsPaid('${record.id}', '${type}')">${
+            record.paid ? "Archivado" : "Marcar como Completado"
+          }</button>
+          `;
+
+          recordsContainer.appendChild(recordElement);
+        });
+
+        initializeSortable();
+      }
+
+      function markAsPaid(id, type) {
+        if (type === "egresos") {
+          egresosRecords = egresosRecords.map((record) => {
+            if (record.id === id) {
+              return { ...record, paid: true };
+            }
+            return record;
+          });
+          saveRecords("egresos");
+        } else {
+          ingresosRecords = ingresosRecords.map((record) => {
+            if (record.id === id) {
+              return { ...record, paid: true };
+            }
+            return record;
+          });
+          saveRecords("ingresos");
+        }
+        renderRecords(type);
+      }
+
+      function editRecord(id, type) {
+        const records = type === "egresos" ? egresosRecords : ingresosRecords;
+        const record = records.find((record) => record.id === id);
+        if (record) {
+          document.getElementById("category").value = record.category;
+          document.getElementById("name").value = record.name;
+          document.getElementById("date").value = record.date;
+          document.getElementById("amount").value = record.amount;
+          deleteRecord(id, type);
+        }
+      }
+
+      function deleteRecord(id, type) {
+        if (type === "egresos") {
+          egresosRecords = egresosRecords.filter((record) => record.id !== id);
+          saveRecords("egresos");
+        } else {
+          ingresosRecords = ingresosRecords.filter(
+            (record) => record.id !== id
+          );
+          saveRecords("ingresos");
+        }
+        renderRecords(type);
+      }
+
+      function saveRecords(type) {
+        if (type === "egresos") {
+          localStorage.setItem(
+            "egresosRecords",
+            JSON.stringify(egresosRecords)
+          );
+        } else {
+          localStorage.setItem(
+            "ingresosRecords",
+            JSON.stringify(ingresosRecords)
+          );
+        }
+      }
+
+      function saveNetBalance() {
+        localStorage.setItem("netBalance", netBalance.toString());
+      }
+
+      function saveCategories() {
+        localStorage.setItem("categories", JSON.stringify(categories));
+      }
+
+      function updateNetBalanceDisplay() {
+        document.getElementById("netBalance").value = netBalance;
+      }
+
+      function clearInputs() {
+        document.getElementById("category").value = "";
+        document.getElementById("name").value = "";
+        document.getElementById("date").value = "";
+        document.getElementById("amount").value = "";
+      }
+
+      function initializeSortable() {
+        if (paymentSortable) {
+          paymentSortable.destroy();
+        }
+        if (owedSortable) {
+          owedSortable.destroy();
+        }
+
+        var egresosRecordsContainer = document.getElementById("egresosRecords");
+        paymentSortable = Sortable.create(egresosRecordsContainer, {
+          animation: 150,
+          onEnd: function (evt) {
+            const newOrder = Array.from(egresosRecordsContainer.children).map(
+              (child) => child.getAttribute("data-id")
+            );
+            egresosRecords.sort(
+              (a, b) => newOrder.indexOf(a.id) - newOrder.indexOf(b.id)
+            );
+            saveRecords("egresos");
+          },
+        });
+
+        var ingresosRecordsContainer =
+          document.getElementById("ingresosRecords");
+        owedSortable = Sortable.create(ingresosRecordsContainer, {
+          animation: 150,
+          onEnd: function (evt) {
+            const newOrder = Array.from(ingresosRecordsContainer.children).map(
+              (child) => child.getAttribute("data-id")
+            );
+            ingresosRecords.sort(
+              (a, b) => newOrder.indexOf(a.id) - newOrder.indexOf(b.id)
+            );
+            saveRecords("ingresos");
+          },
+        });
+      }
+    </script>
+  </body>
+</html>
