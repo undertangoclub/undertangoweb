@@ -2,4 +2,3 @@ User-agent: *
 Disallow:
 
 Sitemap: https://undertangoclub.com/sitemap.xml
-f
