@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UnderTango Club</title>
+    <style>
+      /* Estilos generales */
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f9f9f9;
+        color: #333;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 1rem;
+      }
+      .hero {
+        text-align: center;
+        padding: 2rem 0;
+        background-color: #000;
+        color: #fff;
+      }
+      .hero img {
+        width: 100px;
+        border-radius: 50%;
+      }
+      .hero h1 {
+        font-size: 2rem;
+        margin: 1rem 0;
+      }
+      .hero p {
+        font-size: 1.2rem;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      /* Estilos de Tabs */
+      .tabs {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 2rem;
+        border-bottom: 2px solid #ddd;
+        overflow-x: auto;
+      }
+      .tab {
+        padding: 1rem;
+        cursor: pointer;
+        text-align: center;
+        font-weight: bold;
+        color: #666;
+        border-bottom: 2px solid transparent;
+      }
+      .tab.active {
+        color: #d32f2f;
+        border-bottom: 2px solid #d32f2f;
+      }
+
+      /* Estilos de contenido de pestañas */
+      .tab-content {
+        display: none;
+        padding: 2rem 0;
+      }
+      .tab-content.active {
+        display: block;
+      }
+
+      /* Estilos de las tarjetas */
+      .card {
+        background-color: #fff;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        overflow: hidden;
+        text-align: center;
+        padding: 1rem;
+        transition: transform 0.3s;
+      }
+      .card:hover {
+        transform: translateY(-5px);
+      }
+      .card img {
+        width: 100%;
+        max-width: 400px;
+        height: auto;
+        margin-bottom: 1rem;
+        border-radius: 8px;
+      }
+      .card h3 {
+        color: #d32f2f;
+        font-size: 1.5rem;
+      }
+      .card p {
+        color: #666;
+        margin-bottom: 1rem;
+      }
+      .card a {
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        background-color: #d32f2f;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 4px;
+        transition: background-color 0.3s;
+      }
+      .card a:hover {
+        background-color: #b71c1c;
+      }
+
+      /* Estilos de grid para tarjetas */
+      .card-grid {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        margin-top: 2rem;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Hero Section -->
+    <div class="hero">
+      <img
+        src="https://undertangoclub.com/img/Under-logo-transparente.png"
+        alt="UnderTango Logo"
+      />
+      <h1>UnderTango Club</h1>
+      <p>Tu camino en el mundo del tango. Shows, Clases, Moda, Apps y más.</p>
+    </div>
+
+    <!-- Tabs Section -->
+    <div class="container">
+      <div class="tabs">
+        <div class="tab active" onclick="openTab(event, 'shows')">Shows</div>
+        <div class="tab" onclick="openTab(event, 'clases')">Clases</div>
+        <div class="tab" onclick="openTab(event, 'moda')">Moda</div>
+        <div class="tab" onclick="openTab(event, 'apps')">Apps</div>
+        <div class="tab" onclick="openTab(event, 'taller')">Taller</div>
+        <div class="tab" onclick="openTab(event, 'inversion')">Inversión</div>
+      </div>
+
+      <!-- Shows Tab Content -->
+      <div id="shows" class="tab-content active">
+        <div class="card-grid">
+          <div class="card">
+            <img
+              src="https://undertangoclub.com/img/upcoming-shows.jpg"
+              alt="Próximos Shows"
+            />
+            <h3>Próximos Shows</h3>
+            <p>Descubre nuestros próximos eventos</p>
+            <a href="/pages/upcoming-shows.html">Ver Shows</a>
+          </div>
+          <div class="card">
+            <img
+              src="https://undertangoclub.com/img/past-performances.jpg"
+              alt="Shows Pasados"
+            />
+            <h3>Shows Pasados</h3>
+            <p>Revive nuestras actuaciones anteriores</p>
+            <a href="/pages/past-performances.html">Ver Galería</a>
+          </div>
+          <div class="card">
+            <img
+              src="https://undertangoclub.com/img/book-show.jpg"
+              alt="Reserva un Show"
+            />
+            <h3>Reserva un Show</h3>
+            <p>Contrata nuestros servicios</p>
+            <a href="/pages/book-show.html">Reservar</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Clases Tab Content -->
+      <div id="clases" class="tab-content">
+        <div class="card-grid">
+          <div class="card">
+            <img
+              src="https://undertangoclub.com/img/clases-grupales.jpg"
+              alt="Clases Grupales"
+            />
+            <h3>Clases Grupales</h3>
+            <p>Aprende tango en grupo</p>
+            <a href="/pages/clases-grupales.html">Ver Horarios</a>
+          </div>
+          <div class="card">
+            <img
+              src="https://undertangoclub.com/img/clases-privadas.jpg"
+              alt="Clases Privadas"
+            />
+            <h3>Clases Privadas</h3>
+            <p>Instrucción personalizada</p>
+            <a href="/pages/clases-privadas.html">Reservar Clase</a>
+          </div>
+          <div class="card">
+            <img
+              src="https://undertangoclub.com/img/cursos-on-line.jpg"
+              alt="Cursos Online"
+            />
+            <h3>Cursos Online</h3>
+            <p>Aprende desde casa</p>
+            <a
+              href="https://hotmart.com/es/marketplace/productos/20-lecciones-de-tango/F62016758K"
+              >Acceder</a
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- Moda Tab Content -->
+      <div id="moda" class="tab-content">
+        <div class="card-grid">
+          <div class="card">
+            <img
+              src="https://undertangoclub.com/img/moda.png"
+              alt="Moda Actual"
+            />
+            <h3>Moda Actual</h3>
+            <p>Últimas tendencias en moda tango</p>
+            <a href="/pages/moda.html">Ver Colección</a>
+          </div>
+          <div class="card">
+            <img
+              src="https://undertangoclub.com/img/catalogo-primavera-otonio.jpg"
+              alt="Catálogos"
+            />
+            <h3>Catálogos</h3>
+            <p>Explora nuestras colecciones</p>
+            <a href="/pages/primavera-verano-2024.pdf">Primavera</a>
+            <a href="/pages/otonio-invierno-2025.pdf" style="margin-left: 10px"
+              >Otoño</a
+            >
+          </div>
+          <div class="card">
+            <img
+              src="https://undertangoclub.com/img/moda-tienda.jpg"
+              alt="Tienda"
+            />
+            <h3>Tienda</h3>
+            <p>Compra nuestros productos</p>
+            <a href="/pages/moda-tienda.html">Comprar</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Apps Tab Content -->
+      <div id="apps" class="tab-content">
+        <div class="card-grid">
+          <div class="card">
+            <img
+              src="https://undertangoclub.com/img/red-cripto.jpg"
+              alt="Red Cripto"
+            />
+            <h3>Red Cripto</h3>
+            <p>Explora nuestra red blockchain para el mundo del tango</p>
+            <a href="/ut-coin/index.html">Explorar</a>
+          </div>
+          <div class="card">
+            <img
+              src="https://undertangoclub.com/img/juego-cripto.jpg"
+              alt="Juego Cripto"
+            />
+            <h3>Juego Cripto</h3>
+            <p>Aprende sobre criptomonedas mientras juegas</p>
+            <a href="/fdi/game77/portada-bizantina.html">Jugar</a>
+          </div>
+          <div class="card">
+            <img src="https://undertangoclub.com/img/github.jpg" alt="GitHub" />
+            <h3>GitHub</h3>
+            <p>Explora nuestros proyectos de código abierto</p>
+            <a href="https://github.com/undertangoclub">Ver Proyectos</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Taller Tab Content -->
+      <div id="taller" class="tab-content">
+        <div class="card-grid">
+          <div class="card">
+            <img
+              src="https://undertangoclub.com/img/impresiones-3d.jpg"
+              alt="Impresiones 3D"
+            />
+            <h3>Impresiones 3D</h3>
+            <p>Creaciones personalizadas con tecnología de impresión 3D</p>
+            <a href="/pages/modelado-3d.html">Ver Trabajos</a>
+          </div>
+          <div class="card">
+            <img
+              src="https://undertangoclub.com/img/cortado-laser.jpg"
+              alt="Cortado Láser"
+            />
+            <h3>Cortado Láser</h3>
+            <p>Diseños precisos con nuestra tecnología de corte láser</p>
+            <a href="/pages/cortado-laser.html">Ver Servicios</a>
+          </div>
+          <div class="card">
+            <img
+              src="https://undertangoclub.com/img/diseno-textil.jpg"
+              alt="Diseño Textil"
+            />
+            <h3>Diseño Textil</h3>
+            <p>Creaciones de moda personalizadas para el tango</p>
+            <a href="/pages/moda-taller.html">Ver Diseños</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inversión Tab Content -->
+      <div id="inversion" class="tab-content">
+        <div class="card-grid">
+          <div class="card">
+            <img
+              src="https://undertangoclub.com/img/pagina-inversores.jpg"
+              alt="Fondo de Inversión"
+            />
+            <h3>Fondo de Inversión</h3>
+            <p>Invierte en el crecimiento de UnderTango Club</p>
+            <a href="/fdi/fondo-de-inversiones.html">Más Información</a>
+          </div>
+          <div class="card">
+            <img
+              src="https://undertangoclub.com/img/boletin-semanal.jpg"
+              alt="Boletín Semanal"
+            />
+            <h3>Boletín Semanal</h3>
+            <p>Mantente informado sobre nuestras actividades e inversiones</p>
+            <a href="/pages/boletin-semanal.html">Suscribirse</a>
+          </div>
+          <div class="card">
+            <img
+              src="https://undertangoclub.com/img/whitepaper.jpg"
+              alt="Whitepaper"
+            />
+            <h3>Whitepaper</h3>
+            <p>Lee nuestro documento detallado sobre la visión de UnderTango</p>
+            <a
+              href="https://docs.google.com/document/d/1-chA3vrOGWxO69qJzOj9P7g9RSxSyxY9Yu0DWcCjX4Y/edit"
+              >Leer Whitepaper</a
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- JavaScript para manejar las pestañas -->
+    <script>
+      function openTab(event, tabId) {
+        // Ocultar todos los contenidos de pestañas
+        const tabContents = document.querySelectorAll(".tab-content");
+        tabContents.forEach((content) => content.classList.remove("active"));
+
+        // Remover la clase activa de todas las pestañas
+        const tabs = document.querySelectorAll(".tab");
+        tabs.forEach((tab) => tab.classList.remove("active"));
+
+        // Mostrar el contenido de la pestaña seleccionada
+        document.getElementById(tabId).classList.add("active");
+        event.currentTarget.classList.add("active");
+      }
+    </script>
+  </body>
+</html>

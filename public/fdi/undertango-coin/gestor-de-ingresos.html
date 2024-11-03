@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Gestor Financiero</title>
+    <link rel="icon" type="image/png" href="gestor-favicon.png" />
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -49,6 +50,15 @@
       .sortable-drag {
         opacity: 0.5;
       }
+      .month-panel {
+        margin-top: 20px;
+      }
+      .month-records {
+        background-color: #e9e9e9;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+      }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
   </head>
@@ -60,6 +70,15 @@
         <div class="net-balance">
           <label for="netBalance">Caja Neta de Undertango:</label>
           <input type="number" id="netBalance" value="1027241" readonly />
+        </div>
+        <div class="month-panel">
+          <h3>Archivos Mensuales</h3>
+          <button onclick="showMonthRecords('noviembre2024')">
+            Noviembre 2024
+          </button>
+          <button onclick="showMonthRecords('diciembre2024')">
+            Diciembre 2024
+          </button>
         </div>
       </div>
 
@@ -92,12 +111,18 @@
 
         <h2>Ingresos</h2>
         <div id="ingresosRecords" class="records"></div>
+
+        <div id="monthlyRecords" class="month-records"></div>
       </div>
     </div>
 
     <script>
       let egresosRecords = [];
       let ingresosRecords = [];
+      let archivedRecords = {
+        noviembre2024: { egresos: [], ingresos: [] },
+        diciembre2024: { egresos: [], ingresos: [] },
+      };
       let categories = [];
       let netBalance = 1027241;
 
@@ -109,6 +134,7 @@
         const savedIngresos = localStorage.getItem("ingresosRecords");
         const savedNetBalance = localStorage.getItem("netBalance");
         const savedCategories = localStorage.getItem("categories");
+        const savedArchived = localStorage.getItem("archivedRecords");
 
         if (savedEgresos) {
           egresosRecords = JSON.parse(savedEgresos);
@@ -123,6 +149,9 @@
         if (savedCategories) {
           categories = JSON.parse(savedCategories);
           updateCategoryDropdown();
+        }
+        if (savedArchived) {
+          archivedRecords = JSON.parse(savedArchived);
         }
 
         renderRecords("egresos");
@@ -210,6 +239,9 @@
             <button onclick="markAsPaid('${record.id}', '${type}')">
               ${record.paid ? "Archivado" : "Marcar como Completado"}
             </button>
+            <button onclick="archiveRecord('${
+              record.id
+            }', '${type}')">Archivado</button>
           `;
 
           recordsContainer.appendChild(recordElement);
@@ -243,6 +275,21 @@
           saveRecords("ingresos");
         }
         renderRecords(type);
+      }
+
+      function archiveRecord(id, type) {
+        const records = type === "egresos" ? egresosRecords : ingresosRecords;
+        const record = records.find((record) => record.id === id);
+        if (record) {
+          const month = new Date(record.date).getMonth();
+          const year = new Date(record.date).getFullYear();
+          const key =
+            month === 10 && year === 2024 ? "noviembre2024" : "diciembre2024";
+          archivedRecords[key][type].push(record);
+          deleteRecord(id, type);
+          saveArchivedRecords();
+          renderRecords(type);
+        }
       }
 
       function editRecord(id, type) {
@@ -292,6 +339,13 @@
         localStorage.setItem("categories", JSON.stringify(categories));
       }
 
+      function saveArchivedRecords() {
+        localStorage.setItem(
+          "archivedRecords",
+          JSON.stringify(archivedRecords)
+        );
+      }
+
       function updateNetBalanceDisplay() {
         document.getElementById("netBalance").value = netBalance;
       }
@@ -301,6 +355,49 @@
         document.getElementById("name").value = "";
         document.getElementById("date").value = "";
         document.getElementById("amount").value = "";
+      }
+
+      function showMonthRecords(month) {
+        const recordsContainer = document.getElementById("monthlyRecords");
+        recordsContainer.innerHTML = "";
+
+        const records = archivedRecords[month];
+        const egresos = records.egresos;
+        const ingresos = records.ingresos;
+
+        recordsContainer.innerHTML += `<h3>Egresos - ${month}</h3>`;
+        egresos.forEach((record) => {
+          const recordElement = document.createElement("div");
+          recordElement.classList.add("record");
+
+          recordElement.innerHTML = `
+            <div>
+              <strong>Categoría:</strong> ${record.category} - 
+              <strong>Nombre:</strong> ${record.name} - 
+              <strong>Fecha:</strong> ${record.date} - 
+              <strong>Cantidad:</strong> $${record.amount}
+            </div>
+          `;
+
+          recordsContainer.appendChild(recordElement);
+        });
+
+        recordsContainer.innerHTML += `<h3>Ingresos - ${month}</h3>`;
+        ingresos.forEach((record) => {
+          const recordElement = document.createElement("div");
+          recordElement.classList.add("record");
+
+          recordElement.innerHTML = `
+            <div>
+              <strong>Categoría:</strong> ${record.category} - 
+              <strong>Nombre:</strong> ${record.name} - 
+              <strong>Fecha:</strong> ${record.date} - 
+              <strong>Cantidad:</strong> $${record.amount}
+            </div>
+          `;
+
+          recordsContainer.appendChild(recordElement);
+        });
       }
 
       function initializeSortable() {
