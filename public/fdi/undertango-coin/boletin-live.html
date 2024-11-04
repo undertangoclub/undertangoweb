@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Boletín No. 24 - UnderTango Fondo de Inversión 4/11/2024</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        color: #333;
+        margin: 0;
+        padding: 0;
+        font-size: 18px;
+      }
+      .container {
+        width: 95%;
+        max-width: 1080px;
+        margin: auto;
+        overflow: hidden;
+        padding: 5px;
+      }
+      header {
+        background: #333;
+        color: #fff;
+        padding: 10px 0;
+        border-bottom: #77aaff 3px solid;
+      }
+      header h1 {
+        text-align: center;
+        text-transform: uppercase;
+        margin: 0;
+        font-size: 1.5em;
+      }
+      .main {
+        padding: 5px;
+        background: #fff;
+        margin: 10px 0;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      .info-box {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
+        padding: 10px;
+        margin-bottom: 10px;
+        background: #e2e2e2;
+        border-radius: 5px;
+      }
+      .info-box div {
+        text-align: center;
+        flex: 1 1 300px;
+        margin: 5px;
+      }
+      .info-box div h2 {
+        margin: 5px 0;
+        font-size: 1.2em;
+      }
+      .large-text {
+        font-size: 1.5em;
+        font-weight: bold;
+      }
+      .chart {
+        margin: 20px 0;
+        height: 500px;
+        position: relative;
+      }
+      .percentages,
+      .holders {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
+        padding: 10px;
+        background: #e2e2e2;
+        border-radius: 5px;
+        margin: 10px 0;
+      }
+      .percentages div,
+      .holders div {
+        text-align: left;
+        flex: 1 1 300px;
+        margin: 5px;
+        font-size: 1em;
+      }
+      .bold-text {
+        font-weight: bold;
+        font-size: 1.2em;
+      }
+      .green-text {
+        color: #28a745;
+      }
+      .red-text {
+        color: #dc3545;
+      }
+      @media (max-width: 600px) {
+        header h1 {
+          font-size: 1.2em;
+        }
+        .large-text {
+          font-size: 1.4em;
+        }
+        .info-box div,
+        .percentages div,
+        .holders div {
+          flex: 1 1 100%;
+        }
+        .chart {
+          height: 300px;
+        }
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+  </head>
+  <body>
+    <header>
+      <h1>Boletín No. 24 - UnderTango Fondo de Inversión 4/11/2024</h1>
+    </header>
+    <div class="container">
+      <div class="main">
+        <div class="info-box">
+          <div>
+            <h2>CAJA NETA</h2>
+            <p class="large-text">AR$ 885,460.00</p>
+            <p class="bold-text red-text">Variación Semanal de la Caja: -13.88%</p>
+            <p class="bold-text red-text">Variación mensual entre septiembre y octubre: -6.96%</p>
+          </div>
+          <div>
+            <h2>VALOR DE LA ACCIÓN p/u</h2>
+            <p class="large-text">AR$ 1,409.97</p>
+            <p class="bold-text">Variación de la acción: -13.89%</p>
+          </div>
+        </div>
+        <div class="chart">
+          <canvas id="myChart"></canvas>
+        </div>
+        <div class="percentages">
+          <div>
+            <h3>PORCENTAJES:</h3>
+            <p class="bold-text">40% Caché del Artista</p>
+            <p class="bold-text">30% Caja de Gastos Operativos (G.O.)</p>
+            <p class="bold-text">10% Caja de Producción y Mantenimiento</p>
+            <p class="bold-text">10% Para la Caja UnderTango</p>
+            <p class="bold-text">10% Fondo de Inversiones</p>
+          </div>
+          <div>
+            <h3>TENEDORES:</h3>
+            <p class="bold-text">PABLO CIESLIK : 340 ACCIONES</p>
+            <p class="bold-text">BIANCA WAGNER : 248 ACCIONES</p>
+            <p class="bold-text">LUCIANO VALDEMARIN : 40 ACCIONES</p>
+            <p class="bold-text">Total de acciones efectivas: 628</p>
+            <p class="bold-text">Disponibles para la venta: 20</p>
+          </div>
+        </div>
+        <div class="info-box">
+          <div>
+            <h2>RETRIBUCIÓN SEMANAL</h2>
+            <p class="large-text">Monto a retribuir: AR$ 67,500.00</p>
+            <p class="large-text">AR$ 107.50 por acción</p>
+            <p class="bold-text green-text">Variación por acción: +149.36%</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      const ctx = document.getElementById("myChart").getContext("2d");
+      const myChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: [
+            "mayo",
+            "junio",
+            "julio",
+            "agosto",
+            "septiembre",
+            ["1era semana", "de octubre"],
+            ["2da semana", "de octubre"],
+            ["3era semana", "de octubre"],
+            ["4ta semana", "de octubre"],
+            ["5ta semana", "de octubre"],
+          ],
+          datasets: [
+            {
+              label: "Montos mensuales mayo-octubre",
+              data: [
+                169322, 273790, 488871, 722539, 951721.6, 1001681, 1027241,
+                1027241, 1028144, 885460,
+              ],
+              backgroundColor: [
+                "rgba(255, 159, 64, 0.8)",
+                "rgba(255, 159, 64, 0.8)",
+                "rgba(255, 159, 64, 0.8)",
+                "rgba(255, 159, 64, 0.8)",
+                "rgba(255, 159, 64, 1)",
+                "rgba(54, 162, 235, 0.8)",
+                "rgba(54, 162, 235, 0.8)",
+                "rgba(54, 162, 235, 0.8)",
+                "rgba(54, 162, 235, 0.8)",
+                "rgba(54, 162, 235, 1)",
+              ],
+              borderColor: [
+                "rgba(255, 159, 64, 1)",
+                "rgba(255, 159, 64, 1)",
+                "rgba(255, 159, 64, 1)",
+                "rgba(255, 159, 64, 1)",
+                "rgba(255, 159, 64, 1)",
+                "rgba(54, 162, 235, 1)",
+                "rgba(54, 162, 235, 1)",
+                "rgba(54, 162, 235, 1)",
+                "rgba(54, 162, 235, 1)",
+                "rgba(54, 162, 235, 1)",
+              ],
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  let label = context.dataset.label || "";
+                  if (label) label += ": ";
+                  if (context.parsed.y !== null) {
+                    label += new Intl.NumberFormat("es-AR", {
+                      style: "currency",
+                      currency: "ARS",
+                    }).format(context.parsed.y);
+                  }
+                  return label;
+                },
+              },
+            },
+            datalabels: {
+              anchor: "end",
+              align: "top",
+              offset: 10,
+              formatter: function (value) {
+                return new Intl.NumberFormat("es-AR", {
+                  style: "currency",
+                  currency: "ARS",
+                  maximumFractionDigits: 0,
+                }).format(value);
+              },
+              font: { weight: "bold", size: 16 },
+              color: "black",
+            },
+          },
+          scales: {
+            x: {
+              ticks: {
+                autoSkip: false,
+                maxRotation: 0,
+                minRotation: 0,
+                font: { weight: "bold", size: 14 },
+              },
+            },
+            y: {
+              beginAtZero: true,
+              max: 1100000,
+              ticks: {
+                callback: function (value) {
+                  return new Intl.NumberFormat("es-AR", {
+                    style: "currency",
+                    currency: "ARS",
+                    maximumFractionDigits: 0,
+                  }).format(value);
+                },
+              },
+            },
+          },
+        },
+        plugins: [ChartDataLabels],
+      });
+
+      // Cálculo de la retribución para cada inversor
+      const retribucionPorAccion = 107.50;
+      const accionesPablo = 340;
+      const accionesBianca = 248;
+      const accionesLuciano = 40;
+
+      const montoPablo = (accionesPablo * retribucionPorAccion).toFixed(2);
+      const montoBianca = (accionesBianca * retribucionPorAccion).toFixed(2);
+      const montoLuciano = (accionesLuciano * retribucionPorAccion).toFixed(2);
+
+      console.log("Monto a enviar a Pablo: AR$", montoPablo);
+      console.log("Monto a enviar a Bianca: AR$", montoBianca);
+      console.log("Monto a enviar a Luciano: AR$", montoLuciano);
+    </script>
+  </body>
+</html>

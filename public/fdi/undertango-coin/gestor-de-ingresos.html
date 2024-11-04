@@ -8,88 +8,172 @@
     <style>
       body {
         font-family: Arial, sans-serif;
-        max-width: 800px;
+        max-width: 1200px;
         margin: 0 auto;
         padding: 20px;
       }
       .container {
         display: flex;
+        flex-wrap: nowrap;
+      }
+      .left-panel,
+      .middle-panel,
+      .right-panel {
+        flex: 1;
+        min-width: 300px;
+        padding: 10px;
       }
       .left-panel {
-        width: 200px;
-        padding-right: 20px;
+        border-right: 1px solid #ccc;
       }
-      .right-panel {
-        flex-grow: 1;
+      .middle-panel {
+        border-right: 1px solid #ccc;
+      }
+      .balance-box {
+        background-color: #f5f5f5;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
       }
       .category-input,
       .name-input,
       .date-input,
       .amount-input,
-      .net-balance {
+      .net-balance,
+      .month-panel {
         margin-bottom: 10px;
       }
       .record {
-        display: flex;
-        justify-content: space-between;
         background-color: #f9f9f9;
         padding: 10px;
         margin: 5px 0;
         border-radius: 5px;
-        cursor: move;
       }
       .completed {
         text-decoration: line-through;
       }
       button {
         cursor: pointer;
+        margin-right: 5px;
+        padding: 5px 10px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        background-color: #fff;
       }
-      .sortable-chosen {
-        background-color: #e0e0e0;
+      button:hover {
+        background-color: #f0f0f0;
       }
-      .sortable-drag {
-        opacity: 0.5;
-      }
-      .month-panel {
+      .chart-container {
+        width: 100%;
+        max-width: 400px;
         margin-top: 20px;
       }
-      .month-records {
-        background-color: #e9e9e9;
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+      }
+      .modal-content {
+        background-color: #fff;
+        margin: 15% auto;
+        padding: 20px;
+        border-radius: 5px;
+        width: 80%;
+        max-width: 500px;
+      }
+      .modal-buttons {
+        margin-top: 15px;
+        text-align: center;
+      }
+      input[type="number"] {
+        width: 150px;
+        padding: 5px;
+        margin-right: 10px;
+      }
+      label {
+        display: inline-block;
+        width: 200px;
+        margin-right: 10px;
+      }
+      .category-management {
+        margin-bottom: 20px;
         padding: 10px;
-        margin-bottom: 10px;
+        border: 1px solid #ccc;
         border-radius: 5px;
       }
+      .category-management h3 {
+        margin-top: 0;
+      }
+      .category-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 10px;
+      }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
   <body>
     <h1>Gestor Financiero</h1>
 
     <div class="container">
+      <!-- Panel Izquierdo -->
       <div class="left-panel">
-        <div class="net-balance">
-          <label for="netBalance">Caja Neta de Undertango:</label>
-          <input type="number" id="netBalance" value="1027241" readonly />
+        <div class="balance-box">
+          <div class="net-balance">
+            <label for="netBalance">Caja Neta de Undertango:</label>
+            <input type="number" id="netBalance" value="900000" />
+          </div>
+          <div class="operational-balance">
+            <label for="operationalBalance">Caja de Gastos Operativos:</label>
+            <input type="number" id="operationalBalance" value="0" />
+          </div>
+          <div class="production-balance">
+            <label for="productionBalance">Caja de Producción:</label>
+            <input type="number" id="productionBalance" value="0" />
+          </div>
         </div>
         <div class="month-panel">
           <h3>Archivos Mensuales</h3>
-          <button onclick="showMonthRecords('noviembre2024')">
-            Noviembre 2024
-          </button>
-          <button onclick="showMonthRecords('diciembre2024')">
-            Diciembre 2024
-          </button>
+          <div id="month-buttons"></div>
         </div>
+        <div id="monthlyRecords" class="month-records"></div>
+        <h3>Registros Completados</h3>
+        <div id="completedRecords"></div>
       </div>
 
-      <div class="right-panel">
+      <!-- Panel Central -->
+      <div class="middle-panel">
+        <div class="category-management">
+          <h3>Gestión de Categorías</h3>
+          <div>
+            <input type="text" id="newCategory" placeholder="Nueva Categoría" />
+            <button onclick="addCategory()">Agregar Categoría</button>
+          </div>
+          <div class="category-actions">
+            <select id="categoryToEdit">
+              <option value="">Seleccione una categoría para editar</option>
+            </select>
+            <input
+              type="text"
+              id="editedCategory"
+              placeholder="Nuevo nombre de categoría"
+            />
+            <button onclick="editCategory()">Guardar Cambios</button>
+            <button onclick="deleteCategory()">Eliminar Categoría</button>
+          </div>
+        </div>
         <div class="category-input">
           <label for="category">Categoría:</label>
           <select id="category">
             <option value="">Seleccione una categoría</option>
           </select>
-          <input type="text" id="newCategory" placeholder="Nueva Categoría" />
-          <button onclick="addCategory()">Agregar Categoría</button>
         </div>
         <div class="name-input">
           <label for="name">Nombre del Ingreso/Egreso:</label>
@@ -103,81 +187,303 @@
           <label for="amount">Cantidad:</label>
           <input type="number" id="amount" />
         </div>
-        <button onclick="addRecord('egresos')">Agregar Egreso</button>
-        <button onclick="addRecord('ingresos')">Agregar Ingreso</button>
+        <div class="source-select">
+          <label for="source">Caja para Egreso:</label>
+          <select id="source">
+            <option value="operationalBalance">
+              Caja de Gastos Operativos
+            </option>
+            <option value="productionBalance">Caja de Producción</option>
+          </select>
+        </div>
+        <div class="button-group">
+          <button onclick="addRecord('egresos')">Agregar Egreso</button>
+          <button onclick="addRecord('ingresos')">Agregar Ingreso</button>
+          <button
+            onclick="handleAutomaticDistribution()"
+            style="background-color: #e6f3ff"
+          >
+            Agregar Ingreso con Distribución Automática
+          </button>
+        </div>
 
         <h2>Egresos</h2>
-        <div id="egresosRecords" class="records"></div>
+        <div id="egresosRecords"></div>
 
         <h2>Ingresos</h2>
-        <div id="ingresosRecords" class="records"></div>
+        <div id="ingresosRecords"></div>
 
-        <div id="monthlyRecords" class="month-records"></div>
+        <button onclick="saveEditedRecord()" style="margin-top: 20px">
+          Guardar Cambios
+        </button>
+      </div>
+
+      <!-- Panel Derecho -->
+      <div class="right-panel">
+        <h2>Distribución de Gastos</h2>
+        <div class="chart-container">
+          <canvas id="expensesChart"></canvas>
+        </div>
+        <h2>Distribución de Ingresos</h2>
+        <div class="chart-container">
+          <canvas id="incomesChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal para impuestos -->
+    <div id="taxModal" class="modal">
+      <div class="modal-content">
+        <h3>¿El ingreso tiene impuestos?</h3>
+        <div class="modal-buttons">
+          <button onclick="handleTaxResponse(true)">Sí</button>
+          <button onclick="handleTaxResponse(false)">No</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal para monto de impuestos -->
+    <div id="taxAmountModal" class="modal">
+      <div class="modal-content">
+        <h3>Indique el monto del impuesto</h3>
+        <input type="number" id="taxAmount" step="0.01" />
+        <div class="modal-buttons">
+          <button onclick="processTaxAmount()">Aceptar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal para caché de artista -->
+    <div id="cacheModal" class="modal">
+      <div class="modal-content">
+        <h3>Distribución del Caché de Artista</h3>
+        <p id="cacheDistribution"></p>
+        <div class="modal-buttons">
+          <button onclick="closeModal('cacheModal')">Aceptar</button>
+        </div>
       </div>
     </div>
 
     <script>
       let egresosRecords = [];
       let ingresosRecords = [];
-      let archivedRecords = {
-        noviembre2024: { egresos: [], ingresos: [] },
-        diciembre2024: { egresos: [], ingresos: [] },
-      };
-      let categories = [];
-      let netBalance = 1027241;
-
-      let paymentSortable = null;
-      let owedSortable = null;
+      let completedRecords = [];
+      let archivedRecords = {};
+      let categories = [
+        "Impuestos",
+        "Caché de Artista",
+        "Ingreso Automático",
+        "Distribución Automática",
+      ];
+      let netBalance = 900000;
+      let operationalBalance = 0;
+      let productionBalance = 0;
+      let expensesChart;
+      let incomesChart;
+      let editingRecord = null;
+      let editingType = null;
 
       document.addEventListener("DOMContentLoaded", function () {
-        const savedEgresos = localStorage.getItem("egresosRecords");
-        const savedIngresos = localStorage.getItem("ingresosRecords");
-        const savedNetBalance = localStorage.getItem("netBalance");
-        const savedCategories = localStorage.getItem("categories");
-        const savedArchived = localStorage.getItem("archivedRecords");
-
-        if (savedEgresos) {
-          egresosRecords = JSON.parse(savedEgresos);
-        }
-        if (savedIngresos) {
-          ingresosRecords = JSON.parse(savedIngresos);
-        }
-        if (savedNetBalance) {
-          netBalance = parseFloat(savedNetBalance);
-          document.getElementById("netBalance").value = netBalance;
-        }
-        if (savedCategories) {
-          categories = JSON.parse(savedCategories);
-          updateCategoryDropdown();
-        }
-        if (savedArchived) {
-          archivedRecords = JSON.parse(savedArchived);
-        }
-
+        loadInitialData();
         renderRecords("egresos");
         renderRecords("ingresos");
-        initializeSortable();
+        renderCompletedRecords();
+        initializeCharts();
+        updateCharts();
+        updateMonthButtons();
+        updateCategoryDropdowns();
+        setupBalanceEditing();
       });
 
-      function addCategory() {
-        const newCategory = document.getElementById("newCategory").value.trim();
-        if (newCategory && !categories.includes(newCategory)) {
-          categories.push(newCategory);
-          saveCategories();
-          updateCategoryDropdown();
-          document.getElementById("newCategory").value = "";
+      function loadInitialData() {
+        const savedNetBalance = localStorage.getItem("netBalance");
+        const savedOperationalBalance =
+          localStorage.getItem("operationalBalance");
+        const savedProductionBalance =
+          localStorage.getItem("productionBalance");
+        const savedCategories = localStorage.getItem("categories");
+        const savedEgresos = localStorage.getItem("egresosRecords");
+        const savedIngresos = localStorage.getItem("ingresosRecords");
+        const savedCompleted = localStorage.getItem("completedRecords");
+
+        if (savedNetBalance) netBalance = parseFloat(savedNetBalance);
+        if (savedOperationalBalance)
+          operationalBalance = parseFloat(savedOperationalBalance);
+        if (savedProductionBalance)
+          productionBalance = parseFloat(savedProductionBalance);
+        if (savedCategories) categories = JSON.parse(savedCategories);
+        if (savedEgresos) egresosRecords = JSON.parse(savedEgresos);
+        if (savedIngresos) ingresosRecords = JSON.parse(savedIngresos);
+        if (savedCompleted) completedRecords = JSON.parse(savedCompleted);
+
+        updateBalanceDisplay();
+      }
+
+      function setupBalanceEditing() {
+        const balanceInputs = document.querySelectorAll(
+          '.balance-box input[type="number"]'
+        );
+        balanceInputs.forEach((input) => {
+          input.addEventListener("change", function () {
+            const balanceType = this.id;
+            const newValue = parseFloat(this.value);
+            if (!isNaN(newValue)) {
+              window[balanceType] = newValue;
+              saveAllBalances();
+              if (balanceType === "netBalance") {
+                updateNetBalanceAndSave();
+              }
+            }
+          });
+        });
+      }
+
+      function handleAutomaticDistribution() {
+        const amount = parseFloat(document.getElementById("amount").value);
+        const date = document.getElementById("date").value;
+        const name = document.getElementById("name").value;
+        const selectedCategory = document.getElementById("category").value;
+
+        if (!amount || !date || !name || !selectedCategory) {
+          alert("Por favor complete todos los campos antes de continuar.");
+          return;
+        }
+
+        document.getElementById("taxModal").style.display = "block";
+      }
+
+      function handleTaxResponse(hasTax) {
+        document.getElementById("taxModal").style.display = "none";
+        if (hasTax) {
+          document.getElementById("taxAmountModal").style.display = "block";
+        } else {
+          processDistribution(0);
         }
       }
 
-      function updateCategoryDropdown() {
-        const categoryDropdown = document.getElementById("category");
-        categoryDropdown.innerHTML =
-          '<option value="">Seleccione una categoría</option>';
-        categories.forEach((category) => {
-          const option = document.createElement("option");
-          option.value = category;
-          option.textContent = category;
-          categoryDropdown.appendChild(option);
+      function processTaxAmount() {
+        const taxAmount = parseFloat(
+          document.getElementById("taxAmount").value
+        );
+        if (isNaN(taxAmount)) {
+          alert("Por favor ingrese un monto válido");
+          return;
+        }
+        document.getElementById("taxAmountModal").style.display = "none";
+        processDistribution(taxAmount);
+      }
+
+      function processDistribution(taxAmount) {
+        const amount = parseFloat(document.getElementById("amount").value);
+        const selectedCategory = document.getElementById("category").value;
+        const netAmount = amount - taxAmount;
+
+        const netBalanceAmount = netAmount * 0.1;
+        const operationalAmount = netAmount * 0.3;
+        const productionAmount = netAmount * 0.1;
+        const cacheAmount = netAmount * 0.5;
+
+        netBalance += netBalanceAmount;
+        operationalBalance += operationalAmount;
+        productionBalance += productionAmount;
+
+        updateNetBalanceAndSave();
+        updateBalanceDisplay();
+
+        addAutomaticRecord(
+          "ingresos",
+          amount,
+          selectedCategory,
+          document.getElementById("name").value
+        );
+
+        if (taxAmount > 0) {
+          addAutomaticRecord("egresos", taxAmount, "Impuestos");
+        }
+
+        const biancaAmount = cacheAmount * 0.5;
+        const pabloAmount = cacheAmount * 0.5;
+
+        document.getElementById("cacheDistribution").innerHTML = `
+                El 50% de caché de artista es $${cacheAmount.toFixed(2)}<br>
+                25% para Bianca: $${biancaAmount.toFixed(2)}<br>
+                25% para Pablo: $${pabloAmount.toFixed(2)}
+            `;
+
+        document.getElementById("cacheModal").style.display = "block";
+
+        addAutomaticRecord("egresos", biancaAmount, "Caché Bianca");
+        addAutomaticRecord("egresos", pabloAmount, "Caché Pablo");
+
+        clearInputs();
+        updateCharts();
+      }
+
+      function addCategory() {
+        const newCategory = document.getElementById("newCategory").value.trim();
+
+        if (newCategory && !categories.includes(newCategory)) {
+          categories.push(newCategory);
+          saveCategories();
+          updateCategoryDropdowns();
+          document.getElementById("newCategory").value = "";
+        } else {
+          alert("La categoría ya existe o está vacía.");
+        }
+      }
+
+      function editCategory() {
+        const categoryToEdit = document.getElementById("categoryToEdit").value;
+        const editedCategory = document
+          .getElementById("editedCategory")
+          .value.trim();
+        if (
+          categoryToEdit &&
+          editedCategory &&
+          !categories.includes(editedCategory)
+        ) {
+          const index = categories.indexOf(categoryToEdit);
+          if (index !== -1) {
+            categories[index] = editedCategory;
+            saveCategories();
+            updateCategoryDropdowns();
+            document.getElementById("editedCategory").value = "";
+          }
+        } else {
+          alert(
+            "Seleccione una categoría para editar y proporcione un nuevo nombre válido."
+          );
+        }
+      }
+
+      function deleteCategory() {
+        const categoryToDelete =
+          document.getElementById("categoryToEdit").value;
+        if (categoryToDelete) {
+          const index = categories.indexOf(categoryToDelete);
+          if (index !== -1) {
+            categories.splice(index, 1);
+            saveCategories();
+            updateCategoryDropdowns();
+          }
+        } else {
+          alert("Seleccione una categoría para eliminar.");
+        }
+      }
+
+      function updateCategoryDropdowns() {
+        const categoryDropdowns = document.querySelectorAll(
+          "#category, #categoryToEdit"
+        );
+        categoryDropdowns.forEach((dropdown) => {
+          dropdown.innerHTML =
+            '<option value="">Seleccione una categoría</option>';
+          categories.sort().forEach((category) => {
+            const option = document.createElement("option");
+            option.value = category;
+            option.textContent = category;
+            dropdown.appendChild(option);
+          });
         });
       }
 
@@ -190,6 +496,8 @@
         );
 
         if (category && name && date && amount) {
+          const source =
+            type === "egresos" ? document.getElementById("source").value : null;
           const newRecord = {
             id: Date.now().toString(),
             category,
@@ -197,99 +505,263 @@
             date,
             amount,
             paid: false,
+            source,
+            type,
           };
 
           if (type === "egresos") {
             egresosRecords.push(newRecord);
-            saveRecords("egresos");
+            if (source === "operationalBalance") operationalBalance -= amount;
+            if (source === "productionBalance") productionBalance -= amount;
           } else {
             ingresosRecords.push(newRecord);
-            saveRecords("ingresos");
+            netBalance += amount;
+            updateNetBalanceAndSave();
           }
+
+          saveAllData();
           renderRecords(type);
+          updateCharts();
           clearInputs();
         }
       }
 
-      function renderRecords(type) {
-        const recordsContainer = document.getElementById(
-          type === "egresos" ? "egresosRecords" : "ingresosRecords"
-        );
-        recordsContainer.innerHTML = "";
+      function addAutomaticRecord(
+        type,
+        amount,
+        category,
+        name = "Distribución Automática"
+      ) {
+        const date = new Date().toISOString().split("T")[0];
+        const newRecord = {
+          id: Date.now().toString(),
+          category,
+          name,
+          date,
+          amount,
+          paid: true,
+          type,
+        };
 
+        if (type === "egresos") {
+          egresosRecords.push(newRecord);
+        } else {
+          ingresosRecords.push(newRecord);
+        }
+
+        saveAllData();
+        renderRecords(type);
+      }
+
+      function renderRecords(type) {
+        const recordsContainer = document.getElementById(type + "Records");
+        recordsContainer.innerHTML = "";
         const records = type === "egresos" ? egresosRecords : ingresosRecords;
         records.forEach((record) => {
           const recordElement = document.createElement("div");
           recordElement.classList.add("record");
-          recordElement.setAttribute("data-id", record.id);
-          if (record.paid) {
-            recordElement.classList.add("completed");
-          }
-
           recordElement.innerHTML = `
-            <div>
-              <strong>Categoría:</strong> ${record.category} - 
-              <strong>Nombre:</strong> ${record.name} - 
-              <strong>Fecha:</strong> ${record.date} - 
-              <strong>Cantidad:</strong> $${record.amount}
-            </div>
-            <button onclick="editRecord('${
-              record.id
-            }', '${type}')">Editar</button>
-            <button onclick="markAsPaid('${record.id}', '${type}')">
-              ${record.paid ? "Archivado" : "Marcar como Completado"}
-            </button>
-            <button onclick="archiveRecord('${
-              record.id
-            }', '${type}')">Archivado</button>
-          `;
-
+                    <div>
+                        <strong>Categoría:</strong> ${record.category} - 
+                        <strong>Nombre:</strong> ${record.name} - 
+                        <strong>Fecha:</strong> ${record.date} - 
+                        <strong>Cantidad:</strong> $${record.amount.toFixed(
+                          2
+                        )} - 
+                        <strong>Caja:</strong> ${record.source || "N/A"}
+                    </div>
+                    <button onclick="completeRecord('${
+                      record.id
+                    }', '${type}')">Marcar como Completado</button>
+                    <button onclick="editRecord('${
+                      record.id
+                    }', '${type}')">Editar</button>`;
           recordsContainer.appendChild(recordElement);
         });
-
-        initializeSortable();
       }
 
-      function markAsPaid(id, type) {
-        if (type === "egresos") {
-          egresosRecords = egresosRecords.map((record) => {
-            if (record.id === id && !record.paid) {
-              netBalance -= record.amount;
-              updateNetBalanceDisplay();
-              saveNetBalance();
-              return { ...record, paid: true };
-            }
-            return record;
-          });
-          saveRecords("egresos");
-        } else {
-          ingresosRecords = ingresosRecords.map((record) => {
-            if (record.id === id && !record.paid) {
-              netBalance += record.amount;
-              updateNetBalanceDisplay();
-              saveNetBalance();
-              return { ...record, paid: true };
-            }
-            return record;
-          });
-          saveRecords("ingresos");
-        }
-        renderRecords(type);
+      function renderCompletedRecords() {
+        const completedRecordsContainer =
+          document.getElementById("completedRecords");
+        completedRecordsContainer.innerHTML = "";
+        completedRecords.forEach((record) => {
+          const recordElement = document.createElement("div");
+          recordElement.classList.add("record", "completed");
+          recordElement.innerHTML = `
+                    <div>
+                        <strong>Categoría:</strong> ${record.category} - 
+                        <strong>Nombre:</strong> ${record.name} - 
+                        <strong>Fecha:</strong> ${record.date} - 
+                        <strong>Cantidad:</strong> $${record.amount.toFixed(
+                          2
+                        )} - 
+                        <strong>Tipo:</strong> ${
+                          record.type === "egresos" ? "Egreso" : "Ingreso"
+                        } - 
+                        <strong>Caja:</strong> ${record.source || "N/A"}
+                    </div>`;
+          completedRecordsContainer.appendChild(recordElement);
+        });
       }
 
-      function archiveRecord(id, type) {
+      function completeRecord(id, type) {
         const records = type === "egresos" ? egresosRecords : ingresosRecords;
-        const record = records.find((record) => record.id === id);
-        if (record) {
-          const month = new Date(record.date).getMonth();
-          const year = new Date(record.date).getFullYear();
-          const key =
-            month === 10 && year === 2024 ? "noviembre2024" : "diciembre2024";
-          archivedRecords[key][type].push(record);
-          deleteRecord(id, type);
-          saveArchivedRecords();
+        const recordIndex = records.findIndex((record) => record.id === id);
+        if (recordIndex !== -1) {
+          const completedRecord = records.splice(recordIndex, 1)[0];
+          completedRecord.paid = true;
+          completedRecords.push(completedRecord);
+
+          // Update balance based on the record type and source
+          if (type === "egresos") {
+            if (completedRecord.source === "operationalBalance") {
+              operationalBalance += completedRecord.amount;
+            } else if (completedRecord.source === "productionBalance") {
+              productionBalance += completedRecord.amount;
+            }
+          } else {
+            // For ingresos, add to netBalance
+            netBalance += completedRecord.amount;
+            updateNetBalanceAndSave();
+          }
+
+          saveAllData();
           renderRecords(type);
+          renderCompletedRecords();
+          updateCharts();
+          updateBalanceDisplay();
         }
+      }
+
+      function saveAllData() {
+        localStorage.setItem("egresosRecords", JSON.stringify(egresosRecords));
+        localStorage.setItem(
+          "ingresosRecords",
+          JSON.stringify(ingresosRecords)
+        );
+        localStorage.setItem(
+          "completedRecords",
+          JSON.stringify(completedRecords)
+        );
+        saveAllBalances();
+        saveCategories();
+      }
+
+      function saveCategories() {
+        localStorage.setItem("categories", JSON.stringify(categories));
+      }
+
+      function saveAllBalances() {
+        localStorage.setItem("netBalance", netBalance);
+        localStorage.setItem("operationalBalance", operationalBalance);
+        localStorage.setItem("productionBalance", productionBalance);
+      }
+
+      function updateBalanceDisplay() {
+        document.getElementById("netBalance").value = netBalance.toFixed(2);
+        document.getElementById("operationalBalance").value =
+          operationalBalance.toFixed(2);
+        document.getElementById("productionBalance").value =
+          productionBalance.toFixed(2);
+      }
+
+      function clearInputs() {
+        document.getElementById("category").value = "";
+        document.getElementById("name").value = "";
+        document.getElementById("date").value = "";
+        document.getElementById("amount").value = "";
+      }
+
+      function closeModal(modalId) {
+        document.getElementById(modalId).style.display = "none";
+      }
+
+      function initializeCharts() {
+        const expensesCtx = document
+          .getElementById("expensesChart")
+          .getContext("2d");
+        expensesChart = new Chart(expensesCtx, {
+          type: "pie",
+          data: {
+            labels: [],
+            datasets: [
+              {
+                data: [],
+                backgroundColor: [
+                  "#FF6384",
+                  "#36A2EB",
+                  "#FFCE56",
+                  "#4BC0C0",
+                  "#9966FF",
+                ],
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            title: {
+              display: true,
+              text: "Distribución de Gastos por Categoría",
+            },
+          },
+        });
+
+        const incomesCtx = document
+          .getElementById("incomesChart")
+          .getContext("2d");
+        incomesChart = new Chart(incomesCtx, {
+          type: "pie",
+          data: {
+            labels: [],
+            datasets: [
+              {
+                data: [],
+                backgroundColor: [
+                  "#FF6384",
+                  "#36A2EB",
+                  "#FFCE56",
+                  "#4BC0C0",
+                  "#9966FF",
+                ],
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            title: {
+              display: true,
+              text: "Distribución de Ingresos por Categoría",
+            },
+          },
+        });
+      }
+
+      function updateCharts() {
+        updateChart(
+          egresosRecords,
+          expensesChart,
+          "Distribución de Gastos por Categoría"
+        );
+        updateChart(
+          ingresosRecords,
+          incomesChart,
+          "Distribución de Ingresos por Categoría"
+        );
+      }
+
+      function updateChart(records, chart, title) {
+        const categoriesData = {};
+        records.forEach((record) => {
+          if (!categoriesData[record.category])
+            categoriesData[record.category] = 0;
+          categoriesData[record.category] += record.amount;
+        });
+
+        chart.data.labels = Object.keys(categoriesData);
+        chart.data.datasets[0].data = Object.values(categoriesData);
+
+        chart.options.title.text = title;
+        chart.update();
       }
 
       function editRecord(id, type) {
@@ -300,143 +772,111 @@
           document.getElementById("name").value = record.name;
           document.getElementById("date").value = record.date;
           document.getElementById("amount").value = record.amount;
-          deleteRecord(id, type);
+          if (type === "egresos") {
+            document.getElementById("source").value = record.source;
+          }
+          editingRecord = record;
+          editingType = type;
         }
       }
 
-      function deleteRecord(id, type) {
-        if (type === "egresos") {
-          egresosRecords = egresosRecords.filter((record) => record.id !== id);
-          saveRecords("egresos");
-        } else {
-          ingresosRecords = ingresosRecords.filter(
-            (record) => record.id !== id
+      function saveEditedRecord() {
+        if (editingRecord) {
+          editingRecord.category = document.getElementById("category").value;
+          editingRecord.name = document.getElementById("name").value;
+          editingRecord.date = document.getElementById("date").value;
+          editingRecord.amount = parseFloat(
+            document.getElementById("amount").value
           );
-          saveRecords("ingresos");
-        }
-        renderRecords(type);
-      }
-
-      function saveRecords(type) {
-        if (type === "egresos") {
-          localStorage.setItem(
-            "egresosRecords",
-            JSON.stringify(egresosRecords)
-          );
-        } else {
-          localStorage.setItem(
-            "ingresosRecords",
-            JSON.stringify(ingresosRecords)
-          );
+          if (editingType === "egresos") {
+            editingRecord.source = document.getElementById("source").value;
+          }
+          saveAllData();
+          renderRecords(editingType);
+          updateCharts();
+          clearInputs();
+          editingRecord = null;
         }
       }
 
-      function saveNetBalance() {
-        localStorage.setItem("netBalance", netBalance.toString());
+      function updateMonthButtons() {
+        const monthButtonsContainer = document.getElementById("month-buttons");
+        monthButtonsContainer.innerHTML = "";
+        const months = [
+          ...new Set(
+            [...egresosRecords, ...ingresosRecords].map((record) =>
+              record.date.substring(0, 7)
+            )
+          ),
+        ];
+        months.sort().forEach((month) => {
+          const button = document.createElement("button");
+          button.textContent = month;
+          button.onclick = () => showMonthlyRecords(month);
+          monthButtonsContainer.appendChild(button);
+        });
       }
 
-      function saveCategories() {
-        localStorage.setItem("categories", JSON.stringify(categories));
-      }
-
-      function saveArchivedRecords() {
-        localStorage.setItem(
-          "archivedRecords",
-          JSON.stringify(archivedRecords)
+      function showMonthlyRecords(month) {
+        const monthlyRecordsContainer =
+          document.getElementById("monthlyRecords");
+        monthlyRecordsContainer.innerHTML = "";
+        const monthlyEgresos = egresosRecords.filter((record) =>
+          record.date.startsWith(month)
         );
+        const monthlyIngresos = ingresosRecords.filter((record) =>
+          record.date.startsWith(month)
+        );
+
+        const totalEgresos = monthlyEgresos.reduce(
+          (sum, record) => sum + record.amount,
+          0
+        );
+        const totalIngresos = monthlyIngresos.reduce(
+          (sum, record) => sum + record.amount,
+          0
+        );
+
+        monthlyRecordsContainer.innerHTML = `
+                <h3>Registros de ${month}</h3>
+                <p>Total Egresos: $${totalEgresos.toFixed(2)}</p>
+                <p>Total Ingresos: $${totalIngresos.toFixed(2)}</p>
+                <p>Balance: $${(totalIngresos - totalEgresos).toFixed(2)}</p>
+                <h4>Egresos:</h4>
+                ${monthlyEgresos
+                  .map(
+                    (record) => `
+                    <div class="record">
+                        <strong>${record.category}</strong> - ${
+                      record.name
+                    } - $${record.amount.toFixed(2)} - Caja: ${
+                      record.source || "N/A"
+                    }
+                    </div>
+                `
+                  )
+                  .join("")}
+                <h4>Ingresos:</h4>
+                ${monthlyIngresos
+                  .map(
+                    (record) => `
+                    <div class="record">
+                        <strong>${record.category}</strong> - ${
+                      record.name
+                    } - $${record.amount.toFixed(2)}
+                    </div>
+                `
+                  )
+                  .join("")}
+            `;
       }
 
-      function updateNetBalanceDisplay() {
-        document.getElementById("netBalance").value = netBalance;
+      function updateNetBalanceAndSave() {
+        localStorage.setItem("netBalance", netBalance);
+        document.getElementById("netBalance").value = netBalance.toFixed(2);
       }
 
-      function clearInputs() {
-        document.getElementById("category").value = "";
-        document.getElementById("name").value = "";
-        document.getElementById("date").value = "";
-        document.getElementById("amount").value = "";
-      }
-
-      function showMonthRecords(month) {
-        const recordsContainer = document.getElementById("monthlyRecords");
-        recordsContainer.innerHTML = "";
-
-        const records = archivedRecords[month];
-        const egresos = records.egresos;
-        const ingresos = records.ingresos;
-
-        recordsContainer.innerHTML += `<h3>Egresos - ${month}</h3>`;
-        egresos.forEach((record) => {
-          const recordElement = document.createElement("div");
-          recordElement.classList.add("record");
-
-          recordElement.innerHTML = `
-            <div>
-              <strong>Categoría:</strong> ${record.category} - 
-              <strong>Nombre:</strong> ${record.name} - 
-              <strong>Fecha:</strong> ${record.date} - 
-              <strong>Cantidad:</strong> $${record.amount}
-            </div>
-          `;
-
-          recordsContainer.appendChild(recordElement);
-        });
-
-        recordsContainer.innerHTML += `<h3>Ingresos - ${month}</h3>`;
-        ingresos.forEach((record) => {
-          const recordElement = document.createElement("div");
-          recordElement.classList.add("record");
-
-          recordElement.innerHTML = `
-            <div>
-              <strong>Categoría:</strong> ${record.category} - 
-              <strong>Nombre:</strong> ${record.name} - 
-              <strong>Fecha:</strong> ${record.date} - 
-              <strong>Cantidad:</strong> $${record.amount}
-            </div>
-          `;
-
-          recordsContainer.appendChild(recordElement);
-        });
-      }
-
-      function initializeSortable() {
-        if (paymentSortable) {
-          paymentSortable.destroy();
-        }
-        if (owedSortable) {
-          owedSortable.destroy();
-        }
-
-        var egresosRecordsContainer = document.getElementById("egresosRecords");
-        paymentSortable = Sortable.create(egresosRecordsContainer, {
-          animation: 150,
-          onEnd: function (evt) {
-            const newOrder = Array.from(egresosRecordsContainer.children).map(
-              (child) => child.getAttribute("data-id")
-            );
-            egresosRecords.sort(
-              (a, b) => newOrder.indexOf(a.id) - newOrder.indexOf(b.id)
-            );
-            saveRecords("egresos");
-          },
-        });
-
-        var ingresosRecordsContainer =
-          document.getElementById("ingresosRecords");
-        owedSortable = Sortable.create(ingresosRecordsContainer, {
-          animation: 150,
-          onEnd: function (evt) {
-            const newOrder = Array.from(ingresosRecordsContainer.children).map(
-              (child) => child.getAttribute("data-id")
-            );
-            ingresosRecords.sort(
-              (a, b) => newOrder.indexOf(a.id) - newOrder.indexOf(b.id)
-            );
-            saveRecords("ingresos");
-          },
-        });
-      }
+      updateCategoryDropdowns();
     </script>
   </body>
 </html>

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fondo de Inversiones (FDI)</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        margin: 0;
+        padding: 20px;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+      }
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      .info-box {
+        background-color: #f0f0f0;
+        border: 1px solid #ddd;
+        padding: 10px;
+        margin-bottom: 20px;
+      }
+      form {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-width: 300px;
+      }
+      input,
+      button {
+        padding: 5px;
+      }
+      button {
+        cursor: pointer;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        padding: 10px;
+      }
+      button:hover {
+        background-color: #45a049;
+      }
+      .distribution-box {
+        background-color: #e6f3ff;
+        border: 1px solid #b8d8ff;
+        padding: 10px;
+        margin-bottom: 20px;
+      }
+      .distribution-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+      }
+      #editDistributionAmount {
+        width: 100px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Fondo de Inversiones (FDI)</h1>
+
+    <div class="info-box">
+      <p>
+        <strong>Valor de la Acción:</strong> $<span id="shareValue">0.00</span>
+      </p>
+      <p><strong>Total de Acciones:</strong> <span id="totalShares">0</span></p>
+    </div>
+
+    <div class="distribution-box">
+      <h2>Caja de Distribución Semanal</h2>
+      <p>
+        <strong>Monto actual:</strong> $
+        <span id="distributionAmount">0.00</span>
+        <button onclick="toggleEditDistribution()">Editar</button>
+      </p>
+      <div id="editDistributionForm" style="display: none">
+        <input type="number" id="editDistributionAmount" step="0.01" min="0" />
+        <button onclick="updateDistributionAmount()">Guardar</button>
+        <button onclick="toggleEditDistribution()">Cancelar</button>
+      </div>
+      <div class="distribution-buttons">
+        <button onclick="calculateDistribution()">Calcular Distribución</button>
+        <button onclick="resetDistribution()">Reiniciar Caja</button>
+      </div>
+      <p id="distributionResult"></p>
+    </div>
+
+    <h2>Inversores</h2>
+    <table id="investorsTable">
+      <thead>
+        <tr>
+          <th>Nombre del Inversor</th>
+          <th>Cantidad de Acciones</th>
+          <th>Valor Total</th>
+          <th>Distribución Semanal</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Los inversores se agregarán aquí dinámicamente -->
+      </tbody>
+    </table>
+
+    <h2>Agregar Inversor</h2>
+    <form id="addInvestorForm">
+      <label for="investorName">Nombre del Inversor:</label>
+      <input type="text" id="investorName" required />
+      <label for="shareCount">Cantidad de Acciones:</label>
+      <input type="number" id="shareCount" required min="1" />
+      <button type="submit">Agregar Inversor</button>
+    </form>
+
+    <script>
+      let investors = [];
+      let distributionAmount = 0;
+
+      function loadNetBalance() {
+        const netBalance = parseFloat(localStorage.getItem("netBalance")) || 0;
+        return netBalance;
+      }
+
+      function calculateTotalShares() {
+        return investors.reduce(
+          (total, investor) => total + investor.shares,
+          0
+        );
+      }
+
+      function calculateShareValue() {
+        const netBalance = loadNetBalance();
+        const totalShares = calculateTotalShares();
+        return totalShares > 0 ? netBalance / totalShares : 0;
+      }
+
+      function updateDisplay() {
+        const shareValue = calculateShareValue();
+        const totalShares = calculateTotalShares();
+        document.getElementById("shareValue").textContent =
+          shareValue.toFixed(2);
+        document.getElementById("totalShares").textContent = totalShares;
+        document.getElementById("distributionAmount").textContent =
+          distributionAmount.toFixed(2);
+
+        const tableBody = document.querySelector("#investorsTable tbody");
+        tableBody.innerHTML = "";
+        investors.forEach((investor) => {
+          const row = tableBody.insertRow();
+          row.insertCell(0).textContent = investor.name;
+          row.insertCell(1).textContent = investor.shares;
+          row.insertCell(2).textContent = `$${(
+            investor.shares * shareValue
+          ).toFixed(2)}`;
+          row.insertCell(3).textContent = `$${(
+            investor.shares *
+            (distributionAmount / totalShares)
+          ).toFixed(2)}`;
+        });
+      }
+
+      function addInvestor(name, shares) {
+        investors.push({ name, shares: parseInt(shares) });
+        localStorage.setItem("investors", JSON.stringify(investors));
+        updateDisplay();
+      }
+
+      function calculateDistribution() {
+        const totalShares = calculateTotalShares();
+        const distributionPerShare =
+          totalShares > 0 ? distributionAmount / totalShares : 0;
+        document.getElementById(
+          "distributionResult"
+        ).textContent = `Distribución por acción: $${distributionPerShare.toFixed(
+          2
+        )}`;
+        updateDisplay();
+      }
+
+      function resetDistribution() {
+        distributionAmount = 0;
+        document.getElementById("distributionResult").textContent = "";
+        localStorage.setItem("distributionAmount", distributionAmount);
+        updateDisplay();
+      }
+
+      function toggleEditDistribution() {
+        const editForm = document.getElementById("editDistributionForm");
+        editForm.style.display =
+          editForm.style.display === "none" ? "block" : "none";
+        if (editForm.style.display === "block") {
+          document.getElementById("editDistributionAmount").value =
+            distributionAmount.toFixed(2);
+        }
+      }
+
+      function updateDistributionAmount() {
+        const newAmount = parseFloat(
+          document.getElementById("editDistributionAmount").value
+        );
+        if (!isNaN(newAmount) && newAmount >= 0) {
+          distributionAmount = newAmount;
+          localStorage.setItem("distributionAmount", distributionAmount);
+          updateDisplay();
+          toggleEditDistribution();
+        } else {
+          alert("Por favor, ingrese un monto válido.");
+        }
+      }
+
+      document
+        .getElementById("addInvestorForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+          const name = document.getElementById("investorName").value;
+          const shares = document.getElementById("shareCount").value;
+          addInvestor(name, shares);
+          this.reset();
+        });
+
+      // Cargar inversores guardados
+      const savedInvestors = localStorage.getItem("investors");
+      if (savedInvestors) {
+        investors = JSON.parse(savedInvestors);
+      }
+
+      // Cargar monto de distribución guardado
+      const savedDistribution = localStorage.getItem("distributionAmount");
+      if (savedDistribution) {
+        distributionAmount = parseFloat(savedDistribution);
+      }
+
+      // Actualizar la pantalla cada 5 segundos para reflejar cambios en el netBalance
+      setInterval(updateDisplay, 5000);
+
+      // Actualizar la pantalla inicialmente
+      updateDisplay();
+    </script>
+  </body>
+</html>
