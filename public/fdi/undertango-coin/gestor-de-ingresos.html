@@ -69,27 +69,11 @@
         max-width: 400px;
         margin-top: 20px;
       }
-      .modal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
+      .small-chart-container {
         width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        z-index: 1000;
-      }
-      .modal-content {
-        background-color: #fff;
-        margin: 15% auto;
-        padding: 20px;
-        border-radius: 5px;
-        width: 80%;
-        max-width: 500px;
-      }
-      .modal-buttons {
-        margin-top: 15px;
-        text-align: center;
+        max-width: 200px;
+        margin-top: 20px;
+        display: inline-block;
       }
       input[type="number"] {
         width: 150px;
@@ -116,7 +100,53 @@
         gap: 10px;
         margin-top: 10px;
       }
+      .button-group {
+        margin-bottom: 20px;
+      }
+      /* Estilos para modales */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.4);
+      }
+      .modal-content {
+        background-color: #fff;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        max-width: 500px;
+        border-radius: 5px;
+      }
+      .modal-buttons {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 20px;
+      }
+      /* Estilos para el contenedor de gráficos React */
+      .charts-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+      }
+      .chart-wrapper {
+        flex: 1 1 400px;
+      }
+      .small-chart-wrapper {
+        flex: 1 1 200px;
+      }
     </style>
+    <!-- Inclusión de React, ReactDOM, Babel y Chart.js desde CDNs -->
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
   <body>
@@ -190,6 +220,19 @@
         <div class="source-select">
           <label for="source">Caja para Egreso:</label>
           <select id="source">
+            <option value="">Seleccione una caja</option>
+            <option value="operationalBalance">
+              Caja de Gastos Operativos
+            </option>
+            <option value="productionBalance">Caja de Producción</option>
+            <option value="netBalance">Caja Neta de Undertango</option>
+          </select>
+        </div>
+        <div class="source-select">
+          <label for="incomeSource">Caja para Ingreso:</label>
+          <select id="incomeSource">
+            <option value="">Seleccione una caja</option>
+            <option value="netBalance">Caja Neta de Undertango</option>
             <option value="operationalBalance">
               Caja de Gastos Operativos
             </option>
@@ -205,6 +248,8 @@
           >
             Agregar Ingreso con Distribución Automática
           </button>
+          <!-- Modificado el botón de Transfusión -->
+          <button onclick="processTransfer()">Transfusión</button>
         </div>
 
         <h2>Egresos</h2>
@@ -220,14 +265,8 @@
 
       <!-- Panel Derecho -->
       <div class="right-panel">
-        <h2>Distribución de Gastos</h2>
-        <div class="chart-container">
-          <canvas id="expensesChart"></canvas>
-        </div>
-        <h2>Distribución de Ingresos</h2>
-        <div class="chart-container">
-          <canvas id="incomesChart"></canvas>
-        </div>
+        <!-- Contenedor React para los gráficos -->
+        <div id="chartsContainer"></div>
       </div>
     </div>
 
@@ -265,6 +304,7 @@
     </div>
 
     <script>
+      // Variables globales
       let egresosRecords = [];
       let ingresosRecords = [];
       let completedRecords = [];
@@ -274,12 +314,16 @@
         "Caché de Artista",
         "Ingreso Automático",
         "Distribución Automática",
+        "Transferencia",
       ];
-      let netBalance = 900000;
-      let operationalBalance = 0;
-      let productionBalance = 0;
-      let expensesChart;
-      let incomesChart;
+
+      // Objeto para los balances
+      let balances = {
+        netBalance: 900000,
+        operationalBalance: 0,
+        productionBalance: 0,
+      };
+
       let editingRecord = null;
       let editingType = null;
 
@@ -288,33 +332,35 @@
         renderRecords("egresos");
         renderRecords("ingresos");
         renderCompletedRecords();
-        initializeCharts();
-        updateCharts();
         updateMonthButtons();
         updateCategoryDropdowns();
         setupBalanceEditing();
+        // Inicializar los gráficos después de cargar los datos
+        updateCharts();
       });
 
       function loadInitialData() {
-        const savedNetBalance = localStorage.getItem("netBalance");
-        const savedOperationalBalance =
-          localStorage.getItem("operationalBalance");
-        const savedProductionBalance =
-          localStorage.getItem("productionBalance");
+        const savedBalances = localStorage.getItem("balances");
         const savedCategories = localStorage.getItem("categories");
         const savedEgresos = localStorage.getItem("egresosRecords");
         const savedIngresos = localStorage.getItem("ingresosRecords");
         const savedCompleted = localStorage.getItem("completedRecords");
+        const savedArchived = localStorage.getItem("archivedRecords");
 
-        if (savedNetBalance) netBalance = parseFloat(savedNetBalance);
-        if (savedOperationalBalance)
-          operationalBalance = parseFloat(savedOperationalBalance);
-        if (savedProductionBalance)
-          productionBalance = parseFloat(savedProductionBalance);
+        if (savedBalances) balances = JSON.parse(savedBalances);
         if (savedCategories) categories = JSON.parse(savedCategories);
         if (savedEgresos) egresosRecords = JSON.parse(savedEgresos);
         if (savedIngresos) ingresosRecords = JSON.parse(savedIngresos);
-        if (savedCompleted) completedRecords = JSON.parse(savedCompleted);
+        if (savedCompleted) {
+          completedRecords = JSON.parse(savedCompleted);
+          // Asegurarse de que todos los registros completados tengan 'addedToChart'
+          completedRecords.forEach((record) => {
+            if (record.addedToChart === undefined) {
+              record.addedToChart = false;
+            }
+          });
+        }
+        if (savedArchived) archivedRecords = JSON.parse(savedArchived);
 
         updateBalanceDisplay();
       }
@@ -328,11 +374,10 @@
             const balanceType = this.id;
             const newValue = parseFloat(this.value);
             if (!isNaN(newValue)) {
-              window[balanceType] = newValue;
+              balances[balanceType] = newValue;
               saveAllBalances();
-              if (balanceType === "netBalance") {
-                updateNetBalanceAndSave();
-              }
+              updateBalanceDisplay();
+              updateCharts();
             }
           });
         });
@@ -383,12 +428,12 @@
         const productionAmount = netAmount * 0.1;
         const cacheAmount = netAmount * 0.5;
 
-        netBalance += netBalanceAmount;
-        operationalBalance += operationalAmount;
-        productionBalance += productionAmount;
+        balances.netBalance += netBalanceAmount;
+        balances.operationalBalance += operationalAmount;
+        balances.productionBalance += productionAmount;
 
-        updateNetBalanceAndSave();
         updateBalanceDisplay();
+        saveAllBalances();
 
         addAutomaticRecord(
           "ingresos",
@@ -398,22 +443,46 @@
         );
 
         if (taxAmount > 0) {
-          addAutomaticRecord("egresos", taxAmount, "Impuestos");
+          addAutomaticRecord(
+            "egresos",
+            taxAmount,
+            "Impuestos",
+            "Impuestos",
+            "netBalance"
+          );
+          balances.netBalance -= taxAmount;
+          updateBalanceDisplay();
+          saveAllBalances();
         }
 
         const biancaAmount = cacheAmount * 0.5;
         const pabloAmount = cacheAmount * 0.5;
 
         document.getElementById("cacheDistribution").innerHTML = `
-                El 50% de caché de artista es $${cacheAmount.toFixed(2)}<br>
-                25% para Bianca: $${biancaAmount.toFixed(2)}<br>
-                25% para Pablo: $${pabloAmount.toFixed(2)}
-            `;
+          El 50% de caché de artista es $${cacheAmount.toFixed(2)}<br>
+          25% para Bianca: $${biancaAmount.toFixed(2)}<br>
+          25% para Pablo: $${pabloAmount.toFixed(2)}
+        `;
 
         document.getElementById("cacheModal").style.display = "block";
 
-        addAutomaticRecord("egresos", biancaAmount, "Caché Bianca");
-        addAutomaticRecord("egresos", pabloAmount, "Caché Pablo");
+        addAutomaticRecord(
+          "egresos",
+          biancaAmount,
+          "Caché Bianca",
+          "Caché Bianca",
+          "netBalance"
+        );
+        addAutomaticRecord(
+          "egresos",
+          pabloAmount,
+          "Caché Pablo",
+          "Caché Pablo",
+          "netBalance"
+        );
+        balances.netBalance -= biancaAmount + pabloAmount;
+        updateBalanceDisplay();
+        saveAllBalances();
 
         clearInputs();
         updateCharts();
@@ -496,33 +565,50 @@
         );
 
         if (category && name && date && amount) {
-          const source =
-            type === "egresos" ? document.getElementById("source").value : null;
-          const newRecord = {
-            id: Date.now().toString(),
-            category,
-            name,
-            date,
-            amount,
-            paid: false,
-            source,
-            type,
-          };
-
           if (type === "egresos") {
+            const source = document.getElementById("source").value;
+            if (!source) {
+              alert("Seleccione una caja para el egreso.");
+              return;
+            }
+            const newRecord = {
+              id: Date.now().toString(),
+              category,
+              name,
+              date,
+              amount,
+              paid: false,
+              source,
+              type,
+              addedToChart: false, // Inicialmente no agregado al gráfico
+            };
             egresosRecords.push(newRecord);
-            if (source === "operationalBalance") operationalBalance -= amount;
-            if (source === "productionBalance") productionBalance -= amount;
-          } else {
+          } else if (type === "ingresos") {
+            const incomeSource = document.getElementById("incomeSource").value;
+            if (!incomeSource) {
+              alert("Seleccione una caja para el ingreso.");
+              return;
+            }
+            const newRecord = {
+              id: Date.now().toString(),
+              category,
+              name,
+              date,
+              amount,
+              paid: false,
+              source: incomeSource,
+              type,
+              addedToChart: false, // Inicialmente no agregado al gráfico
+            };
             ingresosRecords.push(newRecord);
-            netBalance += amount;
-            updateNetBalanceAndSave();
           }
 
           saveAllData();
           renderRecords(type);
           updateCharts();
           clearInputs();
+        } else {
+          alert("Por favor complete todos los campos.");
         }
       }
 
@@ -530,7 +616,8 @@
         type,
         amount,
         category,
-        name = "Distribución Automática"
+        name = "Distribución Automática",
+        source = null
       ) {
         const date = new Date().toISOString().split("T")[0];
         const newRecord = {
@@ -541,6 +628,8 @@
           amount,
           paid: true,
           type,
+          source,
+          addedToChart: false, // Inicialmente no agregado al gráfico
         };
 
         if (type === "egresos") {
@@ -561,68 +650,98 @@
           const recordElement = document.createElement("div");
           recordElement.classList.add("record");
           recordElement.innerHTML = `
-                    <div>
-                        <strong>Categoría:</strong> ${record.category} - 
-                        <strong>Nombre:</strong> ${record.name} - 
-                        <strong>Fecha:</strong> ${record.date} - 
-                        <strong>Cantidad:</strong> $${record.amount.toFixed(
-                          2
-                        )} - 
-                        <strong>Caja:</strong> ${record.source || "N/A"}
-                    </div>
-                    <button onclick="completeRecord('${
-                      record.id
-                    }', '${type}')">Marcar como Completado</button>
-                    <button onclick="editRecord('${
-                      record.id
-                    }', '${type}')">Editar</button>`;
+            <div>
+              <strong>Categoría:</strong> ${record.category} - 
+              <strong>Nombre:</strong> ${record.name} - 
+              <strong>Fecha:</strong> ${record.date} - 
+              <strong>Cantidad:</strong> $${record.amount.toFixed(2)} - 
+              <strong>Caja:</strong> ${getCajaName(record.source)}
+            </div>
+            <button onclick="completeRecord('${
+              record.id
+            }', '${type}')">Marcar como Completado</button>
+            <button onclick="editRecord('${
+              record.id
+            }', '${type}')">Editar</button>`;
           recordsContainer.appendChild(recordElement);
         });
+      }
+
+      function getCajaName(source) {
+        switch (source) {
+          case "netBalance":
+            return "Caja Neta de Undertango";
+          case "operationalBalance":
+            return "Caja de Gastos Operativos";
+          case "productionBalance":
+            return "Caja de Producción";
+          default:
+            return "N/A";
+        }
       }
 
       function renderCompletedRecords() {
         const completedRecordsContainer =
           document.getElementById("completedRecords");
         completedRecordsContainer.innerHTML = "";
-        completedRecords.forEach((record) => {
+        completedRecords.forEach((record, index) => {
           const recordElement = document.createElement("div");
           recordElement.classList.add("record", "completed");
           recordElement.innerHTML = `
-                    <div>
-                        <strong>Categoría:</strong> ${record.category} - 
-                        <strong>Nombre:</strong> ${record.name} - 
-                        <strong>Fecha:</strong> ${record.date} - 
-                        <strong>Cantidad:</strong> $${record.amount.toFixed(
-                          2
-                        )} - 
-                        <strong>Tipo:</strong> ${
-                          record.type === "egresos" ? "Egreso" : "Ingreso"
-                        } - 
-                        <strong>Caja:</strong> ${record.source || "N/A"}
-                    </div>`;
+            <div>
+              <strong>Categoría:</strong> ${record.category} - 
+              <strong>Nombre:</strong> ${record.name} - 
+              <strong>Fecha:</strong> ${record.date} - 
+              <strong>Cantidad:</strong> $${record.amount.toFixed(2)} - 
+              <strong>Tipo:</strong> ${
+                record.type === "egresos"
+                  ? "Egreso"
+                  : record.type === "ingresos"
+                  ? "Ingreso"
+                  : "Transferencia"
+              } - 
+              <strong>Caja:</strong> ${getCajaName(record.source)} ${
+            record.destination ? "-> " + getCajaName(record.destination) : ""
+          }
+            </div>
+            ${
+              !record.addedToChart
+                ? `<button onclick="addRecordToChart(${index})">Agregar al Gráfico</button>`
+                : `<span style="color: green; font-weight: bold;">Agregado al Gráfico</span>`
+            }
+            <button onclick="deleteCompletedRecord(${index})">Eliminar</button>
+          `;
           completedRecordsContainer.appendChild(recordElement);
         });
+      }
+
+      function addRecordToChart(index) {
+        if (completedRecords[index] && !completedRecords[index].addedToChart) {
+          completedRecords[index].addedToChart = true;
+          saveAllData();
+          renderCompletedRecords();
+          updateCharts();
+          alert("Registro agregado a los gráficos exitosamente.");
+        }
       }
 
       function completeRecord(id, type) {
         const records = type === "egresos" ? egresosRecords : ingresosRecords;
         const recordIndex = records.findIndex((record) => record.id === id);
+
         if (recordIndex !== -1) {
-          const completedRecord = records.splice(recordIndex, 1)[0];
-          completedRecord.paid = true;
+          const completedRecord = {
+            ...records.splice(recordIndex, 1)[0],
+            paid: true,
+            addedToChart: false, // Inicialmente no agregado al gráfico
+          };
           completedRecords.push(completedRecord);
 
-          // Update balance based on the record type and source
+          // Ajustar el balance aquí
           if (type === "egresos") {
-            if (completedRecord.source === "operationalBalance") {
-              operationalBalance += completedRecord.amount;
-            } else if (completedRecord.source === "productionBalance") {
-              productionBalance += completedRecord.amount;
-            }
+            balances[completedRecord.source] -= completedRecord.amount;
           } else {
-            // For ingresos, add to netBalance
-            netBalance += completedRecord.amount;
-            updateNetBalanceAndSave();
+            balances[completedRecord.source] += completedRecord.amount;
           }
 
           saveAllData();
@@ -631,6 +750,26 @@
           updateCharts();
           updateBalanceDisplay();
         }
+      }
+
+      function deleteCompletedRecord(index) {
+        const deletedRecord = completedRecords.splice(index, 1)[0];
+
+        // Revertir los cambios en el balance
+        if (deletedRecord.type === "egresos") {
+          balances[deletedRecord.source] += deletedRecord.amount;
+        } else if (deletedRecord.type === "ingresos") {
+          balances[deletedRecord.source] -= deletedRecord.amount;
+        } else if (deletedRecord.type === "transfer") {
+          // Revertir transferencia
+          balances[deletedRecord.source] += deletedRecord.amount;
+          balances[deletedRecord.destination] -= deletedRecord.amount;
+        }
+
+        saveAllData();
+        renderCompletedRecords();
+        updateCharts();
+        updateBalanceDisplay();
       }
 
       function saveAllData() {
@@ -643,6 +782,10 @@
           "completedRecords",
           JSON.stringify(completedRecords)
         );
+        localStorage.setItem(
+          "archivedRecords",
+          JSON.stringify(archivedRecords)
+        );
         saveAllBalances();
         saveCategories();
       }
@@ -652,17 +795,16 @@
       }
 
       function saveAllBalances() {
-        localStorage.setItem("netBalance", netBalance);
-        localStorage.setItem("operationalBalance", operationalBalance);
-        localStorage.setItem("productionBalance", productionBalance);
+        localStorage.setItem("balances", JSON.stringify(balances));
       }
 
       function updateBalanceDisplay() {
-        document.getElementById("netBalance").value = netBalance.toFixed(2);
+        document.getElementById("netBalance").value =
+          balances.netBalance.toFixed(2);
         document.getElementById("operationalBalance").value =
-          operationalBalance.toFixed(2);
+          balances.operationalBalance.toFixed(2);
         document.getElementById("productionBalance").value =
-          productionBalance.toFixed(2);
+          balances.productionBalance.toFixed(2);
       }
 
       function clearInputs() {
@@ -670,213 +812,453 @@
         document.getElementById("name").value = "";
         document.getElementById("date").value = "";
         document.getElementById("amount").value = "";
+        document.getElementById("source").value = "";
+        document.getElementById("incomeSource").value = "";
       }
 
       function closeModal(modalId) {
         document.getElementById(modalId).style.display = "none";
       }
 
-      function initializeCharts() {
-        const expensesCtx = document
-          .getElementById("expensesChart")
-          .getContext("2d");
-        expensesChart = new Chart(expensesCtx, {
-          type: "pie",
-          data: {
-            labels: [],
-            datasets: [
-              {
-                data: [],
-                backgroundColor: [
-                  "#FF6384",
-                  "#36A2EB",
-                  "#FFCE56",
-                  "#4BC0C0",
-                  "#9966FF",
-                ],
-              },
-            ],
-          },
-          options: {
-            responsive: true,
-            title: {
-              display: true,
-              text: "Distribución de Gastos por Categoría",
-            },
-          },
+      // Funciones para los gráficos con React y Chart.js manualmente
+      function getChartData() {
+        const completedRecordsFiltered = completedRecords.filter(
+          (record) => record.addedToChart
+        );
+        const archivedRecordsFiltered = Object.values(archivedRecords);
+
+        const expensesData = {};
+        const incomesData = {};
+
+        // Procesar registros completados
+        completedRecordsFiltered.forEach((record) => {
+          const data = record.type === "egresos" ? expensesData : incomesData;
+          data[record.category] = (data[record.category] || 0) + record.amount;
         });
 
-        const incomesCtx = document
-          .getElementById("incomesChart")
-          .getContext("2d");
-        incomesChart = new Chart(incomesCtx, {
-          type: "pie",
-          data: {
-            labels: [],
-            datasets: [
-              {
-                data: [],
-                backgroundColor: [
-                  "#FF6384",
-                  "#36A2EB",
-                  "#FFCE56",
-                  "#4BC0C0",
-                  "#9966FF",
-                ],
-              },
-            ],
-          },
-          options: {
-            responsive: true,
-            title: {
-              display: true,
-              text: "Distribución de Ingresos por Categoría",
-            },
-          },
+        // Procesar registros archivados que también tengan 'addedToChart: true'
+        archivedRecordsFiltered.forEach((monthData) => {
+          monthData.egresos.forEach((record) => {
+            if (record.addedToChart) {
+              expensesData[record.category] =
+                (expensesData[record.category] || 0) + record.amount;
+            }
+          });
+          monthData.ingresos.forEach((record) => {
+            if (record.addedToChart) {
+              incomesData[record.category] =
+                (incomesData[record.category] || 0) + record.amount;
+            }
+          });
         });
+
+        // Datos específicos para las cajas
+        const ingresosOperacionales = completedRecordsFiltered
+          .filter(
+            (record) =>
+              record.type === "ingresos" &&
+              record.source === "operationalBalance"
+          )
+          .reduce((totals, record) => {
+            totals[record.category] =
+              (totals[record.category] || 0) + record.amount;
+            return totals;
+          }, {});
+
+        const egresosOperacionales = completedRecordsFiltered
+          .filter(
+            (record) =>
+              record.type === "egresos" &&
+              record.source === "operationalBalance"
+          )
+          .reduce((totals, record) => {
+            totals[record.category] =
+              (totals[record.category] || 0) + record.amount;
+            return totals;
+          }, {});
+
+        const ingresosProduccion = completedRecordsFiltered
+          .filter(
+            (record) =>
+              record.type === "ingresos" &&
+              record.source === "productionBalance"
+          )
+          .reduce((totals, record) => {
+            totals[record.category] =
+              (totals[record.category] || 0) + record.amount;
+            return totals;
+          }, {});
+
+        const egresosProduccion = completedRecordsFiltered
+          .filter(
+            (record) =>
+              record.type === "egresos" && record.source === "productionBalance"
+          )
+          .reduce((totals, record) => {
+            totals[record.category] =
+              (totals[record.category] || 0) + record.amount;
+            return totals;
+          }, {});
+
+        const operationalData = {
+          "Gastos Operativos": balances.operationalBalance,
+        };
+        const productionData = { Producción: balances.productionBalance };
+
+        return {
+          expenses: expensesData,
+          incomes: incomesData,
+          ingresosOperacionales: ingresosOperacionales,
+          egresosOperacionales: egresosOperacionales,
+          ingresosProduccion: ingresosProduccion,
+          egresosProduccion: egresosProduccion,
+          operational: operationalData,
+          production: productionData,
+        };
       }
 
-      function updateCharts() {
-        updateChart(
-          egresosRecords,
-          expensesChart,
-          "Distribución de Gastos por Categoría"
-        );
-        updateChart(
-          ingresosRecords,
-          incomesChart,
-          "Distribución de Ingresos por Categoría"
-        );
+      function getCategoryTotals(records) {
+        return records.reduce((totals, record) => {
+          totals[record.category] =
+            (totals[record.category] || 0) + record.amount;
+          return totals;
+        }, {});
       }
 
-      function updateChart(records, chart, title) {
-        const categoriesData = {};
+      function updateCategoryTotals(totals, records) {
         records.forEach((record) => {
-          if (!categoriesData[record.category])
-            categoriesData[record.category] = 0;
-          categoriesData[record.category] += record.amount;
+          totals[record.category] =
+            (totals[record.category] || 0) + record.amount;
         });
-
-        chart.data.labels = Object.keys(categoriesData);
-        chart.data.datasets[0].data = Object.values(categoriesData);
-
-        chart.options.title.text = title;
-        chart.update();
       }
 
+      // Exponer getChartData al ámbito global
+      window.getChartData = getChartData;
+
+      // Función para actualizar los gráficos desde React
+      function updateCharts() {
+        window.dispatchEvent(new Event("updateCharts"));
+      }
+
+      // Llamar a updateCharts después de cualquier cambio en los datos
+      function showMonthlyRecords(month) {
+        const monthStart = new Date(month.getFullYear(), month.getMonth(), 1);
+        const monthEnd = new Date(month.getFullYear(), month.getMonth() + 1, 0);
+
+        const filteredEgresos = egresosRecords.filter((record) => {
+          const recordDate = new Date(record.date);
+          return recordDate >= monthStart && recordDate <= monthEnd;
+        });
+
+        const filteredIngresos = ingresosRecords.filter((record) => {
+          const recordDate = new Date(record.date);
+          return recordDate >= monthStart && recordDate <= monthEnd;
+        });
+
+        const monthlyRecordsContainer =
+          document.getElementById("monthlyRecords");
+        monthlyRecordsContainer.innerHTML = `
+          <h3>Registros para ${month.toLocaleString("default", {
+            month: "long",
+            year: "numeric",
+          })}</h3>
+          <h4>Egresos</h4>
+          ${
+            filteredEgresos.length > 0
+              ? filteredEgresos
+                  .map(
+                    (record) => `
+              <div class="record">
+                <strong>${record.name}</strong> - $${record.amount.toFixed(
+                      2
+                    )} - ${record.date}
+              </div>
+            `
+                  )
+                  .join("")
+              : "<p>No hay egresos para este mes.</p>"
+          }
+          <h4>Ingresos</h4>
+          ${
+            filteredIngresos.length > 0
+              ? filteredIngresos
+                  .map(
+                    (record) => `
+              <div class="record">
+                <strong>${record.name}</strong> - $${record.amount.toFixed(
+                      2
+                    )} - ${record.date}
+              </div>
+            `
+                  )
+                  .join("")
+              : "<p>No hay ingresos para este mes.</p>"
+          }
+        `;
+
+        // Archivar los registros filtrados
+        const monthKey = `${month.getFullYear()}-${month.getMonth() + 1}`;
+        archivedRecords[monthKey] = {
+          egresos: filteredEgresos,
+          ingresos: filteredIngresos,
+        };
+
+        // Guardar los registros archivados en localStorage
+        localStorage.setItem(
+          "archivedRecords",
+          JSON.stringify(archivedRecords)
+        );
+
+        // Actualizar los gráficos para incluir los registros archivados
+        updateCharts();
+      }
+
+      // Definir la función updateMonthButtons
+      function updateMonthButtons() {
+        const monthButtonsContainer = document.getElementById("month-buttons");
+        monthButtonsContainer.innerHTML = "";
+
+        const currentDate = new Date();
+        for (let i = 0; i < 12; i++) {
+          const month = new Date(
+            currentDate.getFullYear(),
+            currentDate.getMonth() - i,
+            1
+          );
+          const monthName = month.toLocaleString("default", {
+            month: "long",
+            year: "numeric",
+          });
+          const button = document.createElement("button");
+          button.textContent = monthName;
+          button.onclick = () => showMonthlyRecords(month);
+          monthButtonsContainer.appendChild(button);
+        }
+      }
+
+      // Definida la función processTransfer
+      function processTransfer() {
+        alert("Función de transfusión aún no implementada.");
+        // Aquí puedes implementar la lógica de transferencia
+      }
+
+      // Definida la función editRecord
       function editRecord(id, type) {
         const records = type === "egresos" ? egresosRecords : ingresosRecords;
-        const record = records.find((record) => record.id === id);
+        const record = records.find((rec) => rec.id === id);
         if (record) {
+          editingRecord = record;
+          editingType = type;
+
           document.getElementById("category").value = record.category;
           document.getElementById("name").value = record.name;
           document.getElementById("date").value = record.date;
           document.getElementById("amount").value = record.amount;
           if (type === "egresos") {
             document.getElementById("source").value = record.source;
+          } else {
+            document.getElementById("incomeSource").value = record.source;
           }
-          editingRecord = record;
-          editingType = type;
+
+          // Puedes cambiar el texto del botón de agregar a guardar cambios si lo deseas
+          // Por simplicidad, mantenemos el botón "Guardar Cambios" separado
         }
       }
 
       function saveEditedRecord() {
-        if (editingRecord) {
-          editingRecord.category = document.getElementById("category").value;
-          editingRecord.name = document.getElementById("name").value;
-          editingRecord.date = document.getElementById("date").value;
-          editingRecord.amount = parseFloat(
-            document.getElementById("amount").value
+        if (editingRecord && editingType) {
+          const updatedCategory = document
+            .getElementById("category")
+            .value.trim();
+          const updatedName = document.getElementById("name").value.trim();
+          const updatedDate = document.getElementById("date").value;
+          const updatedAmount = parseFloat(
+            document.getElementById("amount").value.trim()
           );
-          if (editingType === "egresos") {
-            editingRecord.source = document.getElementById("source").value;
+
+          if (
+            updatedCategory &&
+            updatedName &&
+            updatedDate &&
+            !isNaN(updatedAmount)
+          ) {
+            editingRecord.category = updatedCategory;
+            editingRecord.name = updatedName;
+            editingRecord.date = updatedDate;
+            editingRecord.amount = updatedAmount;
+            if (editingType === "egresos") {
+              editingRecord.source = document.getElementById("source").value;
+            } else {
+              editingRecord.source =
+                document.getElementById("incomeSource").value;
+            }
+
+            saveAllData();
+            renderRecords(editingType);
+            renderCompletedRecords();
+            updateCharts();
+            clearInputs();
+            editingRecord = null;
+            editingType = null;
+          } else {
+            alert(
+              "Por favor complete todos los campos para guardar los cambios."
+            );
           }
-          saveAllData();
-          renderRecords(editingType);
-          updateCharts();
-          clearInputs();
-          editingRecord = null;
+        } else {
+          alert("No hay ningún registro siendo editado.");
         }
       }
+    </script>
 
-      function updateMonthButtons() {
-        const monthButtonsContainer = document.getElementById("month-buttons");
-        monthButtonsContainer.innerHTML = "";
-        const months = [
-          ...new Set(
-            [...egresosRecords, ...ingresosRecords].map((record) =>
-              record.date.substring(0, 7)
-            )
-          ),
-        ];
-        months.sort().forEach((month) => {
-          const button = document.createElement("button");
-          button.textContent = month;
-          button.onclick = () => showMonthlyRecords(month);
-          monthButtonsContainer.appendChild(button);
+    <!-- Contenedor React para los gráficos -->
+    <script type="text/babel">
+      const { useState, useEffect, useRef } = React;
+
+      function ChartComponent({ title, data, type }) {
+        const chartRef = useRef(null);
+        const chartInstanceRef = useRef(null);
+
+        useEffect(() => {
+          const ctx = chartRef.current.getContext("2d");
+
+          if (chartInstanceRef.current) {
+            chartInstanceRef.current.destroy();
+          }
+
+          const config = {
+            type: type,
+            data: {
+              labels: Object.keys(data),
+              datasets: [
+                {
+                  data: Object.values(data),
+                  backgroundColor: [
+                    "#FF6384",
+                    "#36A2EB",
+                    "#FFCE56",
+                    "#4BC0C0",
+                    "#9966FF",
+                    "#FF9F40",
+                    "#FF6384",
+                    "#36A2EB",
+                    "#FFCE56",
+                    "#4BC0C0",
+                    "#9966FF",
+                    "#FF9F40",
+                  ],
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: {
+                  position: "top",
+                },
+                title: {
+                  display: true,
+                  text: title,
+                },
+              },
+            },
+          };
+
+          chartInstanceRef.current = new Chart(ctx, config);
+        }, [data, title, type]);
+
+        return <canvas ref={chartRef}></canvas>;
+      }
+
+      function FinancialCharts({ getChartData }) {
+        const [chartData, setChartData] = useState({
+          expenses: {},
+          incomes: {},
+          ingresosOperacionales: {},
+          egresosOperacionales: {},
+          ingresosProduccion: {},
+          egresosProduccion: {},
+          operational: {},
+          production: {},
         });
+
+        useEffect(() => {
+          function updateChartsData() {
+            const newChartData = getChartData();
+            setChartData(newChartData);
+          }
+
+          // Inicializar los datos de los gráficos
+          updateChartsData();
+
+          // Escuchar el evento 'updateCharts' para actualizar los gráficos
+          window.addEventListener("updateCharts", updateChartsData);
+
+          // Limpiar el listener al desmontar el componente
+          return () => {
+            window.removeEventListener("updateCharts", updateChartsData);
+          };
+        }, [getChartData]);
+
+        return (
+          <div className="charts-container">
+            {/* Gráfico General de Egresos */}
+            <div className="chart-wrapper">
+              <ChartComponent
+                title="Distribución de Egresos"
+                data={chartData.expenses}
+                type="pie"
+              />
+            </div>
+            {/* Gráfico General de Ingresos */}
+            <div className="chart-wrapper">
+              <ChartComponent
+                title="Distribución de Ingresos"
+                data={chartData.incomes}
+                type="pie"
+              />
+            </div>
+            {/* Gráfico de Ingresos a Gastos Operativos */}
+            <div className="chart-wrapper">
+              <ChartComponent
+                title="Ingresos a Gastos Operativos"
+                data={chartData.ingresosOperacionales}
+                type="bar"
+              />
+            </div>
+            {/* Gráfico de Egresos de Gastos Operativos */}
+            <div className="chart-wrapper">
+              <ChartComponent
+                title="Egresos de Gastos Operativos"
+                data={chartData.egresosOperacionales}
+                type="bar"
+              />
+            </div>
+            {/* Gráfico de Ingresos a Caja de Producción */}
+            <div className="chart-wrapper">
+              <ChartComponent
+                title="Ingresos a Caja de Producción"
+                data={chartData.ingresosProduccion}
+                type="bar"
+              />
+            </div>
+            {/* Gráfico de Egresos de Caja de Producción */}
+            <div className="chart-wrapper">
+              <ChartComponent
+                title="Egresos de Caja de Producción"
+                data={chartData.egresosProduccion}
+                type="bar"
+              />
+            </div>
+          </div>
+        );
       }
 
-      function showMonthlyRecords(month) {
-        const monthlyRecordsContainer =
-          document.getElementById("monthlyRecords");
-        monthlyRecordsContainer.innerHTML = "";
-        const monthlyEgresos = egresosRecords.filter((record) =>
-          record.date.startsWith(month)
-        );
-        const monthlyIngresos = ingresosRecords.filter((record) =>
-          record.date.startsWith(month)
-        );
-
-        const totalEgresos = monthlyEgresos.reduce(
-          (sum, record) => sum + record.amount,
-          0
-        );
-        const totalIngresos = monthlyIngresos.reduce(
-          (sum, record) => sum + record.amount,
-          0
-        );
-
-        monthlyRecordsContainer.innerHTML = `
-                <h3>Registros de ${month}</h3>
-                <p>Total Egresos: $${totalEgresos.toFixed(2)}</p>
-                <p>Total Ingresos: $${totalIngresos.toFixed(2)}</p>
-                <p>Balance: $${(totalIngresos - totalEgresos).toFixed(2)}</p>
-                <h4>Egresos:</h4>
-                ${monthlyEgresos
-                  .map(
-                    (record) => `
-                    <div class="record">
-                        <strong>${record.category}</strong> - ${
-                      record.name
-                    } - $${record.amount.toFixed(2)} - Caja: ${
-                      record.source || "N/A"
-                    }
-                    </div>
-                `
-                  )
-                  .join("")}
-                <h4>Ingresos:</h4>
-                ${monthlyIngresos
-                  .map(
-                    (record) => `
-                    <div class="record">
-                        <strong>${record.category}</strong> - ${
-                      record.name
-                    } - $${record.amount.toFixed(2)}
-                    </div>
-                `
-                  )
-                  .join("")}
-            `;
-      }
-
-      function updateNetBalanceAndSave() {
-        localStorage.setItem("netBalance", netBalance);
-        document.getElementById("netBalance").value = netBalance.toFixed(2);
-      }
-
-      updateCategoryDropdowns();
+      // Renderizar el componente FinancialCharts en el contenedor React
+      ReactDOM.render(
+        <FinancialCharts getChartData={() => window.getChartData()} />,
+        document.getElementById("chartsContainer")
+      );
     </script>
   </body>
 </html>
