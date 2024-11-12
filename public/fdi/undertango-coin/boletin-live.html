@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Boletín No. 24 - UnderTango Fondo de Inversión 4/11/2024</title>
+    <title>Boletín No. 25 - UnderTango Fondo de Inversión 11/11/2024</title>
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -115,21 +115,27 @@
   </head>
   <body>
     <header>
-      <h1>Boletín No. 24 - UnderTango Fondo de Inversión 4/11/2024</h1>
+      <h1>Boletín No. 25 - UnderTango Fondo de Inversión 11/11/2024</h1>
     </header>
     <div class="container">
       <div class="main">
         <div class="info-box">
           <div>
             <h2>CAJA NETA</h2>
-            <p class="large-text">AR$ 885,460.00</p>
-            <p class="bold-text red-text">Variación Semanal de la Caja: -13.88%</p>
-            <p class="bold-text red-text">Variación mensual entre septiembre y octubre: -6.96%</p>
+            <p class="large-text">AR$ 921,700.00</p>
+            <p class="bold-text green-text">
+              Variación Semanal de la Caja: +15.21%
+            </p>
+            <p class="bold-text green-text">
+              Variación mensual entre octubre y noviembre: +4.09%
+            </p>
           </div>
           <div>
-            <h2>VALOR DE LA ACCIÓN p/u</h2>
-            <p class="large-text">AR$ 1,409.97</p>
-            <p class="bold-text">Variación de la acción: -13.89%</p>
+            <h2>VALOR DE LA ACCIÓN</h2>
+            <p class="large-text">AR$ 1,467.68</p>
+            <p class="bold-text green-text">
+              Variación semanal del valor de la acción: +4.09%
+            </p>
           </div>
         </div>
         <div class="chart">
@@ -156,9 +162,11 @@
         <div class="info-box">
           <div>
             <h2>RETRIBUCIÓN SEMANAL</h2>
-            <p class="large-text">Monto a retribuir: AR$ 67,500.00</p>
-            <p class="large-text">AR$ 107.50 por acción</p>
-            <p class="bold-text green-text">Variación por acción: +149.36%</p>
+            <p class="large-text">Monto a retribuir: AR$ 29,000.00</p>
+            <p class="large-text">AR$ 46.18 por acción</p>
+            <p class="bold-text red-text">
+              Variación semanal del monto a retribuir: -57.04%
+            </p>
           </div>
         </div>
       </div>
@@ -174,29 +182,20 @@
             "julio",
             "agosto",
             "septiembre",
-            ["1era semana", "de octubre"],
-            ["2da semana", "de octubre"],
-            ["3era semana", "de octubre"],
-            ["4ta semana", "de octubre"],
-            ["5ta semana", "de octubre"],
+            "octubre",
+            "1era semana de noviembre",
           ],
           datasets: [
             {
-              label: "Montos mensuales mayo-octubre",
-              data: [
-                169322, 273790, 488871, 722539, 951721.6, 1001681, 1027241,
-                1027241, 1028144, 885460,
-              ],
+              label: "Montos mensuales mayo-noviembre",
+              data: [169322, 273790, 488871, 722539, 951721.6, 885460, 921700],
               backgroundColor: [
                 "rgba(255, 159, 64, 0.8)",
                 "rgba(255, 159, 64, 0.8)",
                 "rgba(255, 159, 64, 0.8)",
                 "rgba(255, 159, 64, 0.8)",
                 "rgba(255, 159, 64, 1)",
-                "rgba(54, 162, 235, 0.8)",
-                "rgba(54, 162, 235, 0.8)",
-                "rgba(54, 162, 235, 0.8)",
-                "rgba(54, 162, 235, 0.8)",
+                "rgba(255, 159, 64, 1)" /* Final week of October in blue */,
                 "rgba(54, 162, 235, 1)",
               ],
               borderColor: [
@@ -206,10 +205,7 @@
                 "rgba(255, 159, 64, 1)",
                 "rgba(255, 159, 64, 1)",
                 "rgba(54, 162, 235, 1)",
-                "rgba(54, 162, 235, 1)",
-                "rgba(54, 162, 235, 1)",
-                "rgba(54, 162, 235, 1)",
-                "rgba(54, 162, 235, 1)",
+                "rgba(255, 159, 64, 1)",
               ],
               borderWidth: 1,
             },
@@ -261,7 +257,7 @@
             },
             y: {
               beginAtZero: true,
-              max: 1100000,
+              max: 1000000,
               ticks: {
                 callback: function (value) {
                   return new Intl.NumberFormat("es-AR", {
@@ -277,8 +273,7 @@
         plugins: [ChartDataLabels],
       });
 
-      // Cálculo de la retribución para cada inversor
-      const retribucionPorAccion = 107.50;
+      const retribucionPorAccion = 46.18;
       const accionesPablo = 340;
       const accionesBianca = 248;
       const accionesLuciano = 40;

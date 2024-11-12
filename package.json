@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "chart.js": "^4.4.6",
+    "googleapis": "^144.0.0",
     "lucide-react": "^0.446.0",
     "react-beautiful-dnd": "^13.1.1",
     "react-chartjs-2": "^5.2.0"
