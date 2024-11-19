@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Boletín No. 24 - UnderTango Fondo de Inversión 4/11/2024</title>
+    <title>Boletín No. 26 - UnderTango Fondo de Inversión 19/11/2024</title>
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -115,21 +115,25 @@
   </head>
   <body>
     <header>
-      <h1>Boletín No. 24 - UnderTango Fondo de Inversión 4/11/2024</h1>
+      <h1>Boletín No. 26 - UnderTango Fondo de Inversión 19/11/2024</h1>
     </header>
     <div class="container">
       <div class="main">
         <div class="info-box">
           <div>
             <h2>CAJA NETA</h2>
-            <p class="large-text">AR$ 885,460.00</p>
-            <p class="bold-text red-text">Variación Semanal de la Caja: -13.88%</p>
-            <p class="bold-text red-text">Variación mensual entre septiembre y octubre: -6.96%</p>
+            <p class="large-text">AR$ 983,751.00</p>
+            <p class="bold-text green-text">
+              Variación semanal de la caja: +11.1%
+            </p>
+            <p class="bold-text green-text">
+              Variación mensual entre octubre y noviembre: +11.1%
+            </p>
           </div>
           <div>
             <h2>VALOR DE LA ACCIÓN p/u</h2>
-            <p class="large-text">AR$ 1,409.97</p>
-            <p class="bold-text">Variación de la acción: -13.89%</p>
+            <p class="large-text">AR$ 1,565.68</p>
+            <p class="bold-text green-text">Variación de la acción: +11.1%</p>
           </div>
         </div>
         <div class="chart">
@@ -138,11 +142,10 @@
         <div class="percentages">
           <div>
             <h3>PORCENTAJES:</h3>
-            <p class="bold-text">40% Caché del Artista</p>
-            <p class="bold-text">30% Caja de Gastos Operativos (G.O.)</p>
-            <p class="bold-text">10% Caja de Producción y Mantenimiento</p>
-            <p class="bold-text">10% Para la Caja UnderTango</p>
-            <p class="bold-text">10% Fondo de Inversiones</p>
+            <p class="bold-text">50% Caché de artistas y empleados</p>
+            <p class="bold-text">25% Caja de gastos de producción</p>
+            <p class="bold-text">15% Para la caja UnderTango</p>
+            <p class="bold-text">10% Retribución semanal</p>
           </div>
           <div>
             <h3>TENEDORES:</h3>
@@ -156,9 +159,9 @@
         <div class="info-box">
           <div>
             <h2>RETRIBUCIÓN SEMANAL</h2>
-            <p class="large-text">Monto a retribuir: AR$ 67,500.00</p>
-            <p class="large-text">AR$ 107.50 por acción</p>
-            <p class="bold-text green-text">Variación por acción: +149.36%</p>
+            <p class="large-text">Monto a retribuir: AR$ 33,000.00</p>
+            <p class="large-text">AR$ 52.55 por acción</p>
+            <p class="bold-text green-text">Variación por acción: +13.79%</p>
           </div>
         </div>
       </div>
@@ -174,28 +177,24 @@
             "julio",
             "agosto",
             "septiembre",
-            ["1era semana", "de octubre"],
-            ["2da semana", "de octubre"],
-            ["3era semana", "de octubre"],
-            ["4ta semana", "de octubre"],
-            ["5ta semana", "de octubre"],
+            "octubre",
+            ["1era semana", "de noviembre"],
+            ["2da semana", "de noviembre"],
           ],
           datasets: [
             {
-              label: "Montos mensuales mayo-octubre",
+              label: "Montos mensuales mayo-noviembre",
               data: [
-                169322, 273790, 488871, 722539, 951721.6, 1001681, 1027241,
-                1027241, 1028144, 885460,
+                169322, 273790, 488871, 722539, 951721.6, 885460, 921700,
+                983751,
               ],
               backgroundColor: [
                 "rgba(255, 159, 64, 0.8)",
                 "rgba(255, 159, 64, 0.8)",
                 "rgba(255, 159, 64, 0.8)",
                 "rgba(255, 159, 64, 0.8)",
+                "rgba(255, 159, 64, 0.8)",
                 "rgba(255, 159, 64, 1)",
-                "rgba(54, 162, 235, 0.8)",
-                "rgba(54, 162, 235, 0.8)",
-                "rgba(54, 162, 235, 0.8)",
                 "rgba(54, 162, 235, 0.8)",
                 "rgba(54, 162, 235, 1)",
               ],
@@ -205,9 +204,7 @@
                 "rgba(255, 159, 64, 1)",
                 "rgba(255, 159, 64, 1)",
                 "rgba(255, 159, 64, 1)",
-                "rgba(54, 162, 235, 1)",
-                "rgba(54, 162, 235, 1)",
-                "rgba(54, 162, 235, 1)",
+                "rgba(255, 159, 64, 1)",
                 "rgba(54, 162, 235, 1)",
                 "rgba(54, 162, 235, 1)",
               ],
@@ -224,7 +221,9 @@
               callbacks: {
                 label: function (context) {
                   let label = context.dataset.label || "";
-                  if (label) label += ": ";
+                  if (label) {
+                    label += ": ";
+                  }
                   if (context.parsed.y !== null) {
                     label += new Intl.NumberFormat("es-AR", {
                       style: "currency",
@@ -277,19 +276,24 @@
         plugins: [ChartDataLabels],
       });
 
-      // Cálculo de la retribución para cada inversor
-      const retribucionPorAccion = 107.50;
-      const accionesPablo = 340;
-      const accionesBianca = 248;
-      const accionesLuciano = 40;
+      // Distribution calculator
+      const totalShares = 628;
+      const distributionAmount = 33000;
+      const distributionPerShare = distributionAmount / totalShares;
 
-      const montoPablo = (accionesPablo * retribucionPorAccion).toFixed(2);
-      const montoBianca = (accionesBianca * retribucionPorAccion).toFixed(2);
-      const montoLuciano = (accionesLuciano * retribucionPorAccion).toFixed(2);
+      // Calculate distribution for each investor
+      const investors = [
+        { name: "PABLO CIESLIK", shares: 340 },
+        { name: "BIANCA WAGNER", shares: 248 },
+        { name: "LUCIANO VALDEMARIN", shares: 40 },
+      ];
 
-      console.log("Monto a enviar a Pablo: AR$", montoPablo);
-      console.log("Monto a enviar a Bianca: AR$", montoBianca);
-      console.log("Monto a enviar a Luciano: AR$", montoLuciano);
+      investors.forEach((investor) => {
+        investor.distribution = investor.shares * distributionPerShare;
+        console.log(
+          `${investor.name}: AR$ ${investor.distribution.toFixed(2)}`
+        );
+      });
     </script>
   </body>
 </html>
