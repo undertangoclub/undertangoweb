@@ -86,3 +86,4 @@ temp/
 
 # Custom ignores for sensitive files (example for sensitive configs in JSON)
 public/fdi/undertango-coin/*.json
+public/fdi/undertango-coin/gestor-de-ingresos.html

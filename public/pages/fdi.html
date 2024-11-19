@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fondo de Inversiones y Boletín Semanal</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        color: #333;
+        margin: 0;
+        padding: 20px;
+      }
+      .container {
+        max-width: 1080px;
+        margin: auto;
+        padding: 20px;
+      }
+      header {
+        background-color: #333;
+        color: white;
+        text-align: center;
+        padding: 15px 0;
+        margin-bottom: 20px;
+        border-radius: 5px;
+      }
+      header h1 {
+        margin: 0;
+        font-size: 1.8em;
+      }
+      .card {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        padding: 20px;
+      }
+      .card h2 {
+        margin: 0 0 15px;
+        font-size: 1.5em;
+        color: #444;
+      }
+      .card table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+      }
+      .card table th,
+      .card table td {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: left;
+      }
+      .card table th {
+        background-color: #f4f4f4;
+        font-weight: bold;
+      }
+      .form-group {
+        margin-top: 10px;
+      }
+      label {
+        font-weight: bold;
+      }
+      input[type="number"] {
+        width: 100%;
+        padding: 8px;
+        margin: 5px 0;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+      }
+      button {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+      button:hover {
+        background-color: #218838;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Fondo de Inversiones y Boletín Semanal</h1>
+    </header>
+    <div class="container">
+      <div class="card">
+        <h2>Información Financiera</h2>
+        <p>
+          <strong>Caja Neta:</strong> AR$
+          <span id="netBalance">983,751.00</span>
+        </p>
+        <p>
+          <strong>Valor de la acción:</strong> AR$
+          <span id="shareValue">1,565.68</span>
+        </p>
+      </div>
+
+      <div class="card">
+        <h2>Distribución de Ingresos</h2>
+        <div class="form-group">
+          <label for="distributionAmount">Monto a distribuir (AR$):</label>
+          <input
+            type="number"
+            id="distributionAmount"
+            value="33000"
+            step="100"
+            oninput="recalculateDistribution()"
+          />
+        </div>
+        <p>
+          <strong>Distribución por acción:</strong> AR$
+          <span id="distributionPerShare">52.55</span>
+        </p>
+      </div>
+
+      <div class="card">
+        <h2>Distribución por Inversor</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Inversor</th>
+              <th>Acciones</th>
+              <th>Total (AR$)</th>
+              <th>Distribución Semanal (AR$)</th>
+            </tr>
+          </thead>
+          <tbody id="investorsTable">
+            <!-- Los datos de los inversores serán generados dinámicamente -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <script>
+      // Datos iniciales
+      const investors = [
+        { name: "PABLO CIESLIK", shares: 340 },
+        { name: "BIANCA WAGNER", shares: 248 },
+        { name: "LUCIANO VALDEMARIN", shares: 40 },
+      ];
+      let netBalance = 983751;
+      let distributionAmount = 33000;
+
+      // Función para calcular el valor por acción
+      function calculateShareValue() {
+        const totalShares = investors.reduce(
+          (sum, investor) => sum + investor.shares,
+          0
+        );
+        return netBalance / totalShares;
+      }
+
+      // Función para recalcular la distribución
+      function recalculateDistribution() {
+        const totalShares = investors.reduce(
+          (sum, investor) => sum + investor.shares,
+          0
+        );
+        distributionAmount =
+          parseFloat(document.getElementById("distributionAmount").value) || 0;
+        const distributionPerShare = distributionAmount / totalShares;
+
+        // Actualizar valores
+        document.getElementById("distributionPerShare").textContent =
+          distributionPerShare.toFixed(2);
+
+        // Actualizar tabla de inversores
+        const tableBody = document.getElementById("investorsTable");
+        tableBody.innerHTML = "";
+        investors.forEach((investor) => {
+          const totalValue = investor.shares * calculateShareValue();
+          const weeklyDistribution = investor.shares * distributionPerShare;
+
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${investor.name}</td>
+            <td>${investor.shares}</td>
+            <td>AR$ ${totalValue.toFixed(2)}</td>
+            <td>AR$ ${weeklyDistribution.toFixed(2)}</td>
+          `;
+          tableBody.appendChild(row);
+        });
+      }
+
+      // Inicializar página
+      function init() {
+        // Calcular valores iniciales
+        const shareValue = calculateShareValue();
+        document.getElementById("netBalance").textContent =
+          netBalance.toLocaleString("es-AR", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          });
+        document.getElementById("shareValue").textContent =
+          shareValue.toFixed(2);
+
+        // Actualizar la distribución
+        recalculateDistribution();
+      }
+
+      // Llamar a la función de inicialización
+      document.addEventListener("DOMContentLoaded", init);
+    </script>
+  </body>
+</html>
