@@ -10,29 +10,33 @@
         background-color: #1a0f0a;
         color: #d4a574;
         margin: 0;
-        padding: 20px;
+        padding: 10px;
         min-height: 100vh;
+        box-sizing: border-box;
       }
 
       .container {
-        max-width: 1400px;
+        width: 100%;
+        max-width: 100%;
         margin: 0 auto;
         display: flex;
-        gap: 20px;
+        gap: 15px;
         flex-wrap: wrap;
+        overflow-x: hidden;
       }
 
       .month {
         flex: 1;
-        min-width: 300px;
+        min-width: 280px;
+        max-width: calc(50% - 8px);
         background-color: rgba(41, 27, 23, 0.9);
         border-radius: 10px;
-        padding: 20px;
+        padding: 15px;
       }
 
       .month-header {
-        margin-bottom: 20px;
-        padding: 15px;
+        margin-bottom: 15px;
+        padding: 10px;
         background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
           url("https://hebbkx1anhila5yf.public.blob.vercel-storage.com/11-2024-9vRUE8b2vSmqweM2I7CJw1H9gdAt6k.png");
         background-size: cover;
@@ -43,7 +47,7 @@
       .month-header h2 {
         color: #ffd700;
         margin: 0;
-        font-size: 24px;
+        font-size: 1.5rem;
         text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
       }
 
@@ -55,19 +59,21 @@
 
       .weekday {
         text-align: center;
-        padding: 8px;
+        padding: 6px;
         font-weight: bold;
         color: #ffd700;
+        font-size: 0.9rem;
       }
 
       .day {
         aspect-ratio: 1;
         background-color: rgba(62, 39, 35, 0.5);
         border: 1px solid #4a2f2a;
-        padding: 8px;
-        min-height: 80px;
+        padding: 6px;
+        min-height: 60px;
         cursor: pointer;
         transition: background-color 0.3s;
+        overflow-y: auto;
       }
 
       .day:hover {
@@ -76,11 +82,12 @@
 
       .day-number {
         font-weight: bold;
-        margin-bottom: 5px;
+        margin-bottom: 4px;
+        font-size: 0.9rem;
       }
 
       .event {
-        font-size: 0.8em;
+        font-size: 0.8rem;
         padding: 2px 4px;
         margin: 2px 0;
         background-color: rgba(255, 215, 0, 0.1);
@@ -89,25 +96,30 @@
       }
 
       .add-event {
-        margin-top: 20px;
+        margin-top: 15px;
         background-color: rgba(41, 27, 23, 0.9);
-        padding: 20px;
+        padding: 15px;
         border-radius: 10px;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
       }
 
       .add-event h3 {
         color: #ffd700;
         margin-top: 0;
+        font-size: 1.2rem;
       }
 
       .form-group {
-        margin-bottom: 15px;
+        margin-bottom: 10px;
       }
 
       .form-group label {
         display: block;
-        margin-bottom: 5px;
+        margin-bottom: 4px;
         color: #d4a574;
+        font-size: 0.9rem;
       }
 
       input,
@@ -118,20 +130,134 @@
         border: 1px solid #4a2f2a;
         color: #d4a574;
         border-radius: 4px;
+        font-size: 0.9rem;
+        box-sizing: border-box;
       }
 
       button {
         background-color: #8b4513;
         color: #ffd700;
         border: none;
-        padding: 10px 20px;
+        padding: 8px 16px;
         border-radius: 4px;
         cursor: pointer;
         transition: background-color 0.3s;
+        font-size: 0.9rem;
       }
 
       button:hover {
         background-color: #a0522d;
+      }
+
+      .referencias .tooltip {
+        visibility: hidden;
+        width: 200px;
+        background-color: rgba(41, 27, 23, 0.9);
+        color: #d4a574;
+        text-align: left;
+        border-radius: 6px;
+        padding: 10px;
+        position: absolute;
+        z-index: 1;
+        top: 100%;
+        left: 50%;
+        margin-left: -100px;
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+
+      .referencias:hover .tooltip {
+        visibility: visible;
+        opacity: 1;
+      }
+
+      .referencias:hover .tooltip {
+        visibility: visible;
+        opacity: 1;
+      }
+
+      @media (max-width: 768px) {
+        .month {
+          min-width: 100%;
+          max-width: 100%;
+        }
+
+        .container {
+          gap: 10px;
+        }
+
+        .day {
+          min-height: 50px;
+        }
+      }
+
+      @media (max-width: 768px) {
+        body {
+          padding: 5px;
+        }
+
+        .container {
+          gap: 10px;
+          flex-direction: column; /* Asegura un diseño vertical */
+        }
+
+        .month {
+          min-width: 100%;
+          max-width: 100%;
+          margin: 5px 0;
+        }
+
+        .calendar-grid {
+          grid-template-columns: repeat(2, 1fr); /* Cambia a 2 columnas */
+        }
+
+        .day {
+          font-size: 0.8rem; /* Reduce tamaño en móviles */
+          min-height: 40px;
+          aspect-ratio: auto; /* Quita restricción fija */
+        }
+
+        .month-header h2 {
+          font-size: 1.2rem; /* Reduce el tamaño de encabezados */
+        }
+
+        input,
+        textarea {
+          font-size: 0.8rem;
+          padding: 6px;
+        }
+
+        button {
+          font-size: 0.8rem;
+          padding: 6px 12px;
+        }
+
+        .add-event {
+          padding: 10px;
+        }
+
+        .form-group label {
+          font-size: 0.8rem;
+        }
+
+        .referencias .tooltip {
+          font-size: 0.7rem; /* Ajusta tamaño de las referencias */
+        }
+      }
+
+      @media (max-width: 480px) {
+        .calendar-grid {
+          grid-template-columns: 1fr; /* Una columna en pantallas muy pequeñas */
+        }
+
+        .day {
+          min-height: 30px;
+          font-size: 0.7rem;
+        }
+
+        .referencias .tooltip {
+          width: 150px; /* Reduce el ancho de tooltips */
+        }
       }
     </style>
   </head>
@@ -185,6 +311,19 @@
         <textarea id="eventDescription" rows="3"></textarea>
       </div>
       <button onclick="addEvent()">Agregar Evento</button>
+    </div>
+
+    <div class="referencias">
+      Referencias
+      <span class="tooltip">
+        Ø = Bianca y Pablo<br />
+        TyM = Tiki y Meli<br />
+        YyD = Yesi y Dennis<br />
+        x2 = doble turno<br />
+        Cr = Cruceros<br />
+        CM = Casa Malbec<br />
+        DAM = DAM
+      </span>
     </div>
 
     <script>

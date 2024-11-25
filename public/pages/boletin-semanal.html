@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Boletín No. 26 - UnderTango Fondo de Inversión 19/11/2024</title>
+    <title>Boletín No. 27 - UnderTango Fondo de Inversión 25/11/2024</title>
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -115,25 +115,24 @@
   </head>
   <body>
     <header>
-      <h1>Boletín No. 26 - UnderTango Fondo de Inversión 19/11/2024</h1>
+      <h1>Boletín No. 27 - UnderTango Fondo de Inversión 25/11/2024</h1>
     </header>
     <div class="container">
       <div class="main">
         <div class="info-box">
           <div>
             <h2>CAJA NETA</h2>
-            <p class="large-text">AR$ 983,751.00</p>
-            <p class="bold-text green-text">
-              Variación semanal de la caja: +6.73%
+            <p class="large-text">AR$ 924,300.00</p>
+            <p class="bold-text red-text">
+              Variación semanal de la caja: -6.05%
             </p>
             <p class="bold-text green-text">
-              Variación mensual entre octubre y noviembre: +11.1%
+              Variación mensual entre octubre y noviembre: +4.38%
             </p>
           </div>
           <div>
             <h2>VALOR DE LA ACCIÓN p/u</h2>
-            <p class="large-text">AR$ 1,565.68</p>
-            <p class="bold-text green-text">Variación de la acción: +6.73%</p>
+            <p class="large-text">AR$ 1,471.34</p>
           </div>
         </div>
         <div class="chart">
@@ -160,9 +159,9 @@
         <div class="info-box">
           <div>
             <h2>RETRIBUCIÓN SEMANAL</h2>
-            <p class="large-text">Monto a retribuir: AR$ 33,000.00</p>
-            <p class="large-text">AR$ 52.55 por acción</p>
-            <p class="bold-text green-text">Variación por acción: +13.79%</p>
+            <p class="large-text">Monto a retribuir: AR$ 54,000.00</p>
+            <p class="large-text">AR$ 86.00 por acción</p>
+            <p class="bold-text green-text">Variación por acción: +63.62%</p>
           </div>
         </div>
       </div>
@@ -181,13 +180,14 @@
             "octubre",
             ["1era semana", "de noviembre"],
             ["2da semana", "de noviembre"],
+            ["3era semana", "de noviembre"],
           ],
           datasets: [
             {
               label: "Montos mensuales mayo-noviembre",
               data: [
                 169322, 273790, 488871, 722539, 951721.6, 885460, 921700,
-                983751,
+                983751, 924300,
               ],
               backgroundColor: [
                 "rgba(255, 159, 64, 0.8)",
@@ -198,6 +198,7 @@
                 "rgba(255, 159, 64, 1)",
                 "rgba(54, 162, 235, 0.8)",
                 "rgba(54, 162, 235, 1)",
+                "rgba(255, 99, 132, 0.8)",
               ],
               borderColor: [
                 "rgba(255, 159, 64, 1)",
@@ -208,6 +209,7 @@
                 "rgba(255, 159, 64, 1)",
                 "rgba(54, 162, 235, 1)",
                 "rgba(54, 162, 235, 1)",
+                "rgba(255, 99, 132, 1)",
               ],
               borderWidth: 1,
             },
@@ -275,25 +277,6 @@
           },
         },
         plugins: [ChartDataLabels],
-      });
-
-      // Distribution calculator
-      const totalShares = 628;
-      const distributionAmount = 33000;
-      const distributionPerShare = distributionAmount / totalShares;
-
-      // Calculate distribution for each investor
-      const investors = [
-        { name: "PABLO CIESLIK", shares: 340 },
-        { name: "BIANCA WAGNER", shares: 248 },
-        { name: "LUCIANO VALDEMARIN", shares: 40 },
-      ];
-
-      investors.forEach((investor) => {
-        investor.distribution = investor.shares * distributionPerShare;
-        console.log(
-          `${investor.name}: AR$ ${investor.distribution.toFixed(2)}`
-        );
       });
     </script>
   </body>
