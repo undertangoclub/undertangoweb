@@ -6,7 +6,7 @@
     <title>Calendario de Tango</title>
     <style>
       body {
-        font-family: Arial, sans-serif;
+        font-family: "Arial", sans-serif;
         background-color: #1a0f0a;
         color: #d4a574;
         margin: 0;
@@ -16,18 +16,22 @@
       }
 
       .container {
+        width: 100%;
+        max-width: 100%;
+        margin: 0 auto;
         display: flex;
-        flex-wrap: wrap;
         gap: 15px;
-        justify-content: center;
+        flex-wrap: wrap;
+        overflow-x: hidden;
       }
 
       .month {
+        flex: 1;
+        min-width: 280px;
+        max-width: calc(50% - 8px);
         background-color: rgba(41, 27, 23, 0.9);
         border-radius: 10px;
         padding: 15px;
-        width: 100%;
-        max-width: 800px;
       }
 
       .month-header {
@@ -48,17 +52,12 @@
       }
 
       .calendar-grid {
-        display: flex;
-        flex-wrap: wrap;
-      }
-
-      .week {
-        display: flex;
-        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 4px;
       }
 
       .weekday {
-        width: 40px;
         text-align: center;
         padding: 6px;
         font-weight: bold;
@@ -66,23 +65,15 @@
         font-size: 0.9rem;
       }
 
-      .days-column {
-        display: flex;
-        flex-direction: column;
-        width: 40px;
-      }
-
       .day {
-        height: 40px;
+        aspect-ratio: 1;
         background-color: rgba(62, 39, 35, 0.5);
         border: 1px solid #4a2f2a;
         padding: 6px;
+        min-height: 60px;
         cursor: pointer;
         transition: background-color 0.3s;
-        overflow: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        overflow-y: auto;
       }
 
       .day:hover {
@@ -91,31 +82,17 @@
 
       .day-number {
         font-weight: bold;
+        margin-bottom: 4px;
         font-size: 0.9rem;
       }
 
-      .events-column {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-      }
-
-      .event-row {
-        display: flex;
-        height: 40px;
-        border-bottom: 1px solid #4a2f2a;
-      }
-
       .event {
-        flex: 1;
         font-size: 0.8rem;
         padding: 2px 4px;
+        margin: 2px 0;
         background-color: rgba(255, 215, 0, 0.1);
+        border-radius: 3px;
         color: #ffd700;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
       }
 
       .add-event {
@@ -124,7 +101,7 @@
         padding: 15px;
         border-radius: 10px;
         width: 100%;
-        max-width: 800px;
+        max-width: 100%;
         box-sizing: border-box;
       }
 
@@ -172,13 +149,6 @@
         background-color: #a0522d;
       }
 
-      .referencias {
-        margin-top: 15px;
-        position: relative;
-        display: inline-block;
-        cursor: pointer;
-      }
-
       .referencias .tooltip {
         visibility: hidden;
         width: 200px;
@@ -189,7 +159,7 @@
         padding: 10px;
         position: absolute;
         z-index: 1;
-        bottom: 125%;
+        top: 100%;
         left: 50%;
         margin-left: -100px;
         opacity: 0;
@@ -201,21 +171,92 @@
         opacity: 1;
       }
 
+      .referencias:hover .tooltip {
+        visibility: visible;
+        opacity: 1;
+      }
+
       @media (max-width: 768px) {
-        .month,
+        .month {
+          min-width: 100%;
+          max-width: 100%;
+        }
+
+        .container {
+          gap: 10px;
+        }
+
+        .day {
+          min-height: 50px;
+        }
+      }
+
+      @media (max-width: 768px) {
+        body {
+          padding: 5px;
+        }
+
+        .container {
+          gap: 10px;
+          flex-direction: column; /* Asegura un diseño vertical */
+        }
+
+        .month {
+          min-width: 100%;
+          max-width: 100%;
+          margin: 5px 0;
+        }
+
+        .calendar-grid {
+          grid-template-columns: repeat(2, 1fr); /* Cambia a 2 columnas */
+        }
+
+        .day {
+          font-size: 0.8rem; /* Reduce tamaño en móviles */
+          min-height: 40px;
+          aspect-ratio: auto; /* Quita restricción fija */
+        }
+
+        .month-header h2 {
+          font-size: 1.2rem; /* Reduce el tamaño de encabezados */
+        }
+
+        input,
+        textarea {
+          font-size: 0.8rem;
+          padding: 6px;
+        }
+
+        button {
+          font-size: 0.8rem;
+          padding: 6px 12px;
+        }
+
         .add-event {
           padding: 10px;
         }
 
-        .weekday,
-        .day {
-          width: 30px;
-          height: 30px;
+        .form-group label {
           font-size: 0.8rem;
         }
 
-        .event {
+        .referencias .tooltip {
+          font-size: 0.7rem; /* Ajusta tamaño de las referencias */
+        }
+      }
+
+      @media (max-width: 480px) {
+        .calendar-grid {
+          grid-template-columns: 1fr; /* Una columna en pantallas muy pequeñas */
+        }
+
+        .day {
+          min-height: 30px;
           font-size: 0.7rem;
+        }
+
+        .referencias .tooltip {
+          width: 150px; /* Reduce el ancho de tooltips */
         }
       }
     </style>
@@ -228,18 +269,13 @@
           <h2>Noviembre 2024</h2>
         </div>
         <div class="calendar-grid">
-          <div class="days-column">
-            <div class="weekday">Dom</div>
-            <div class="weekday">Lun</div>
-            <div class="weekday">Mar</div>
-            <div class="weekday">Mié</div>
-            <div class="weekday">Jue</div>
-            <div class="weekday">Vie</div>
-            <div class="weekday">Sáb</div>
-          </div>
-          <div class="events-column">
-            <!-- Las semanas se generarán dinámicamente aquí -->
-          </div>
+          <div class="weekday">Dom</div>
+          <div class="weekday">Lun</div>
+          <div class="weekday">Mar</div>
+          <div class="weekday">Mié</div>
+          <div class="weekday">Jue</div>
+          <div class="weekday">Vie</div>
+          <div class="weekday">Sáb</div>
         </div>
       </div>
 
@@ -249,18 +285,13 @@
           <h2>Diciembre 2024</h2>
         </div>
         <div class="calendar-grid">
-          <div class="days-column">
-            <div class="weekday">Dom</div>
-            <div class="weekday">Lun</div>
-            <div class="weekday">Mar</div>
-            <div class="weekday">Mié</div>
-            <div class="weekday">Jue</div>
-            <div class="weekday">Vie</div>
-            <div class="weekday">Sáb</div>
-          </div>
-          <div class="events-column">
-            <!-- Las semanas se generarán dinámicamente aquí -->
-          </div>
+          <div class="weekday">Dom</div>
+          <div class="weekday">Lun</div>
+          <div class="weekday">Mar</div>
+          <div class="weekday">Mié</div>
+          <div class="weekday">Jue</div>
+          <div class="weekday">Vie</div>
+          <div class="weekday">Sáb</div>
         </div>
       </div>
     </div>
@@ -268,15 +299,15 @@
     <div class="add-event">
       <h3>Agregar Evento</h3>
       <div class="form-group">
-        <label for="eventDate">Fecha:</label>
+        <label>Fecha:</label>
         <input type="date" id="eventDate" />
       </div>
       <div class="form-group">
-        <label for="eventTime">Hora:</label>
+        <label>Hora:</label>
         <input type="time" id="eventTime" />
       </div>
       <div class="form-group">
-        <label for="eventDescription">Descripción:</label>
+        <label>Descripción:</label>
         <textarea id="eventDescription" rows="3"></textarea>
       </div>
       <button onclick="addEvent()">Agregar Evento</button>
@@ -285,7 +316,7 @@
     <div class="referencias">
       Referencias
       <span class="tooltip">
-        �� = Bianca y Pablo<br />
+        Ø = Bianca y Pablo<br />
         TyM = Tiki y Meli<br />
         YyD = Yesi y Dennis<br />
         x2 = doble turno<br />
@@ -301,60 +332,42 @@
       const BASE_ID = "appPGVN4sDJ0aTrSb";
       const TABLE_NAME = "calendario";
 
-      function createCalendarDays(eventsColumn, year, month) {
+      function createCalendarDays(calendarGrid, year, month) {
+        // Clear existing days
+        const weekdays = calendarGrid.querySelectorAll(".weekday");
+        calendarGrid.innerHTML = "";
+        weekdays.forEach((day) => calendarGrid.appendChild(day));
+
         const firstDay = new Date(year, month, 1);
         const lastDay = new Date(year, month + 1, 0);
-        const totalDays = lastDay.getDate();
         const startingDay = firstDay.getDay();
 
-        let currentWeek = document.createElement("div");
-        currentWeek.className = "week";
-
-        // Añadir días vacíos al principio si es necesario
+        // Add empty cells for days before the first of the month
         for (let i = 0; i < startingDay; i++) {
           const emptyDay = document.createElement("div");
-          emptyDay.className = "event-row";
-          currentWeek.appendChild(emptyDay);
+          emptyDay.className = "day";
+          calendarGrid.appendChild(emptyDay);
         }
 
-        for (let day = 1; day <= totalDays; day++) {
-          const eventRow = document.createElement("div");
-          eventRow.className = "event-row";
-          eventRow.innerHTML = `<div class="day"><span class="day-number">${day}</span></div>`;
-          currentWeek.appendChild(eventRow);
-
-          if ((startingDay + day) % 7 === 0 || day === totalDays) {
-            eventsColumn.appendChild(currentWeek);
-            currentWeek = document.createElement("div");
-            currentWeek.className = "week";
-          }
-        }
-
-        // Añadir días vacíos al final si es necesario
-        while (
-          currentWeek.children.length < 7 &&
-          currentWeek.children.length > 0
-        ) {
-          const emptyDay = document.createElement("div");
-          emptyDay.className = "event-row";
-          currentWeek.appendChild(emptyDay);
-        }
-
-        if (currentWeek.children.length > 0) {
-          eventsColumn.appendChild(currentWeek);
+        // Add days of the month
+        for (let day = 1; day <= lastDay.getDate(); day++) {
+          const dayElement = document.createElement("div");
+          dayElement.className = "day";
+          dayElement.innerHTML = `<div class="day-number">${day}</div>`;
+          calendarGrid.appendChild(dayElement);
         }
       }
 
       function initializeCalendars() {
-        const novemberEventsColumn = document.querySelector(
-          ".month:first-child .events-column"
+        const novemberGrid = document.querySelector(
+          ".month:first-child .calendar-grid"
         );
-        const decemberEventsColumn = document.querySelector(
-          ".month:last-child .events-column"
+        const decemberGrid = document.querySelector(
+          ".month:last-child .calendar-grid"
         );
 
-        createCalendarDays(novemberEventsColumn, 2024, 10); // 10 = Noviembre (0-based)
-        createCalendarDays(decemberEventsColumn, 2024, 11); // 11 = Diciembre (0-based)
+        createCalendarDays(novemberGrid, 2024, 10); // 10 = November (0-based)
+        createCalendarDays(decemberGrid, 2024, 11); // 11 = December (0-based)
       }
 
       async function loadEvents() {
@@ -385,19 +398,21 @@
           const date = new Date(record.fields.fecha);
           const month = date.getMonth();
           const day = date.getDate();
-          const monthIndex = month - 10; // 0 para Noviembre, 1 para Diciembre
+          const monthIndex = month - 10; // 0 for November, 1 for December
 
           const monthContainers = document.querySelectorAll(".month");
           if (monthIndex >= 0 && monthIndex < 2) {
-            const eventRows =
-              monthContainers[monthIndex].querySelectorAll(".event-row");
-            const eventRow = eventRows[day - 1]; // -1 porque los días empiezan en 1
+            const days = monthContainers[monthIndex].querySelectorAll(".day");
+            const dayElement = Array.from(days).find(
+              (el) =>
+                el.querySelector(".day-number")?.textContent === String(day)
+            );
 
-            if (eventRow) {
+            if (dayElement) {
               const eventDiv = document.createElement("div");
               eventDiv.className = "event";
               eventDiv.textContent = record.fields.Evento;
-              eventRow.appendChild(eventDiv);
+              dayElement.appendChild(eventDiv);
             }
           }
         });
@@ -439,11 +454,11 @@
             throw new Error(`HTTP error! status: ${response.status}`);
           }
 
-          // Refrescar calendarios
+          // Refresh calendars
           initializeCalendars();
           loadEvents();
 
-          // Limpiar formulario
+          // Clear form
           document.getElementById("eventDate").value = "";
           document.getElementById("eventTime").value = "";
           document.getElementById("eventDescription").value = "";
@@ -455,7 +470,7 @@
         }
       }
 
-      // Inicializar al cargar la página
+      // Initialize on page load
       document.addEventListener("DOMContentLoaded", () => {
         initializeCalendars();
         loadEvents();
