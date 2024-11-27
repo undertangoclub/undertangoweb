@@ -177,86 +177,49 @@
       }
 
       @media (max-width: 768px) {
+        .container {
+          flex-direction: column; /* Cambia a diseño vertical */
+          gap: 10px;
+        }
+
         .month {
           min-width: 100%;
           max-width: 100%;
         }
 
-        .container {
-          gap: 10px;
+        .calendar-grid {
+          grid-template-columns: repeat(7, 1fr); /* Mantén 7 columnas */
         }
 
         .day {
           min-height: 50px;
-        }
-      }
-
-      @media (max-width: 768px) {
-        body {
-          padding: 5px;
-        }
-
-        .container {
-          gap: 10px;
-          flex-direction: column; /* Asegura un diseño vertical */
-        }
-
-        .month {
-          min-width: 100%;
-          max-width: 100%;
-          margin: 5px 0;
-        }
-
-        .calendar-grid {
-          grid-template-columns: repeat(2, 1fr); /* Cambia a 2 columnas */
-        }
-
-        .day {
-          font-size: 0.8rem; /* Reduce tamaño en móviles */
-          min-height: 40px;
-          aspect-ratio: auto; /* Quita restricción fija */
+          font-size: 0.8rem;
         }
 
         .month-header h2 {
-          font-size: 1.2rem; /* Reduce el tamaño de encabezados */
-        }
-
-        input,
-        textarea {
-          font-size: 0.8rem;
-          padding: 6px;
-        }
-
-        button {
-          font-size: 0.8rem;
-          padding: 6px 12px;
-        }
-
-        .add-event {
-          padding: 10px;
-        }
-
-        .form-group label {
-          font-size: 0.8rem;
-        }
-
-        .referencias .tooltip {
-          font-size: 0.7rem; /* Ajusta tamaño de las referencias */
+          font-size: 1.2rem;
         }
       }
 
       @media (max-width: 480px) {
         .calendar-grid {
-          grid-template-columns: 1fr; /* Una columna en pantallas muy pequeñas */
+          grid-template-columns: repeat(7, 1fr); /* Mantén 7 columnas */
         }
 
         .day {
-          min-height: 30px;
+          min-height: 40px;
           font-size: 0.7rem;
         }
+      }
 
-        .referencias .tooltip {
-          width: 150px; /* Reduce el ancho de tooltips */
+      @media (max-width: 480px) {
+        .calendar-grid {
+          grid-template-columns: repeat(7, 1fr); /* Mantiene las 7 columnas */
+        }
+
+        .day {
+          min-height: 40px; /* Reduce aún más la altura mínima */
+          font-size: 0.7rem; /* Ajusta el tamaño del texto */
         }
       }
     </style>
