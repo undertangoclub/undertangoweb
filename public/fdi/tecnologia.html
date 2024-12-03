@@ -43,63 +43,6 @@
         background-color: #39ff14;
         color: black;
       }
-
-      /* Caja de comentarios */
-      #commentForm {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        width: 100%;
-        max-width: 600px;
-        margin: 2rem 0;
-      }
-      input,
-      textarea {
-        width: 100%;
-        margin-bottom: 1rem;
-        padding: 0.5rem;
-        font-size: 1rem;
-        border-radius: 4px;
-        border: 1px solid #e84343;
-        background-color: #333;
-        color: white;
-      }
-      textarea {
-        resize: none;
-        height: 100px;
-      }
-      button {
-        background-color: red;
-        color: white;
-        border: none;
-        padding: 0.75rem 1.5rem;
-        font-size: 1rem;
-        cursor: pointer;
-        transition: background-color 0.3s;
-      }
-      button:hover {
-        background-color: #39ff14;
-        color: black;
-      }
-
-      /* Comentarios */
-      #commentsSection {
-        width: 100%;
-        max-width: 600px;
-        margin-top: 2rem;
-      }
-      #commentsList {
-        list-style-type: none;
-        padding: 0;
-      }
-      #commentsList li {
-        background-color: #222;
-        border: 1px solid #e84343;
-        margin-bottom: 1rem;
-        padding: 1rem;
-        color: white;
-      }
-
       footer {
         margin-top: 2rem;
         text-align: center;
@@ -147,114 +90,13 @@
         integrando lo mejor del arte, la tecnología y las finanzas
         descentralizadas en un solo espacio.
       </p>
-
       <p>
         NOTA: Todo el complejo digital de UnderTango está en construcción, esta
-        página web está siendo construída diariamente, si has llegado hasta
-        aquí, dejanos un comentario abajo! Es un gusto conectar Ø
+        página web está siendo construída diariamente. Es un gusto conectar Ø.
       </p>
       <a href="fondo-de-inversiones.html" class="button">Volver al Inicio</a>
-
-      <!-- Caja de comentarios -->
-      <h2>Deja un comentario</h2>
-      <form id="commentForm">
-        <input
-          type="text"
-          id="userName"
-          placeholder="Tu nombre"
-          maxlength="50"
-          required
-        />
-        <textarea
-          id="userMessage"
-          placeholder="Tu comentario (máximo 200 caracteres)"
-          maxlength="200"
-          required
-        ></textarea>
-        <button type="submit">Enviar comentario</button>
-      </form>
-
-      <div id="commentsSection">
-        <h3>Comentarios recientes</h3>
-        <ul id="commentsList"></ul>
-      </div>
     </div>
 
     <footer>© 2024 UnderTango. Todos los derechos reservados.</footer>
-
-    <!-- Add Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-
-    <script>
-      // Configuración de Firebase
-      const firebaseConfig = {
-        apiKey: "AIzaSyC05s84tQfQbiJua0G0LHnQsZP76HqxMk4",
-        authDomain: "undertango.firebaseapp.com",
-        projectId: "undertango",
-        storageBucket: "undertango.appspot.com",
-        messagingSenderId: "21199358960",
-        appId: "1:21199358960:web:6b751db7c333403057ab35",
-      };
-
-      // Inicializa Firebase
-      firebase.initializeApp(firebaseConfig);
-      const db = firebase.firestore();
-
-      // Función para agregar comentarios
-      const commentForm = document.getElementById("commentForm");
-      commentForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const name = document.getElementById("userName").value;
-        const message = document.getElementById("userMessage").value;
-
-        try {
-          // Guarda el comentario en Firestore
-          await db.collection("comments").add({
-            name: name,
-            message: message,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-          });
-
-          // Limpia el formulario
-          commentForm.reset();
-          loadComments(); // Recarga los comentarios
-        } catch (error) {
-          console.error("Error al agregar comentario:", error);
-          alert(
-            "Hubo un error al enviar tu comentario. Por favor, intenta de nuevo."
-          );
-        }
-      });
-
-      // Función para cargar los comentarios
-      async function loadComments() {
-        const commentsList = document.getElementById("commentsList");
-        commentsList.innerHTML = ""; // Limpiar la lista de comentarios
-
-        try {
-          // Obtener los comentarios ordenados por fecha
-          const querySnapshot = await db
-            .collection("comments")
-            .orderBy("timestamp", "desc")
-            .limit(10) // Limitar a los 10 comentarios más recientes
-            .get();
-
-          querySnapshot.forEach((doc) => {
-            const comment = doc.data();
-            const li = document.createElement("li");
-            li.innerHTML = `<strong>${comment.name}</strong>: ${comment.message}`;
-            commentsList.appendChild(li);
-          });
-        } catch (error) {
-          console.error("Error al cargar comentarios:", error);
-          commentsList.innerHTML =
-            "<li>Error al cargar comentarios. Por favor, recarga la página.</li>";
-        }
-      }
-
-      // Cargar comentarios cuando la página se carga
-      window.onload = loadComments;
-    </script>
   </body>
 </html>
