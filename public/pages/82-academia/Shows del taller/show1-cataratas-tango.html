@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Show de Tango - Cataratas Tango</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Poiret+One&display=swap");
+
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+      }
+
+      body {
+        font-family: "Poiret One", cursive;
+        background-color: #1a1a1a;
+        color: white;
+        font-size: 1.2em;
+      }
+
+      header {
+        background-color: rgba(0, 0, 0, 0.5);
+        padding: 1em;
+        text-align: center;
+      }
+
+      h1 {
+        text-shadow: 3px 3px 12px rgba(0, 0, 0, 1);
+        margin: 0;
+      }
+
+      main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 2em;
+        overflow-y: auto;
+      }
+
+      footer {
+        background-color: rgba(0, 0, 0, 0.5);
+        text-align: center;
+        padding: 1em;
+        font-size: 0.8em;
+      }
+
+      .gallery img {
+        width: 80%;
+        max-width: 800px;
+        border-radius: 5px;
+        box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
+      }
+
+      audio {
+        margin-top: 1em;
+        width: 100%;
+        max-width: 800px;
+      }
+
+      .content-section {
+        text-align: center;
+        max-width: 800px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Show de Tango - Cataratas Tango</h1>
+    </header>
+
+    <main>
+      <section class="content-section">
+        <h2>Un Show Inolvidable</h2>
+        <p>
+          Hoy, 07/12/2024, se realizó el show de cierre del taller de los
+          alumnos que estuvieron 6 meses aprendiendo. En este evento debutaron
+          con su primer show de tango escenario, demostrando las habilidades que
+          adquirieron durante el taller.
+        </p>
+        <div class="gallery">
+          <img
+            src="./cataratastango.jpg"
+            alt="Show y Milonga Cataratas Tango"
+          />
+        </div>
+
+        <h3>Entrevista Especial</h3>
+        <p>
+          Escucha la entrevista realizada en Radio Provincia de Misiones LT17 en
+          el programa "Cultura en Movimiento":
+        </p>
+        <audio controls>
+          <source src="./entrevistatango.mp3" type="audio/mpeg" />
+          Tu navegador no soporta el elemento de audio.
+        </audio>
+      </section>
+    </main>
+
+    <footer>
+      <p>&copy; 2024 UnderTango Club. Todos los derechos reservados.</p>
+    </footer>
+  </body>
+</html>
