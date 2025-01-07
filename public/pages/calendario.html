@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Calendario de Tango</title>
+    <title>Calendario de Tango (Edición por clic)</title>
     <style>
       body {
         font-family: "Arial", sans-serif;
@@ -19,19 +19,16 @@
         width: 100%;
         max-width: 100%;
         margin: 0 auto;
-        display: flex;
+        display: block;
         gap: 15px;
-        flex-wrap: wrap;
-        overflow-x: hidden;
       }
 
       .month {
-        flex: 1;
-        min-width: 280px;
-        max-width: calc(50% - 8px);
+        width: 100%;
         background-color: rgba(41, 27, 23, 0.9);
         border-radius: 10px;
         padding: 15px;
+        margin-bottom: 20px;
       }
 
       .month-header {
@@ -47,8 +44,9 @@
       .month-header h2 {
         color: #ffd700;
         margin: 0;
-        font-size: 1.5rem;
+        font-size: 1.8rem;
         text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        text-align: center;
       }
 
       .calendar-grid {
@@ -62,7 +60,7 @@
         padding: 6px;
         font-weight: bold;
         color: #ffd700;
-        font-size: 0.9rem;
+        font-size: 1rem;
       }
 
       .day {
@@ -73,6 +71,10 @@
         min-height: 60px;
         cursor: pointer;
         transition: background-color 0.3s;
+        display: grid;
+        grid-template-rows: repeat(5, 1fr);
+        grid-template-columns: 1fr 2fr 1fr;
+        gap: 2px;
         overflow-y: auto;
       }
 
@@ -81,72 +83,45 @@
       }
 
       .day-number {
+        grid-column: 1 / span 3;
+        text-align: center;
         font-weight: bold;
         margin-bottom: 4px;
-        font-size: 0.9rem;
+        font-size: 1rem;
       }
 
-      .event {
+      .time-slot {
+        text-align: center;
         font-size: 0.8rem;
-        padding: 2px 4px;
-        margin: 2px 0;
-        background-color: rgba(255, 215, 0, 0.1);
-        border-radius: 3px;
-        color: #ffd700;
-      }
-
-      .add-event {
-        margin-top: 15px;
         background-color: rgba(41, 27, 23, 0.9);
-        padding: 15px;
-        border-radius: 10px;
-        width: 100%;
-        max-width: 100%;
-        box-sizing: border-box;
-      }
-
-      .add-event h3 {
-        color: #ffd700;
-        margin-top: 0;
-        font-size: 1.2rem;
-      }
-
-      .form-group {
-        margin-bottom: 10px;
-      }
-
-      .form-group label {
-        display: block;
-        margin-bottom: 4px;
-        color: #d4a574;
-        font-size: 0.9rem;
-      }
-
-      input,
-      textarea {
-        width: 100%;
-        padding: 8px;
-        background-color: rgba(62, 39, 35, 0.5);
-        border: 1px solid #4a2f2a;
-        color: #d4a574;
         border-radius: 4px;
-        font-size: 0.9rem;
-        box-sizing: border-box;
-      }
-
-      button {
-        background-color: #8b4513;
+        padding: 2px;
         color: #ffd700;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 4px;
         cursor: pointer;
-        transition: background-color 0.3s;
-        font-size: 0.9rem;
       }
 
-      button:hover {
-        background-color: #a0522d;
+      .location-slot {
+        text-align: center;
+        font-size: 0.8rem;
+        background-color: rgba(62, 39, 35, 0.9);
+        border-radius: 4px;
+        padding: 2px;
+        color: #d4a574;
+        cursor: pointer;
+      }
+
+      .performer-slot {
+        text-align: center;
+        font-size: 0.8rem;
+        background-color: rgba(82, 49, 45, 0.9);
+        border-radius: 4px;
+        padding: 2px;
+        color: #ffd700;
+        cursor: pointer;
+      }
+
+      .referencias {
+        margin-top: 20px;
       }
 
       .referencias .tooltip {
@@ -171,14 +146,9 @@
         opacity: 1;
       }
 
-      .referencias:hover .tooltip {
-        visibility: visible;
-        opacity: 1;
-      }
-
       @media (max-width: 768px) {
         .container {
-          flex-direction: column; /* Cambia a diseño vertical */
+          flex-direction: column;
           gap: 10px;
         }
 
@@ -188,7 +158,7 @@
         }
 
         .calendar-grid {
-          grid-template-columns: repeat(7, 1fr); /* Mantén 7 columnas */
+          grid-template-columns: repeat(7, 1fr);
         }
 
         .day {
@@ -203,7 +173,7 @@
 
       @media (max-width: 480px) {
         .calendar-grid {
-          grid-template-columns: repeat(7, 1fr); /* Mantén 7 columnas */
+          grid-template-columns: repeat(7, 1fr);
         }
 
         .day {
@@ -211,25 +181,14 @@
           font-size: 0.7rem;
         }
       }
-
-      @media (max-width: 480px) {
-        .calendar-grid {
-          grid-template-columns: repeat(7, 1fr); /* Mantiene las 7 columnas */
-        }
-
-        .day {
-          min-height: 40px; /* Reduce aún más la altura mínima */
-          font-size: 0.7rem; /* Ajusta el tamaño del texto */
-        }
-      }
     </style>
   </head>
   <body>
     <div class="container">
-      <!-- Noviembre -->
+      <!-- Enero -->
       <div class="month">
         <div class="month-header">
-          <h2>Noviembre 2024</h2>
+          <h2>Enero 2025</h2>
         </div>
         <div class="calendar-grid">
           <div class="weekday">Dom</div>
@@ -242,10 +201,10 @@
         </div>
       </div>
 
-      <!-- Diciembre -->
+      <!-- Febrero -->
       <div class="month">
         <div class="month-header">
-          <h2>Diciembre 2024</h2>
+          <h2>Febrero 2025</h2>
         </div>
         <div class="calendar-grid">
           <div class="weekday">Dom</div>
@@ -257,23 +216,6 @@
           <div class="weekday">Sáb</div>
         </div>
       </div>
-    </div>
-
-    <div class="add-event">
-      <h3>Agregar Evento</h3>
-      <div class="form-group">
-        <label>Fecha:</label>
-        <input type="date" id="eventDate" />
-      </div>
-      <div class="form-group">
-        <label>Hora:</label>
-        <input type="time" id="eventTime" />
-      </div>
-      <div class="form-group">
-        <label>Descripción:</label>
-        <textarea id="eventDescription" rows="3"></textarea>
-      </div>
-      <button onclick="addEvent()">Agregar Evento</button>
     </div>
 
     <div class="referencias">
@@ -290,56 +232,86 @@
     </div>
 
     <script>
-      const AIRTABLE_API_KEY =
-        "pato81fvPnkEuWh3z.106e22ccb41bfad6205fed18c2ac2e509a026e20071c0420b94e3dd1da5d7764";
+      // ================================
+      // CONFIGURACIÓN DE AIRTABLE
+      // ================================
+      // Ajusta estas constantes con tus propios datos
+      const AIRTABLE_TOKEN =
+        "patuKKtlyfqvVNCpc.25468d0bda6badcfd90c84a03a681fc462c0b66b57b964eddb0449b24134a45e"; // Tu token personal
       const BASE_ID = "appPGVN4sDJ0aTrSb";
       const TABLE_NAME = "calendario";
 
+      // ================================
+      // CREACIÓN DE LA ESTRUCTURA DEL CALENDARIO
+      // ================================
       function createCalendarDays(calendarGrid, year, month) {
-        // Clear existing days
-        const weekdays = calendarGrid.querySelectorAll(".weekday");
+        // Guarda las cabeceras originales (Dom, Lun, etc.)
+        const weekdays = Array.from(calendarGrid.querySelectorAll(".weekday"));
+
+        // Limpia la grilla
         calendarGrid.innerHTML = "";
+        // Reinsertamos las cabeceras
         weekdays.forEach((day) => calendarGrid.appendChild(day));
 
         const firstDay = new Date(year, month, 1);
         const lastDay = new Date(year, month + 1, 0);
         const startingDay = firstDay.getDay();
 
-        // Add empty cells for days before the first of the month
+        // Espacios vacíos antes del primer día
         for (let i = 0; i < startingDay; i++) {
           const emptyDay = document.createElement("div");
           emptyDay.className = "day";
           calendarGrid.appendChild(emptyDay);
         }
 
-        // Add days of the month
+        // Crea los días y slots
         for (let day = 1; day <= lastDay.getDate(); day++) {
           const dayElement = document.createElement("div");
           dayElement.className = "day";
           dayElement.innerHTML = `<div class="day-number">${day}</div>`;
+
+          // Creamos 5 filas de slots
+          for (let i = 0; i < 5; i++) {
+            dayElement.innerHTML += `
+              <div class="time-slot" onclick="editSlot(this, 'hora')">Hora ${
+                i + 1
+              }</div>
+              <div class="location-slot" onclick="editSlot(this, 'lugar')">Lugar ${
+                i + 1
+              }</div>
+              <div class="performer-slot" onclick="editSlot(this, 'interprete')">Intérprete ${
+                i + 1
+              }</div>
+            `;
+          }
           calendarGrid.appendChild(dayElement);
         }
       }
 
+      // Inicializa los dos meses (Enero y Febrero)
       function initializeCalendars() {
-        const novemberGrid = document.querySelector(
+        const januaryGrid = document.querySelector(
           ".month:first-child .calendar-grid"
         );
-        const decemberGrid = document.querySelector(
+        const februaryGrid = document.querySelector(
           ".month:last-child .calendar-grid"
         );
 
-        createCalendarDays(novemberGrid, 2024, 10); // 10 = November (0-based)
-        createCalendarDays(decemberGrid, 2024, 11); // 11 = December (0-based)
+        createCalendarDays(januaryGrid, 2025, 0);
+        createCalendarDays(februaryGrid, 2025, 1);
       }
 
+      // ================================
+      // CARGAR EVENTOS DESDE AIRTABLE
+      // ================================
       async function loadEvents() {
         try {
           const response = await fetch(
             `https://api.airtable.com/v0/${BASE_ID}/${TABLE_NAME}`,
             {
+              method: "GET",
               headers: {
-                Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+                Authorization: `Bearer ${AIRTABLE_TOKEN}`,
                 "Content-Type": "application/json",
               },
             }
@@ -352,91 +324,187 @@
           const data = await response.json();
           displayEvents(data.records);
         } catch (error) {
-          console.error("Error loading events:", error);
+          console.error("Error cargando eventos:", error);
+          alert("Error al cargar los eventos de Airtable");
         }
       }
 
+      // Muestra los eventos en cada día
       function displayEvents(records) {
         records.forEach((record) => {
-          const date = new Date(record.fields.fecha);
-          const month = date.getMonth();
-          const day = date.getDate();
-          const monthIndex = month - 10; // 0 for November, 1 for December
-
-          const monthContainers = document.querySelectorAll(".month");
-          if (monthIndex >= 0 && monthIndex < 2) {
-            const days = monthContainers[monthIndex].querySelectorAll(".day");
-            const dayElement = Array.from(days).find(
-              (el) =>
-                el.querySelector(".day-number")?.textContent === String(day)
-            );
+          const { fields } = record;
+          // Asumimos que 'fecha' en Airtable guarda fecha (o fecha+hora)
+          if (fields.fecha) {
+            const date = new Date(fields.fecha);
+            const dayElement = findDayElement(date);
 
             if (dayElement) {
-              const eventDiv = document.createElement("div");
-              eventDiv.className = "event";
-              eventDiv.textContent = record.fields.Evento;
-              dayElement.appendChild(eventDiv);
+              // Busca el primer slot libre para 'hora'
+              if (fields.hora) {
+                const timeSlot = dayElement.querySelector(
+                  ".time-slot:not([data-id])"
+                );
+                if (timeSlot) {
+                  timeSlot.textContent = fields.hora;
+                  timeSlot.setAttribute("data-id", record.id);
+                }
+              }
+              // Lo mismo para 'lugar'
+              if (fields.lugar) {
+                const locationSlot = dayElement.querySelector(
+                  ".location-slot:not([data-id])"
+                );
+                if (locationSlot) {
+                  locationSlot.textContent = fields.lugar;
+                  locationSlot.setAttribute("data-id", record.id);
+                }
+              }
+              // Y para 'interprete'
+              if (fields.interprete) {
+                const performerSlot = dayElement.querySelector(
+                  ".performer-slot:not([data-id])"
+                );
+                if (performerSlot) {
+                  performerSlot.textContent = fields.interprete;
+                  performerSlot.setAttribute("data-id", record.id);
+                }
+              }
             }
           }
         });
       }
 
-      async function addEvent() {
-        const date = document.getElementById("eventDate").value;
-        const time = document.getElementById("eventTime").value;
-        const description = document.getElementById("eventDescription").value;
+      // ================================
+      // EDITAR SLOT (PATCH A AIRTABLE)
+      // ================================
+      async function editSlot(element, type) {
+        const recordId = element.getAttribute("data-id");
+        const currentValue = element.textContent;
+        const newValue = prompt(`Editar ${type}:`, currentValue);
 
-        if (!date || !time || !description) {
-          alert("Por favor complete todos los campos");
-          return;
-        }
+        if (newValue === null) return; // Usuario canceló
+
+        // Obtener la fecha del día que se está editando
+        const dayElement = element.closest(".day");
+        const dayNumber = dayElement.querySelector(".day-number").textContent;
+        const monthElement = dayElement.closest(".month");
+        const monthHeader =
+          monthElement.querySelector(".month-header h2").textContent;
+        const year = 2025;
+        const month = monthHeader.includes("Enero") ? 0 : 1;
+        const date = new Date(year, month, parseInt(dayNumber));
+
+        // Asegurarse de que la fecha esté en formato YYYY-MM-DD
+        const formattedDate = date.toISOString().split("T")[0];
+
+        // Actualizar UI
+        element.textContent = newValue;
 
         try {
-          const response = await fetch(
-            `https://api.airtable.com/v0/${BASE_ID}/${TABLE_NAME}`,
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${AIRTABLE_API_KEY}`,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                records: [
-                  {
-                    fields: {
-                      fecha: `${date}T${time}:00.000Z`,
-                      Evento: description,
-                    },
+          if (recordId) {
+            // ACTUALIZAR registro existente
+            const response = await fetch(
+              `https://api.airtable.com/v0/${BASE_ID}/${TABLE_NAME}/${recordId}`,
+              {
+                method: "PATCH",
+                headers: {
+                  Authorization: `Bearer ${AIRTABLE_TOKEN}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  fields: {
+                    [type]: newValue,
                   },
-                ],
-              }),
-            }
-          );
+                }),
+              }
+            );
 
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            if (!response.ok) {
+              const errorData = await response.json();
+              console.error("Error detallado:", errorData);
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+          } else {
+            // CREAR nuevo registro con todos los campos necesarios
+            const fields = {
+              fecha: formattedDate,
+              [type]: newValue,
+            };
+
+            // Asegurarse de que todos los campos requeridos estén presentes
+            if (!fields.hora) fields.hora = "";
+            if (!fields.lugar) fields.lugar = "";
+            if (!fields.interprete) fields.interprete = "";
+
+            const response = await fetch(
+              `https://api.airtable.com/v0/${BASE_ID}/${TABLE_NAME}`,
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${AIRTABLE_TOKEN}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  records: [
+                    {
+                      fields: fields,
+                    },
+                  ],
+                }),
+              }
+            );
+
+            if (!response.ok) {
+              const errorData = await response.json();
+              console.error("Error detallado:", errorData);
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            // Guardar el ID del nuevo registro en el elemento
+            element.setAttribute("data-id", result.records[0].id);
           }
 
-          // Refresh calendars
-          initializeCalendars();
-          loadEvents();
-
-          // Clear form
-          document.getElementById("eventDate").value = "";
-          document.getElementById("eventTime").value = "";
-          document.getElementById("eventDescription").value = "";
-
-          alert("Evento agregado exitosamente");
+          console.log("Operación exitosa");
         } catch (error) {
-          console.error("Error adding event:", error);
-          alert("Error al agregar el evento");
+          console.error("Error completo:", error);
+          alert(
+            "Error al guardar en Airtable. Revisa la consola para más detalles."
+          );
+          // Revertir cambios en UI si hay error
+          element.textContent = currentValue;
         }
       }
 
-      // Initialize on page load
+      // ================================
+      // AYUDANTE: ENCONTRAR <div.day> CORRECTO
+      // ================================
+      function findDayElement(date) {
+        const month = date.getMonth(); // 0 = enero, 1 = febrero
+        const day = date.getDate();
+
+        // monthSelector: si es 0 -> first-child, si es 1 -> last-child
+        // (porque solo tenemos 2 meses en este ejemplo)
+        const monthSelector = month === 0 ? "first-child" : "last-child";
+        const monthElement = document.querySelector(`.month:${monthSelector}`);
+
+        if (monthElement) {
+          const days = monthElement.querySelectorAll(".day");
+          const dayElement = Array.from(days).find((el) => {
+            const dayNumber = el.querySelector(".day-number");
+            return dayNumber && dayNumber.textContent === day.toString();
+          });
+          return dayElement;
+        }
+        return null;
+      }
+
+      // ================================
+      // INICIALIZACIÓN
+      // ================================
       document.addEventListener("DOMContentLoaded", () => {
         initializeCalendars();
-        loadEvents();
+        loadEvents(); // Carga los eventos y luego los muestra
       });
     </script>
   </body>
