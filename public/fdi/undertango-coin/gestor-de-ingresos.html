@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestor Financiero - Undertango</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        line-height: 1.6;
+        background-color: #f4f4f9;
+        color: #333;
+      }
+      .header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 1rem;
+        background-color: #007bff;
+        color: white;
+        border-radius: 8px;
+      }
+      .header h1 {
+        margin: 0 0 10px;
+      }
+      .caja-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 20px;
+      }
+      .caja {
+        background-color: #e9ecef;
+        padding: 10px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        min-width: 150px;
+      }
+      .caja h2 {
+        font-size: 1rem;
+        margin-bottom: 5px;
+        color: #333;
+      }
+      .caja span {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #000;
+      }
+      form {
+        margin: 20px 0;
+        padding: 20px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      input,
+      select,
+      button {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+      button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #0056b3;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        background-color: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      th,
+      td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+      }
+      th {
+        background-color: #007bff;
+        color: white;
+      }
+      .monto-negativo {
+        color: #dc3545;
+      }
+      .monto-positivo {
+        color: #28a745;
+      }
+      optgroup {
+        font-weight: bold;
+      }
+
+      .lock-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 1.5rem;
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+      }
+      .lock-button:hover {
+        color: #ccc;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>Gestor Financiero - Undertango</h1>
+      <button class="lock-button" id="lockButton">Ø</button>
+      <div class="caja-container">
+        <div class="caja">
+          <h2>Caja Undertango</h2>
+          <span id="cajaUndertango">$0.00</span>
+        </div>
+        <div class="caja">
+          <h2>Caja Producción</h2>
+          <span id="cajaProduccion">$0.00</span>
+        </div>
+        <div class="caja">
+          <h2>Caja Gastos Operativos</h2>
+          <span id="cajaGastosOperativos">$0.00</span>
+        </div>
+        <div class="caja">
+          <h2>Fondo de Inversion</h2>
+          <span id="cajaFDI">$0.00</span>
+        </div>
+        <div class="caja">
+          <h2>Caja Corporativa</h2>
+          <span id="cajaPersonal">$0.00</span>
+        </div>
+      </div>
+    </div>
+    <form id="registroForm">
+      <label for="fecha">Fecha (Día y Mes):</label>
+      <input
+        type="text"
+        id="fecha"
+        placeholder="dd/mm"
+        pattern="\d{2}/\d{2}"
+        required
+      />
+
+      <label for="origen">Origen:</label>
+      <select id="origen" required>
+        <option value="">--Seleccione--</option>
+        <optgroup label="Clientes">
+          <option value="Cruceros">Cruceros</option>
+          <option value="Casa Malbec">Casa Malbec</option>
+          <option value="Melia">Melia</option>
+          <option value="DAM">DAM</option>
+          <option value="Otros">Otros</option>
+        </optgroup>
+        <optgroup label="Cajas">
+          <option value="Caja Undertango">Caja Undertango</option>
+          <option value="Caja Producción">Caja Producción</option>
+          <option value="Caja Gastos Operativos">Caja Gastos Operativos</option>
+          <option value="Fondo de Inversion">Fondo de Inversion</option>
+          <option value="Caja Personal">Caja Personal</option>
+        </optgroup>
+      </select>
+
+      <label for="destino">Destino:</label>
+      <input
+        type="text"
+        id="destinoInput"
+        placeholder="Ejemplo: Compra de insumos"
+        required
+      />
+      <select id="destinoSelect" style="display: none" required>
+        <option value="">--Seleccione la caja destino--</option>
+        <option value="Caja Undertango">Caja Undertango</option>
+        <option value="Caja Producción">Caja Producción</option>
+        <option value="Caja Gastos Operativos">Caja Gastos Operativos</option>
+        <option value="Fondo de Inversion">Fondo de Inversion</option>
+        <option value="Caja Personal">Caja Personal</option>
+      </select>
+
+      <label for="detalle">Detalle:</label>
+      <input
+        type="text"
+        id="detalle"
+        placeholder="Descripción adicional"
+        required
+      />
+
+      <label for="monto">Monto:</label>
+      <input type="number" id="monto" step="0.01" required />
+
+      <button type="submit">Agregar Registro</button>
+    </form>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Origen</th>
+          <th>Destino</th>
+          <th>Detalle</th>
+          <th>Monto</th>
+        </tr>
+      </thead>
+      <tbody id="registrosBody"></tbody>
+    </table>
+    <script>
+      const AIRTABLE_API_KEY =
+        "pato81fvPnkEuWh3z.106e22ccb41bfad6205fed18c2ac2e509a026e20071c0420b94e3dd1da5d7764";
+      const BASE_ID = "appPGVN4sDJ0aTrSb";
+      const TABLE_NAME = "fdi1";
+
+      // Configuración de la distribución de ingresos
+      const DISTRIBUCION_INGRESOS = {
+        Melia: {
+          "Caja Undertango": 0.25,
+          "Caja Producción": 0.1,
+          "Caja Gastos Operativos": 0.1,
+          "Fondo de Inversion": 0.05,
+          "Bianca Wagner": 0.25,
+          "Pablo Cieslik": 0.25,
+        },
+        Cruceros: {
+          "Caja Undertango": 0.15,
+          "Caja Producción": 0.09,
+          "Caja Gastos Operativos": 0.09,
+          "Fondo de Inversion": 0.05,
+          "Caja Personal": 0.32,
+          "Bianca Wagner": 0.15,
+          "Pablo Cieslik": 0.15,
+        },
+        "Casa Malbec": {
+          "Caja Undertango": 0.15,
+          "Caja Producción": 0.07,
+          "Caja Gastos Operativos": 0.07,
+          "Fondo de Inversion": 0.05,
+          "Caja Personal": 0.36,
+          "Bianca Wagner": 0.15,
+          "Pablo Cieslik": 0.15,
+        },
+      };
+
+      // Configuración de cajas para seguimiento
+      const CAJAS = {
+        "Caja Undertango": "cajaUndertango",
+        "Caja Producción": "cajaProduccion",
+        "Caja Gastos Operativos": "cajaGastosOperativos",
+        "Fondo de Inversion": "cajaFDI",
+        "Caja Personal": "cajaPersonal",
+      };
+
+      // Event listener para cambiar entre input y select de destino
+      document
+        .getElementById("origen")
+        .addEventListener("change", function (e) {
+          const destinoInput = document.getElementById("destinoInput");
+          const destinoSelect = document.getElementById("destinoSelect");
+
+          if (e.target.value === "Otros") {
+            destinoInput.style.display = "none";
+            destinoInput.required = false;
+            destinoSelect.style.display = "block";
+            destinoSelect.required = true;
+          } else {
+            destinoInput.style.display = "block";
+            destinoInput.required = true;
+            destinoSelect.style.display = "none";
+            destinoSelect.required = false;
+          }
+        });
+
+      function esCaja(origen) {
+        return Object.keys(CAJAS).includes(origen);
+      }
+
+      function convertToISODate(fecha) {
+        const [day, month] = fecha.split("/");
+        const year = new Date().getFullYear();
+        return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+      }
+
+      function displayRecords(records) {
+        const tbody = document.querySelector("#registrosBody");
+        tbody.innerHTML = "";
+
+        records.forEach((record) => {
+          const row = tbody.insertRow();
+          const fields = record.fields;
+          const monto = fields["Monto"] || 0;
+          const montoClass = monto < 0 ? "monto-negativo" : "monto-positivo";
+
+          row.innerHTML = `
+            <td>${fields["Fecha"] || ""}</td>
+            <td>${fields["Origen"] || ""}</td>
+            <td>${fields["Destino"] || ""}</td>
+            <td>${fields["Detalle"] || ""}</td>
+            <td class="${montoClass}">$${Math.abs(monto).toFixed(2)}</td>
+          `;
+        });
+      }
+
+      async function fetchRecords() {
+        try {
+          const response = await fetch(
+            `https://api.airtable.com/v0/${BASE_ID}/${TABLE_NAME}?sort[0][field]=Fecha&sort[0][direction]=desc`,
+            {
+              headers: {
+                Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const data = await response.json();
+          displayRecords(data.records);
+          actualizarCajas(data.records);
+        } catch (error) {
+          console.error("Error fetching Airtable data:", error);
+        }
+      }
+      async function createRecord(fields) {
+        const response = await fetch(
+          `https://api.airtable.com/v0/${BASE_ID}/${TABLE_NAME}`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              records: [{ fields }],
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error("Error response from Airtable:", errorData);
+          throw new Error("Error al crear el registro en Airtable.");
+        }
+
+        return response.json();
+      }
+
+      let isUnlocked = false;
+
+      document
+        .getElementById("lockButton")
+        .addEventListener("click", function () {
+          const userResponse = prompt("Ø");
+          if (userResponse === "Ø") {
+            isUnlocked = true;
+            alert("Acceso habilitado. Ahora puedes registrar datos.");
+          } else {
+            isUnlocked = false;
+            alert(
+              "Acceso denegado. Debes ingresar 'Ø' para habilitar el acceso."
+            );
+          }
+        });
+
+      async function addRecord(event) {
+        event.preventDefault();
+
+        if (!isUnlocked) {
+          alert("Ø");
+          return;
+        }
+
+        const detalle = document.getElementById("detalle").value;
+        const fecha = convertToISODate(document.getElementById("fecha").value);
+        const origen = document.getElementById("origen").value;
+        const destino =
+          origen === "Otros"
+            ? document.getElementById("destinoSelect").value
+            : document.getElementById("destinoInput").value;
+        const monto = parseFloat(document.getElementById("monto").value);
+
+        if (!fecha || !origen || !destino || isNaN(monto)) {
+          alert("Por favor, completa todos los campos correctamente.");
+          return;
+        }
+
+        try {
+          if (origen === "Otros") {
+            await createRecord({
+              Fecha: fecha,
+              Origen: origen,
+              Destino: destino,
+              Detalle: detalle,
+              Monto: monto,
+              [destino]: monto,
+            });
+          } else if (esCaja(origen)) {
+            const saldoCaja = parseFloat(
+              document
+                .getElementById(CAJAS[origen])
+                .textContent.replace("$", "")
+            );
+            if (monto > saldoCaja) {
+              alert(
+                `Saldo insuficiente en ${origen}. Saldo actual: $${saldoCaja}`
+              );
+              return;
+            }
+            await createRecord({
+              Fecha: fecha,
+              Origen: origen,
+              Destino: destino,
+              Monto: -monto,
+              [origen]: -monto,
+            });
+          } else {
+            await createRecord({
+              Fecha: fecha,
+              Origen: origen,
+              Destino: destino,
+              Monto: monto,
+            });
+
+            if (DISTRIBUCION_INGRESOS[origen]) {
+              await distribuirIngreso(origen, monto, fecha);
+            }
+          }
+
+          await fetchRecords();
+          document.getElementById("registroForm").reset();
+        } catch (error) {
+          console.error("Error en el proceso de registro:", error);
+          alert("Hubo un error al procesar el registro.");
+        }
+      }
+
+      async function distribuirIngreso(origen, monto, fecha) {
+        const distribucion = DISTRIBUCION_INGRESOS[origen];
+        const records = Object.entries(distribucion).map(
+          ([destino, porcentaje]) => {
+            const montoDistribuido = parseFloat(
+              (monto * porcentaje).toFixed(2)
+            );
+            const fields = {
+              Fecha: fecha,
+              Origen: origen,
+              Destino: `${destino} (${(porcentaje * 100).toFixed(0)}%)`,
+              Detalle: "Distribución automática",
+              Monto: montoDistribuido,
+            };
+
+            if (destino in CAJAS) {
+              fields[destino] = montoDistribuido;
+            }
+
+            return { fields };
+          }
+        );
+
+        try {
+          const response = await fetch(
+            `https://api.airtable.com/v0/${BASE_ID}/${TABLE_NAME}`,
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ records }),
+            }
+          );
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            console.error("Error response from Airtable:", errorData);
+            throw new Error("Error al agregar la redistribución a Airtable.");
+          }
+        } catch (error) {
+          console.error("Error redistributing ingreso:", error);
+          throw error;
+        }
+      }
+
+      async function actualizarCajas(records) {
+        const totales = {
+          "Caja Undertango": 0,
+          "Caja Producción": 0,
+          "Caja Gastos Operativos": 0,
+          "Fondo de Inversion": 0,
+          "Caja Personal": 0,
+        };
+
+        records.forEach((record) => {
+          const fields = record.fields;
+          Object.keys(totales).forEach((caja) => {
+            if (fields[caja]) {
+              totales[caja] += parseFloat(fields[caja]) || 0;
+            }
+          });
+        });
+
+        Object.entries(totales).forEach(([caja, total]) => {
+          const elementId = CAJAS[caja];
+          document.getElementById(elementId).textContent = `$${total.toFixed(
+            2
+          )}`;
+        });
+      }
+
+      // Event Listeners
+      document
+        .getElementById("registroForm")
+        .addEventListener("submit", addRecord);
+      document.addEventListener("DOMContentLoaded", fetchRecords);
+    </script>
+  </body>
+</html>
