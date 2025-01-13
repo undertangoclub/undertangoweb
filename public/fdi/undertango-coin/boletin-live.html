@@ -97,8 +97,53 @@
       .bold-text {
         font-weight: bold;
       }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 5px;
+      }
+      table th, table td {
+        padding: 8px;
+        border-bottom: 1px solid #ccc;
+        text-align: left;
+      }
+      .distribution-section {
+        background: #fff;
+        padding: 15px;
+        margin-top: 20px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      }
+      .distribution-section h2 {
+        margin-top: 0;
+      }
+      .distribution-box {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-top: 10px;
+      }
+      .distribution-client {
+        flex: 1 1 250px;
+        background: #eaeaea;
+        padding: 10px;
+        border-radius: 5px;
+      }
+      .distribution-client h3 {
+        margin-top: 0;
+        font-size: 1.1em;
+        text-align: center;
+      }
+      .distribution-client ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .distribution-client ul li {
+        margin: 4px 0;
+      }
       @media(max-width: 600px) {
-        .info-box, .grid-box {
+        .info-box, .grid-box, .distribution-box {
           flex-direction: column;
           align-items: center;
         }
@@ -119,14 +164,25 @@
         <!-- Sección de datos generales de la caja y variaciones -->
         <div class="info-box" id="infoBoxGeneral">
           <div>
-            <h2>Caja Neta (AR$)</h2>
-            <p class="large-text" id="valorCaja">Cargando...</p>
-            <p class="variation" id="variacionCaja"></p>
+            <h2>Caja Undertango (AR$)</h2>
+            <p class="large-text" id="valorCajaUndertango">Cargando...</p>
           </div>
+          <div>
+            <h2>Fondo de Inversión (AR$)</h2>
+            <p class="large-text" id="valorFondoInversion">Cargando...</p>
+            <p>(Monto total a retribuir)</p>
+          </div>
+        </div>
+
+        <!-- Sección Valor de la acción y retribución -->
+        <div class="info-box">
           <div>
             <h2>Valor de la Acción</h2>
             <p class="large-text" id="valorAccion">Cargando...</p>
-            <p class="variation" id="variacionAccion"></p>
+          </div>
+          <div>
+            <h2>Retribución por Acción</h2>
+            <p class="large-text" id="retribucionPorAccion">Cargando...</p>
           </div>
         </div>
 
@@ -139,16 +195,88 @@
         <div class="grid-box">
           <div>
             <h3>Accionistas</h3>
-            <ul id="listaAccionistas">
-              <!-- Se llenará dinámicamente con p.ej. <li>Pablo: 100 acciones</li> -->
-            </ul>
-            <p class="bold-text">Total Acciones: <span id="accionesTotales">...</span></p>
-            <p class="bold-text">Acciones Disponibles: <span id="accionesDisponibles">...</span></p>
+            <!-- Tabla para visualizar inversores y sus datos -->
+            <table id="tablaAccionistas">
+              <thead>
+                <tr>
+                  <th>Inversor</th>
+                  <th>Acciones</th>
+                  <th>Capital (AR$)</th>
+                  <th>Porcentaje</th>
+                  <th>Retribución</th>
+                </tr>
+              </thead>
+              <tbody id="listaAccionistas"></tbody>
+            </table>
+            <p class="bold-text" style="text-align:right;margin-top:5px;">
+              Total Acciones: <span id="accionesTotales">...</span>
+            </p>
           </div>
           <div>
-            <h3>Retribución Mensual</h3>
-            <p>Monto total a retribuir: <span class="bold-text" id="montoRetribucion">...</span></p>
-            <p>Retribución por acción: <span class="bold-text" id="retribucionPorAccion">...</span></p>
+            <h3>Variación Mensual (Caja Undertango)</h3>
+            <p class="variation" id="variacionCajaUndertango"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección adicional para porcentajes por cliente -->
+      <div class="distribution-section">
+        <h2>Distribución por Cliente</h2>
+        <p>Estos son los porcentajes actuales definidos en el FD.I para cada cliente:</p>
+        <div class="distribution-box">
+          <!-- Cruceros -->
+          <div class="distribution-client">
+            <h3>Cruceros</h3>
+            <ul>
+              <li>10% Caja Undertango</li>
+              <li>7% GO</li>
+              <li>4% FDI</li>
+              <li>32% Personal</li>
+              <li>15% Bianca</li>
+              <li>15% Pablo</li>
+              <li>5% Producción</li>
+              <li>5% Moda U</li>
+              <li>3% Marketing</li>
+              <li>4% Impuestos</li>
+            </ul>
+          </div>
+          <!-- Casa Malbec -->
+          <div class="distribution-client">
+            <h3>Casa Malbec</h3>
+            <ul>
+              <li>36% Personal</li>
+              <li>14% Bianca</li>
+              <li>14% Pablo</li>
+              <li>10% Caja Undertango</li>
+              <li>5% GO</li>
+              <li>3% FDI</li>
+              <li>5% Producción</li>
+              <li>5% Moda U</li>
+              <li>3% Marketing</li>
+              <li>4% Impuestos</li>
+            </ul>
+          </div>
+          <!-- Meliá -->
+          <div class="distribution-client">
+            <h3>Meliá</h3>
+            <ul>
+              <li>20% Bianca</li>
+              <li>5% FDI</li>
+              <li>20% Caja Undertango</li>
+              <li>20% Pablo</li>
+              <li>12% GO</li>
+              <li>10% Producción</li>
+              <li>6% Moda U</li>
+              <li>3% Marketing</li>
+              <li>4% Impuestos</li>
+            </ul>
+          </div>
+          <!-- DAM -->
+          <div class="distribution-client">
+            <h3>DAM</h3>
+            <ul>
+              <li>100% Producción</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -156,35 +284,31 @@
 
     <!-- JavaScript principal -->
     <script>
-      // [1] Claves de Airtable (en modo testing, se ponen en duro)
-      const AIRTABLE_API_KEY = "TU_API_KEY";
-      const BASE_ID = "appXXXXX";
-      const TABLE_NAME = "fdi1";
+      // Ajusta estos tokens / IDs a tu base
+      const AIRTABLE_API_KEY = "pato81fvPnkEuWh3z.106e22ccb41bfad6205fed18c2ac2e509a026e20071c0420b94e3dd1da5d7764";
+      const BASE_ID = "appPGVN4sDJ0aTrSb";
+      const TABLE_MOVIMIENTOS = "fdi1";  
+      const TABLE_INVERSORES = "fdi";   
 
-      // [2] Variables globales para almacenar datos
-      let cajaNetaActual = 0;
-      let accionesTotales = 0;
-      let accionesDisponibles = 0;
-      let montoRetribucion = 0;
-      let accionistasData = []; // p.ej. [ { nombre: "Pablo", acciones: 100 }, { ... } ]
-      let historicoCaja = [];   // p.ej. [ { mes: "Enero", valor: 100000 }, ... ]
+      let cajaUndertango = 0;
+      let fondoInversion = 0;
+      let accionistas = [];
+      let totalAcciones = 0;
+      let historicoCaja = [];
 
-      // [3] Al cargar la página, obtenemos datos desde Airtable y actualizamos la UI
       document.addEventListener("DOMContentLoaded", async () => {
-        await fetchDatosAirtable(); // 1) Obtén los datos
-        calcularValores();          // 2) Realiza los cálculos (valor acción, variaciones, etc.)
-        renderizarDatos();         // 3) Actualiza elementos en pantalla
-        dibujarGrafico();          // 4) Dibuja el gráfico con Chart.js
+        await fetchMovimientos();    // Suma Caja Undertango y Fondo de Inversion
+        await fetchInversores();    // Lista de inversores y sus acciones
+        calcularTotales();          // Sumar acciones
+        renderDatos();              // Mostrar en HTML
+        dibujarGrafico();           // Gráfico
       });
 
-      // [4] Función para obtener datos desde Airtable (AJUSTA a tus campos)
-      async function fetchDatosAirtable() {
+      // [1] Obtener datos desde fdi1
+      async function fetchMovimientos() {
         try {
-          // EJEMPLO: tomamos el primer registro con la info de la caja, etc.
-          // O bien, si guardas mes a mes, iteras en .records
-
           const response = await fetch(
-            `https://api.airtable.com/v0/${BASE_ID}/${TABLE_NAME}`,
+            `https://api.airtable.com/v0/${BASE_ID}/${TABLE_MOVIMIENTOS}`,
             {
               headers: {
                 Authorization: `Bearer ${AIRTABLE_API_KEY}`
@@ -192,109 +316,134 @@
             }
           );
           if (!response.ok) {
-            throw new Error("Error al obtener datos de Airtable");
+            throw new Error("Error al obtener datos de Airtable - fdi1");
           }
           const data = await response.json();
 
-          // Suponiendo que en cada record tengamos campos tipo:
-          // "Mes", "Anio", "CajaNeta", "AccionesTotales", "AccionesDisponibles", "RetribucionMensual"
-          // "Accionistas" (p.ej. un objeto, o varios records con cada accionista), etc.
-
-          // Para ejemplo, tomamos todos los records y construimos arrays (historicoCaja, accionistas, etc.)
+          cajaUndertango = 0;
+          fondoInversion = 0;
           historicoCaja = [];
-          accionistasData = [];
 
           data.records.forEach(record => {
-            const fields = record.fields;
-            // Si un record corresponde a la "caja actual", tomamos esos datos
-            if (fields.EsCajaActual === true) {
-              cajaNetaActual = fields.CajaNeta || 0;
-              accionesTotales = fields.AccionesTotales || 1;
-              accionesDisponibles = fields.AccionesDisponibles || 0;
-              montoRetribucion = fields.RetribucionMensual || 0;
-
-              // Si en Airtable guardaste la lista de accionistas en un array, lo tomas;
-              // o si cada record corresponde a un accionista, lo manejas de otra forma.
-              if (fields.Accionistas) {
-                accionistasData = JSON.parse(fields.Accionistas);
-              }
+            const f = record.fields;
+            if (f["Caja Undertango"] !== undefined) {
+              cajaUndertango += parseFloat(f["Caja Undertango"] || 0);
             }
-            // Para el historial
-            if (fields.Mes && fields.Anio && fields.CajaNeta) {
+            if (f["Fondo de Inversion"] !== undefined) {
+              fondoInversion += parseFloat(f["Fondo de Inversion"] || 0);
+            }
+            if (f["Fecha"] && f["Caja Undertango"] !== undefined) {
+              const fechaObj = new Date(f["Fecha"]);
+              const mesAnio = fechaObj.toLocaleDateString("es-AR", {
+                month: "long",
+                year: "numeric"
+              });
               historicoCaja.push({
-                mes: fields.Mes,   // p.ej. "Enero"
-                anio: fields.Anio, // p.ej. 2025
-                valor: fields.CajaNeta
+                mes: mesAnio,
+                valor: parseFloat(f["Caja Undertango"] || 0)
               });
             }
           });
-
-          // Podrías ordenar `historicoCaja` por año/mes si hace falta
-          // historicoCaja.sort((a, b) => { ... });
         } catch (error) {
-          console.error("fetchDatosAirtable:", error);
+          console.error("fetchMovimientos:", error);
         }
       }
 
-      // [5] Función para hacer cálculos básicos
-      function calcularValores() {
-        // Valor de la acción (simple)
-        // Evitamos división por cero
-        if (accionesTotales === 0) accionesTotales = 1;
+      // [2] Obtener datos desde fdi (inversores)
+      async function fetchInversores() {
+        try {
+          const response = await fetch(
+            `https://api.airtable.com/v0/${BASE_ID}/${TABLE_INVERSORES}`,
+            {
+              headers: {
+                Authorization: `Bearer ${AIRTABLE_API_KEY}`
+              }
+            }
+          );
+          if (!response.ok) {
+            throw new Error("Error al obtener datos de inversores - tabla fdi");
+          }
+          const data = await response.json();
+
+          accionistas = data.records
+            .filter(record => record.fields["Inversor"] && record.fields["cantidad de acciones"])
+            .map(record => ({
+              nombre: record.fields["Inversor"],
+              acciones: parseInt(record.fields["cantidad de acciones"], 10) || 0
+            }));
+        } catch (error) {
+          console.error("fetchInversores:", error);
+        }
       }
 
-      // [6] Renderizar datos en la interfaz
-      function renderizarDatos() {
-        // Caja neta
-        document.getElementById("valorCaja").textContent = formatearMonto(cajaNetaActual);
+      // [3] Calcular totales
+      function calcularTotales() {
+        totalAcciones = accionistas.reduce((acum, inv) => acum + inv.acciones, 0);
+      }
 
-        // Valor acción = caja / acciones totales
-        const valorAccionCalc = cajaNetaActual / accionesTotales;
-        document.getElementById("valorAccion").textContent = formatearMonto(valorAccionCalc);
+      // [4] Renderizar datos
+      function renderDatos() {
+        // Caja Undertango
+        document.getElementById("valorCajaUndertango").textContent = formatMoney(cajaUndertango);
 
-        // (Opcional) Variación mensual de la caja: tomamos últimos dos valores del historial
+        // Fondo de Inversión
+        document.getElementById("valorFondoInversion").textContent = formatMoney(fondoInversion);
+
+        // Valor de la Acción = Caja Undertango / totalAcciones (opcional)
+        let valorAccion = 0;
+        if (totalAcciones > 0) {
+          valorAccion = cajaUndertango / totalAcciones;
+        }
+        document.getElementById("valorAccion").textContent = formatMoney(valorAccion);
+
+        // Retribución por Acción = Fondo de Inversion / totalAcciones
+        let retribPorAccion = 0;
+        if (totalAcciones > 0) {
+          retribPorAccion = fondoInversion / totalAcciones;
+        }
+        document.getElementById("retribucionPorAccion").textContent = formatMoney(retribPorAccion);
+
+        // Mostrar inversores en la tabla
+        const tbody = document.getElementById("listaAccionistas");
+        tbody.innerHTML = "";
+
+        accionistas.forEach(a => {
+          const capitalAcumulado = a.acciones * valorAccion;
+          const porcentajeAcciones = (a.acciones / totalAcciones) * 100;
+          const retribDelAccionista = a.acciones * retribPorAccion;
+
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${a.nombre}</td>
+            <td>${a.acciones}</td>
+            <td>${formatMoney(capitalAcumulado)}</td>
+            <td>${porcentajeAcciones.toFixed(2)}%</td>
+            <td>${formatMoney(retribDelAccionista)}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        // Total Acciones
+        document.getElementById("accionesTotales").textContent = totalAcciones.toString();
+
+        // Variación Mensual
+        historicoCaja.sort((a, b) => ordenarPorMesAnio(a.mes, b.mes));
         if (historicoCaja.length > 1) {
           const penultimo = historicoCaja[historicoCaja.length - 2].valor || 1;
           const ultimo = historicoCaja[historicoCaja.length - 1].valor || 1;
-          const variacionCaja = ((ultimo - penultimo) / penultimo) * 100;
-          mostrarVariacion(variacionCaja, "variacionCaja");
+          const variacion = ((ultimo - penultimo) / penultimo) * 100;
+          showVariation(variacion, "variacionCajaUndertango");
+        } else {
+          document.getElementById("variacionCajaUndertango").textContent = "Sin datos previos";
         }
-
-        // Variación mensual del valor de la acción: 
-        // (Requiere la data del mes anterior y la misma cantidad de acciones, etc.)
-        if (historicoCaja.length > 1) {
-          const penultimoCaja = historicoCaja[historicoCaja.length - 2].valor || 1;
-          const penultimoValorAccion = penultimoCaja / accionesTotales;
-          const valorAccionCalc = cajaNetaActual / accionesTotales;
-          const variacionAccion = ((valorAccionCalc - penultimoValorAccion) / penultimoValorAccion) * 100;
-          mostrarVariacion(variacionAccion, "variacionAccion");
-        }
-
-        // Lista de accionistas
-        const ulAccionistas = document.getElementById("listaAccionistas");
-        ulAccionistas.innerHTML = "";
-        accionistasData.forEach(a => {
-          const li = document.createElement("li");
-          li.textContent = `${a.nombre}: ${a.acciones} acciones`;
-          ulAccionistas.appendChild(li);
-        });
-
-        // Total y disponibles
-        document.getElementById("accionesTotales").textContent = accionesTotales;
-        document.getElementById("accionesDisponibles").textContent = accionesDisponibles;
-
-        // Retribución Mensual
-        document.getElementById("montoRetribucion").textContent = formatearMonto(montoRetribucion);
-        const retribPorAccion = montoRetribucion / accionesTotales;
-        document.getElementById("retribucionPorAccion").textContent = formatearMonto(retribPorAccion);
       }
 
-      // [7] Dibujar gráfico con Chart.js, basado en historicoCaja
+      // [5] Dibujar gráfico con Chart.js
       function dibujarGrafico() {
         const ctx = document.getElementById("chartEvolucion").getContext("2d");
+        historicoCaja.sort((a, b) => ordenarPorMesAnio(a.mes, b.mes));
 
-        // Transformamos el historico en arrays para labels y data
-        const labels = historicoCaja.map(item => `${item.mes} ${item.anio}`);
+        const labels = historicoCaja.map(item => item.mes);
         const dataValues = historicoCaja.map(item => item.valor);
 
         new Chart(ctx, {
@@ -303,7 +452,7 @@
             labels: labels,
             datasets: [
               {
-                label: "Evolución de la Caja Neta",
+                label: "Evolución Caja Undertango",
                 data: dataValues,
                 backgroundColor: "rgba(54, 162, 235, 0.2)",
                 borderColor: "rgba(54, 162, 235, 1)",
@@ -320,7 +469,7 @@
                 beginAtZero: false,
                 ticks: {
                   callback: function(value) {
-                    return formatearMonto(value);
+                    return formatMoney(value);
                   }
                 }
               }
@@ -329,27 +478,53 @@
         });
       }
 
-      // [8] Helper: Formatear monto en ARS
-      function formatearMonto(num) {
+      // Helpers
+      function formatMoney(num) {
         return new Intl.NumberFormat("es-AR", {
           style: "currency",
           currency: "ARS",
           maximumFractionDigits: 2
-        }).format(num);
+        }).format(num || 0);
       }
 
-      // [9] Helper: Mostrar la variación en porcentaje con color
-      function mostrarVariacion(variacion, elementoId) {
+      function showVariation(variacion, elementoId) {
         const spanVar = document.getElementById(elementoId);
         const vPorc = variacion.toFixed(2) + "%";
-
         if (variacion >= 0) {
-          spanVar.textContent = "Var: +" + vPorc;
+          spanVar.textContent = `Var: +${vPorc}`;
           spanVar.classList.add("green-text");
         } else {
-          spanVar.textContent = "Var: " + vPorc;
+          spanVar.textContent = `Var: ${vPorc}`;
           spanVar.classList.add("red-text");
         }
+      }
+
+      // Ordenar por mes y año
+      function ordenarPorMesAnio(m1, m2) {
+        const meses = [
+          "enero","febrero","marzo","abril","mayo","junio",
+          "julio","agosto","septiembre","octubre","noviembre","diciembre"
+        ];
+        function parseMesAnio(str) {
+          let lower = str.toLowerCase().trim();
+          // Intentamos dividir por " de "
+          let parts = lower.split("de").map(s => s.trim());
+          if (parts.length < 2) {
+            // sino, dividimos por espacio
+            parts = lower.split(" ");
+          }
+          const mesStr = parts[0];
+          const anioStr = parts[1] ? parts[1] : "2025";
+          const mesNum = meses.indexOf(mesStr);
+          const anioNum = parseInt(anioStr, 10) || 2025;
+          return { mesNum, anioNum };
+        }
+        const { mesNum: mNum1, anioNum: aNum1 } = parseMesAnio(m1);
+        const { mesNum: mNum2, anioNum: aNum2 } = parseMesAnio(m2);
+        if (aNum1 !== aNum2) {
+          return aNum1 - aNum2;
+        }
+        return mNum1 - mNum2;
       }
     </script>
   </body>
