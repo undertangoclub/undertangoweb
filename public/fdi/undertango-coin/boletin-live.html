@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Boletín Luna N°1 - 2025 Undertango Fondo de Inversión</title>
+
     <!-- Estilos Básicos -->
     <style>
       body {
@@ -142,6 +143,56 @@
       .distribution-client ul li {
         margin: 4px 0;
       }
+
+      /* Estilos para la sección de registro de movimientos (fdi2) */
+      .movimientos-section {
+        background: #fff;
+        margin-top: 20px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        padding: 15px;
+      }
+      .movimientos-section h2 {
+        margin-top: 0;
+      }
+      .registro-form {
+        margin-top: 20px;
+        padding: 15px;
+        background: #fdfdfd;
+        border-radius: 5px;
+      }
+      .registro-form label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      .registro-form input,
+      .registro-form select,
+      .registro-form button {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 10px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+      }
+      .registro-form button {
+        background: #333;
+        color: #fff;
+        cursor: pointer;
+      }
+      .registro-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+      .registro-table th, .registro-table td {
+        padding: 8px;
+        border-bottom: 1px solid #ccc;
+      }
+      .registro-table th {
+        background: #f4f4f4;
+      }
+
       @media(max-width: 600px) {
         .info-box, .grid-box, .distribution-box {
           flex-direction: column;
@@ -153,6 +204,7 @@
     <!-- Librerías de Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
+
   <body>
     <header>
       <img class="logo-luna" src="https://cdn-icons-png.flaticon.com/512/3267/3267734.png" alt="Logo Luna"/>
@@ -224,72 +276,73 @@
         <h2>Distribución por Cliente</h2>
         <p>Estos son los porcentajes actuales definidos en el FD.I para cada cliente:</p>
         <div class="distribution-box">
-          <!-- Cruceros -->
-          <div class="distribution-client">
-            <h3>Cruceros</h3>
-            <ul>
-              <li>10% Caja Undertango</li>
-              <li>7% GO</li>
-              <li>4% FDI</li>
-              <li>32% Personal</li>
-              <li>15% Bianca</li>
-              <li>15% Pablo</li>
-              <li>5% Producción</li>
-              <li>5% Moda U</li>
-              <li>3% Marketing</li>
-              <li>4% Impuestos</li>
-            </ul>
-          </div>
-          <!-- Casa Malbec -->
-          <div class="distribution-client">
-            <h3>Casa Malbec</h3>
-            <ul>
-              <li>36% Personal</li>
-              <li>14% Bianca</li>
-              <li>14% Pablo</li>
-              <li>10% Caja Undertango</li>
-              <li>5% GO</li>
-              <li>3% FDI</li>
-              <li>5% Producción</li>
-              <li>5% Moda U</li>
-              <li>3% Marketing</li>
-              <li>4% Impuestos</li>
-            </ul>
-          </div>
-          <!-- Meliá -->
-          <div class="distribution-client">
-            <h3>Meliá</h3>
-            <ul>
-              <li>20% Bianca</li>
-              <li>5% FDI</li>
-              <li>20% Caja Undertango</li>
-              <li>20% Pablo</li>
-              <li>12% GO</li>
-              <li>10% Producción</li>
-              <li>6% Moda U</li>
-              <li>3% Marketing</li>
-              <li>4% Impuestos</li>
-            </ul>
-          </div>
-          <!-- DAM -->
-          <div class="distribution-client">
-            <h3>DAM</h3>
-            <ul>
-              <li>100% Producción</li>
-            </ul>
-          </div>
+          <!-- Tu configuración de clientes -->
+          <!-- ... -->
+        </div>
+      </div>
+
+      <!-- Sección de Movimientos del Fondo (tabla fdi2) -->
+      <div class="movimientos-section">
+        <h2>Registro de Movimientos (Fondo de Inversión)</h2>
+        <!-- Tabla de movimientos fdi2 -->
+        <table class="registro-table" id="tablaMovimientosFDI2">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Inversor</th>
+              <th>Descripción</th>
+              <th>Acción</th>
+              <th>Cantidad</th>
+            </tr>
+          </thead>
+          <tbody id="listaMovimientosFDI2"></tbody>
+        </table>
+
+        <!-- Formulario para agregar un nuevo movimiento en fdi2 -->
+        <div class="registro-form">
+          <h3>Agregar Movimiento en FDI2</h3>
+
+          <label for="fechaFDI2">Fecha</label>
+          <input type="date" id="fechaFDI2" />
+
+          <label for="inversorFDI2">Inversor</label>
+          <select id="inversorFDI2">
+            <option value="">--Seleccione--</option>
+            <option value="Bianca Wagner">Bianca Wagner</option>
+            <option value="Luciano Valdemarín">Luciano Valdemarín</option>
+            <option value="Pablo Cieslik">Pablo Cieslik</option>
+          </select>
+
+          <label for="descripcionFDI2">Descripción</label>
+          <input type="text" id="descripcionFDI2" placeholder="Ej: Retiro de retribución" />
+
+          <label for="accionFDI2">Acción</label>
+          <select id="accionFDI2">
+            <option value="">--Seleccione--</option>
+            <option value="compra acciones">Compra Acciones</option>
+            <option value="vende acciones">Vende Acciones</option>
+            <option value="recibe retribución">Recibe Retribución</option>
+          </select>
+
+          <label for="cantidadFDI2">Monto o Cantidad</label>
+          <input type="number" id="cantidadFDI2" step="0.01" />
+
+          <button id="btnAgregarFDI2">Agregar Movimiento</button>
         </div>
       </div>
     </div>
 
     <!-- JavaScript principal -->
     <script>
-      // Ajusta estos tokens / IDs a tu base
-      const AIRTABLE_API_KEY = "pato81fvPnkEuWh3z.106e22ccb41bfad6205fed18c2ac2e509a026e20071c0420b94e3dd1da5d7764";
+      // Ajusta estos tokens / IDs a tu base de Airtable
+      const AIRTABLE_API_KEY = "patuKKtlyfqvVNCpc.25468d0bda6badcfd90c84a03a681fc462c0b66b57b964eddb0449b24134a45e";
       const BASE_ID = "appPGVN4sDJ0aTrSb";
-      const TABLE_MOVIMIENTOS = "fdi1";  
-      const TABLE_INVERSORES = "fdi";   
+      // Nombres de tablas en Airtable
+      const TABLE_MOVIMIENTOS = "fdi1";
+      const TABLE_INVERSORES = "fdi";
+      const TABLE_FONDO = "fdi2";
 
+      // Variables globales
       let cajaUndertango = 0;
       let fondoInversion = 0;
       let accionistas = [];
@@ -297,24 +350,25 @@
       let historicoCaja = [];
 
       document.addEventListener("DOMContentLoaded", async () => {
-        await fetchMovimientos();    // Suma Caja Undertango y Fondo de Inversion
-        await fetchInversores();    // Lista de inversores y sus acciones
-        calcularTotales();          // Sumar acciones
-        renderDatos();              // Mostrar en HTML
-        dibujarGrafico();           // Gráfico
+        await fetchMovimientos();   // Cargar fdi1
+        await fetchInversores();    // Cargar fdi
+        calcularTotales();
+        renderDatos();
+        dibujarGrafico();
+
+        // Cargar movimientos fdi2
+        await fetchMovimientosFDI2();
       });
 
       // [1] Obtener datos desde fdi1
       async function fetchMovimientos() {
         try {
-          const response = await fetch(
-            `https://api.airtable.com/v0/${BASE_ID}/${TABLE_MOVIMIENTOS}`,
-            {
-              headers: {
-                Authorization: `Bearer ${AIRTABLE_API_KEY}`
-              }
+          const url = `https://api.airtable.com/v0/${BASE_ID}/${TABLE_MOVIMIENTOS}`;
+          const response = await fetch(url, {
+            headers: {
+              Authorization: `Bearer ${AIRTABLE_API_KEY}`
             }
-          );
+          });
           if (!response.ok) {
             throw new Error("Error al obtener datos de Airtable - fdi1");
           }
@@ -326,12 +380,15 @@
 
           data.records.forEach(record => {
             const f = record.fields;
+            // Sumamos Caja Undertango
             if (f["Caja Undertango"] !== undefined) {
               cajaUndertango += parseFloat(f["Caja Undertango"] || 0);
             }
+            // Sumamos Fondo de Inversion
             if (f["Fondo de Inversion"] !== undefined) {
               fondoInversion += parseFloat(f["Fondo de Inversion"] || 0);
             }
+            // Histórico para variación
             if (f["Fecha"] && f["Caja Undertango"] !== undefined) {
               const fechaObj = new Date(f["Fecha"]);
               const mesAnio = fechaObj.toLocaleDateString("es-AR", {
@@ -349,27 +406,26 @@
         }
       }
 
-      // [2] Obtener datos desde fdi (inversores)
+      // [2] fdi (inversores)
       async function fetchInversores() {
         try {
-          const response = await fetch(
-            `https://api.airtable.com/v0/${BASE_ID}/${TABLE_INVERSORES}`,
-            {
-              headers: {
-                Authorization: `Bearer ${AIRTABLE_API_KEY}`
-              }
+          const url = `https://api.airtable.com/v0/${BASE_ID}/${TABLE_INVERSORES}`;
+          const response = await fetch(url, {
+            headers: {
+              Authorization: `Bearer ${AIRTABLE_API_KEY}`
             }
-          );
+          });
           if (!response.ok) {
-            throw new Error("Error al obtener datos de inversores - tabla fdi");
+            throw new Error("Error al obtener datos de inversores - fdi");
           }
           const data = await response.json();
 
           accionistas = data.records
-            .filter(record => record.fields["Inversor"] && record.fields["cantidad de acciones"])
-            .map(record => ({
-              nombre: record.fields["Inversor"],
-              acciones: parseInt(record.fields["cantidad de acciones"], 10) || 0
+            .filter(r => r.fields["Inversor"] && r.fields["cantidad de acciones"])
+            .map(r => ({
+              id: r.id,
+              nombre: r.fields["Inversor"],
+              acciones: parseFloat(r.fields["cantidad de acciones"]) || 0
             }));
         } catch (error) {
           console.error("fetchInversores:", error);
@@ -378,32 +434,26 @@
 
       // [3] Calcular totales
       function calcularTotales() {
-        totalAcciones = accionistas.reduce((acum, inv) => acum + inv.acciones, 0);
+        totalAcciones = accionistas.reduce((acc, inv) => acc + inv.acciones, 0);
       }
 
-      // [4] Renderizar datos
+      // [4] Renderizar
       function renderDatos() {
-        // Caja Undertango
         document.getElementById("valorCajaUndertango").textContent = formatMoney(cajaUndertango);
-
-        // Fondo de Inversión
         document.getElementById("valorFondoInversion").textContent = formatMoney(fondoInversion);
 
-        // Valor de la Acción = Caja Undertango / totalAcciones (opcional)
         let valorAccion = 0;
         if (totalAcciones > 0) {
           valorAccion = cajaUndertango / totalAcciones;
         }
         document.getElementById("valorAccion").textContent = formatMoney(valorAccion);
 
-        // Retribución por Acción = Fondo de Inversion / totalAcciones
         let retribPorAccion = 0;
         if (totalAcciones > 0) {
           retribPorAccion = fondoInversion / totalAcciones;
         }
         document.getElementById("retribucionPorAccion").textContent = formatMoney(retribPorAccion);
 
-        // Mostrar inversores en la tabla
         const tbody = document.getElementById("listaAccionistas");
         tbody.innerHTML = "";
 
@@ -415,7 +465,7 @@
           const tr = document.createElement("tr");
           tr.innerHTML = `
             <td>${a.nombre}</td>
-            <td>${a.acciones}</td>
+            <td>${a.acciones.toFixed(2)}</td>
             <td>${formatMoney(capitalAcumulado)}</td>
             <td>${porcentajeAcciones.toFixed(2)}%</td>
             <td>${formatMoney(retribDelAccionista)}</td>
@@ -423,10 +473,8 @@
           tbody.appendChild(tr);
         });
 
-        // Total Acciones
-        document.getElementById("accionesTotales").textContent = totalAcciones.toString();
+        document.getElementById("accionesTotales").textContent = totalAcciones.toFixed(2);
 
-        // Variación Mensual
         historicoCaja.sort((a, b) => ordenarPorMesAnio(a.mes, b.mes));
         if (historicoCaja.length > 1) {
           const penultimo = historicoCaja[historicoCaja.length - 2].valor || 1;
@@ -438,7 +486,7 @@
         }
       }
 
-      // [5] Dibujar gráfico con Chart.js
+      // [5] Gráfico
       function dibujarGrafico() {
         const ctx = document.getElementById("chartEvolucion").getContext("2d");
         historicoCaja.sort((a, b) => ordenarPorMesAnio(a.mes, b.mes));
@@ -478,6 +526,229 @@
         });
       }
 
+      // ============================================
+      // Movimientos en fdi2 (con el campo "fecha")
+      // ============================================
+      async function fetchMovimientosFDI2() {
+        try {
+          // Cambiamos "Fecha" a "fecha" en el parámetro de sort
+          const url = `https://api.airtable.com/v0/${BASE_ID}/${TABLE_FONDO}?sort[0][field]=fecha&sort[0][direction]=desc`;
+          const response = await fetch(url, {
+            headers: {
+              Authorization: `Bearer ${AIRTABLE_API_KEY}`
+            }
+          });
+          if (!response.ok) {
+            throw new Error("Error al obtener datos de Airtable - fdi2");
+          }
+          const data = await response.json();
+          renderMovimientosFDI2(data.records);
+        } catch (error) {
+          console.error("fetchMovimientosFDI2:", error);
+        }
+      }
+
+      function renderMovimientosFDI2(records) {
+        const tbody = document.getElementById("listaMovimientosFDI2");
+        tbody.innerHTML = "";
+
+        records.forEach(rec => {
+          const f = rec.fields;
+          // Cambiamos f["Fecha"] por f["fecha"]
+          const fechaVal = f["fecha"] ? new Date(f["fecha"]).toLocaleDateString() : "";
+          const inversor = f["Inversor"] || "";
+          const descripcion = f["descripcion"] || "";
+          const accion = f["Acción"] || "";
+          const cantidad = f["cantidad"] || 0;
+
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${fechaVal}</td>
+            <td>${inversor}</td>
+            <td>${descripcion}</td>
+            <td>${accion}</td>
+            <td>${cantidad}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      document.getElementById("btnAgregarFDI2").addEventListener("click", async () => {
+        const fecha = document.getElementById("fechaFDI2").value;
+        const inversor = document.getElementById("inversorFDI2").value; 
+        const descripcion = document.getElementById("descripcionFDI2").value.trim();
+        const accion = document.getElementById("accionFDI2").value;
+        const montoOCantidad = parseFloat(document.getElementById("cantidadFDI2").value) || 0;
+
+        if (!fecha || !accion) {
+          alert("Por favor, completa al menos la fecha y la acción.");
+          return;
+        }
+
+        try {
+          // Enviamos a fdi2 con el campo "fecha" (minúsculas)
+          await createRecordFDI2({ 
+            fecha: fecha,           // <--- "fecha", no "Fecha"
+            Inversor: inversor,
+            descripcion: descripcion,
+            "Acción": accion,       // si tu campo en Airtable se llama "Acción" con tilde, déjalo así
+            cantidad: montoOCantidad
+          });
+
+          if (accion === "recibe retribución") {
+            await createRecordFDI1({
+              Fecha: fecha,
+              Origen: "FDI",
+              Destino: "Retribución",
+              Detalle: descripcion || "Retribución",
+              Monto: -montoOCantidad,
+              "Fondo de Inversion": -montoOCantidad
+            });
+          }
+
+          if (accion === "compra acciones") {
+            await createRecordFDI1({
+              Fecha: fecha,
+              Origen: "FDI",
+              Destino: "Compra Acciones",
+              Detalle: descripcion,
+              Monto: -montoOCantidad,
+              "Fondo de Inversion": -montoOCantidad
+            });
+
+            // Calculamos cuántas acciones compra
+            const valorAccion = (totalAcciones > 0) ? (cajaUndertango / totalAcciones) : 1;
+            const accionesCompradas = montoOCantidad / valorAccion;
+
+            const inversorObj = accionistas.find(a => a.nombre === inversor);
+            if (inversorObj) {
+              const nuevasAcciones = inversorObj.acciones + accionesCompradas;
+              await updateAccionesInversor(inversorObj.id, nuevasAcciones);
+            }
+          }
+
+          /*
+          if (accion === "vende acciones") {
+            // Ejemplo (adaptar si lo necesitas):
+            await createRecordFDI1({
+              Fecha: fecha,
+              Origen: "Venta Acciones",
+              Destino: "Fondo de Inversion",
+              Detalle: descripcion,
+              Monto: montoOCantidad,
+              "Fondo de Inversion": montoOCantidad
+            });
+            const valorAccion = (totalAcciones > 0) ? (cajaUndertango / totalAcciones) : 1;
+            const accionesVendidas = montoOCantidad / valorAccion;
+            const inversorObj = accionistas.find(a => a.nombre === inversor);
+            if (inversorObj && inversorObj.acciones >= accionesVendidas) {
+              const nuevasAcciones = inversorObj.acciones - accionesVendidas;
+              await updateAccionesInversor(inversorObj.id, nuevasAcciones);
+            }
+          }
+          */
+
+          // Recargamos todo
+          await fetchMovimientosFDI2();
+          await fetchMovimientos();
+          await fetchInversores();
+          calcularTotales();
+          renderDatos();
+
+          // Limpiamos formulario
+          document.getElementById("fechaFDI2").value = "";
+          document.getElementById("inversorFDI2").value = "";
+          document.getElementById("descripcionFDI2").value = "";
+          document.getElementById("accionFDI2").value = "";
+          document.getElementById("cantidadFDI2").value = "";
+
+          alert("Movimiento agregado correctamente.");
+        } catch (error) {
+          console.error("Error al agregar movimiento fdi2:", error);
+          alert("Ocurrió un error al agregar el movimiento en fdi2.");
+        }
+      });
+
+      async function createRecordFDI2(fields) {
+        const url = `https://api.airtable.com/v0/${BASE_ID}/${TABLE_FONDO}`;
+        
+        // Format fields - ahora Inversor es un string simple para Single Select
+        const formattedFields = {
+          fecha: fields.fecha,
+          Inversor: fields.Inversor,
+          "Acción": fields.Acción,
+          cantidad: fields.cantidad,
+          Detalle: fields.descripcion // <= si en el formulario la variable se llama 'descripcion'
+        };
+        
+      
+        console.log('Formatted fields:', formattedFields);
+      
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            records: [{ fields: formattedFields }]
+          })
+        });
+      
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error("Request payload:", { fields: formattedFields });
+          console.error("Airtable error response:", errorData);
+          throw new Error(`No se pudo crear el registro en fdi2: ${errorData.error?.message || 'Error desconocido'}`);
+        }
+      
+        return await response.json();
+      }
+      async function createRecordFDI1(fields) {
+        const url = `https://api.airtable.com/v0/${BASE_ID}/${TABLE_MOVIMIENTOS}`;
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            records: [{ fields }]
+          })
+        });
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error("Error createRecordFDI1:", errorData);
+          throw new Error("No se pudo crear el registro en fdi1");
+        }
+      }
+
+      async function updateAccionesInversor(recordId, nuevasAcciones) {
+        const url = `https://api.airtable.com/v0/${BASE_ID}/${TABLE_INVERSORES}`;
+        const response = await fetch(url, {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            records: [
+              {
+                id: recordId,
+                fields: {
+                  "cantidad de acciones": nuevasAcciones
+                }
+              }
+            ]
+          })
+        });
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error("Error updateAccionesInversor:", errorData);
+          throw new Error("No se pudo actualizar la cantidad de acciones en fdi");
+        }
+      }
+
       // Helpers
       function formatMoney(num) {
         return new Intl.NumberFormat("es-AR", {
@@ -499,7 +770,6 @@
         }
       }
 
-      // Ordenar por mes y año
       function ordenarPorMesAnio(m1, m2) {
         const meses = [
           "enero","febrero","marzo","abril","mayo","junio",
@@ -507,10 +777,8 @@
         ];
         function parseMesAnio(str) {
           let lower = str.toLowerCase().trim();
-          // Intentamos dividir por " de "
           let parts = lower.split("de").map(s => s.trim());
           if (parts.length < 2) {
-            // sino, dividimos por espacio
             parts = lower.split(" ");
           }
           const mesStr = parts[0];
@@ -527,5 +795,6 @@
         return mNum1 - mNum2;
       }
     </script>
+
   </body>
 </html>
