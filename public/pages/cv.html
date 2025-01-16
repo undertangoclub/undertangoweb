@@ -1,393 +1,494 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pablo Guillermo Cieslik - Currículum</title>
-    <style>
-      @import url("https://fonts.googleapis.com/css2?family=Poiret+One&display=swap");
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pablo Guillermo Cieslik - CV</title>
+  <!-- Fuentes y estilos -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=Roboto+Condensed&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    /* Reset básico */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: #ffffff;
+      color: #333333;
+      line-height: 1.4;
+      margin: 0 auto;
+      max-width: 1200px;
+      padding: 0 1rem;
+    }
 
-      html,
-      body {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-        display: flex;
+    header {
+      text-align: center;
+      padding: 2rem 0 1rem;
+      border-bottom: 2px solid #eee;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    header img.profile-pic {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 50%;
+      margin-bottom: 1rem;
+    }
+    header h1 {
+      font-family: 'Roboto Condensed', sans-serif;
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+    header h2 {
+      font-weight: normal;
+      color: #003463; /* Azul oscuro en lugar del rosado */
+      margin-bottom: 0.5rem;
+      font-size: 1.2rem;
+    }
+    header .contact-info {
+      font-size: 0.95rem;
+      color: #666666;
+      margin-bottom: 1rem;
+    }
+
+    /* Contenedor principal */
+    .container {
+      display: flex;
+      flex-direction: row;
+      gap: 1.5rem;
+      padding: 1.5rem 0;
+    }
+
+    /* Columna izquierda: Experiencia, Educación, etc. */
+    .left-column {
+      flex: 1;
+      min-width: 300px;
+      max-width: 700px;
+    }
+    /* Columna derecha: Resumen, Idiomas, Certificaciones, etc. */
+    .right-column {
+      flex: 1;
+      min-width: 280px;
+    }
+
+    /* Títulos de sección */
+    h3.section-title {
+      font-family: 'Roboto Condensed', sans-serif;
+      font-size: 1.2rem;
+      color: #003463; /* Azul oscuro */
+      margin: 1.5rem 0 0.5rem;
+      text-transform: uppercase;
+      border-bottom: 1px solid #cdd7e0; /* Pequeña referencia a un tono azul claro */
+      padding-bottom: 0.3rem;
+    }
+
+    /* Bloques de información (items) */
+    .info-block {
+      margin-bottom: 1rem;
+    }
+    .info-block h4 {
+      margin-bottom: 0.2rem;
+      font-weight: 700;
+      font-size: 1rem;
+    }
+    .info-block p {
+      margin: 0.3rem 0;
+      font-size: 0.95rem;
+    }
+    .info-block ul {
+      list-style: disc;
+      margin-left: 1.2rem;
+      margin-top: 0.4rem;
+      padding-left: 0;
+    }
+    .info-block ul li {
+      margin: 0.3rem 0;
+    }
+
+    /* Resaltado en el texto */
+    .highlight {
+      background: #cce3f6; /* Un tono azul clarito en lugar de rosado */
+      padding: 0 4px;
+      border-radius: 4px;
+    }
+
+    /* Estilos para IDIOMAS con “bolitas” de nivel */
+    .languages {
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+    }
+    .language-level {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .circles {
+      display: flex;
+      gap: 0.2rem;
+    }
+    .circle {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #ccc; /* base */
+      border: 1px solid #999;
+    }
+    /* Llenar círculos activos en azul */
+    .circle.active {
+      background: #003463;
+      border: 1px solid #003463;
+    }
+
+    footer {
+      border-top: 2px solid #eee;
+      text-align: center;
+      padding: 1rem 0;
+      font-size: 0.85rem;
+      color: #888888;
+      margin-bottom: 2rem;
+    }
+
+    /* Enlaces */
+    a {
+      color: #003463; /* Azul oscuro en lugar del rosado */
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* Responsive */
+    @media (max-width: 800px) {
+      .container {
         flex-direction: column;
-        background-color: #1a1a1a;
-        color: white;
-        font-family: "Poiret One", cursive;
       }
+    }
+  </style>
+</head>
+<body>
 
-      header,
-      footer {
-        background-color: rgba(0, 0, 0, 0.5);
-        padding: 1em;
-        text-align: center;
-      }
+  <!-- Encabezado con foto de perfil -->
+  <header>
+    <!-- Ajusta la ruta a tu carpeta según tu entorno de trabajo -->
+    <img 
+      src="../img/perfil.png" 
+      alt="Foto de perfil" 
+      class="profile-pic" 
+    />
+    <h1>PABLO GUILLERMO CIESLIK</h1>
+    <h2>Project Manager | Founder of Ø UnderTango Club | Art & Tech Innovator</h2>
+    <div class="contact-info">
+      <p>Tel: +54 3757 618270 | Email: <a href="mailto:pablocieslik@gmail.com">pablocieslik@gmail.com</a> | 
+      <a href="https://www.linkedin.com/in/pablo-cieslik/" target="_blank">LinkedIn</a> | Argentina</p>
+    </div>
+  </header>
 
-      h1,
-      h2 {
-        text-shadow: 3px 3px 12px rgba(0, 0, 0, 1);
-        margin: 0;
-      }
+  <!-- Contenido principal en dos columnas -->
+  <div class="container">
 
-      main {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-        align-items: center;
-        padding: 2em;
-        gap: 2em;
-      }
+    <!-- COLUMNA IZQUIERDA -->
+    <div class="left-column">
 
-      .section {
-        max-width: 800px;
-        width: 100%;
-      }
+      <!-- EXPERIENCIA -->
+      <h3 class="section-title">Experiencia</h3>
 
-      .section h2 {
-        border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-        padding-bottom: 0.5em;
-        margin-top: 0;
-      }
+      <!-- Founder - UnderTango Ø Shows -->
+      <div class="info-block">
+        <h4>Founder - UnderTango Ø Shows</h4>
+        <p><em>01/2014 - Presente | Puerto Iguazú, Misiones, Argentina</em></p>
+        <p>
+          UnderTango Ø fusiona la tradición del tango con tecnología moderna, 
+          creando experiencias únicas de tango electrónico, con alcance y expansión global.
+          <br>
+          <strong>web:</strong> 
+          <a href="https://undertangoclub.com" target="_blank">https://undertangoclub.com</a>
+        </p>
+        <ul>
+          <li>Define visión y misión alineadas con tendencias actuales</li>
+          <li>Desarrolla estrategias a largo plazo para crecimiento empresarial</li>
+          <li>Dirige producciones de tango electrónico, supervisando creatividad</li>
+          <li>Integra blockchain y NFT para certificar contenidos artísticos</li>
+          <li>Lidera equipo multidisciplinario y gestiona relaciones con socios</li>
+          <li>
+            Lanzó exitosamente espectáculo 
+            <span class="highlight">“Tanguedia Nº2”</span> 
+            con reconocimiento global
+          </li>
+        </ul>
+      </div>
 
-      .info {
-        display: flex;
-        flex-direction: column;
-        gap: 1em;
-      }
+      <!-- Gerente - Fondo de Inversión Ø UnderTango -->
+      <div class="info-block">
+        <h4>Gerente - Fondo de Inversión Ø UnderTango</h4>
+        <p><em>12/2012 - 03/2013 | Puerto Iguazú, Misiones, Argentina</em></p>
+        <ul>
+          <li>Creación y gestión de fondo de inversión especializado en proyectos culturales</li>
+          <li>Coordinación con inversores y socios estratégicos</li>
+          <li>Análisis financiero y planificación de riesgos</li>
+        </ul>
+      </div>
 
-      .info-item {
-        background-color: rgba(255, 255, 255, 0.1);
-        padding: 1.5em;
-        border-radius: 10px;
-        box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5);
-      }
+      <!-- Director General - Moda Ø UnderTango -->
+      <div class="info-block">
+        <h4>Director General - Moda Ø UnderTango</h4>
+        <p><em>11/2024 - Presente | Puerto Iguazú - Misiones, Argentina</em></p>
+        <p>
+          Línea de indumentaria que combina tradición y modernidad para satisfacer 
+          las necesidades de los amantes del tango, ofreciendo prendas elegantes, 
+          cómodas y funcionales, ideales tanto para la pista de baile como para la vida cotidiana.
+          <br>
+          <strong>IG:</strong> 
+          <a href="https://www.instagram.com/modaundertango" target="_blank">instagram.com/modaundertango</a>
+        </p>
+      </div>
 
-      .info-item h3 {
-        margin-top: 0;
-      }
+      <!-- Productor - Ø UnderTango Music Club -->
+      <div class="info-block">
+        <h4>Productor - Ø UnderTango Music Club</h4>
+        <p><em>01/2016 - Presente</em></p>
+        <p>
+          <strong>"El ágora del aprendizaje" [ag]</strong><br>
+          Un espacio para el trabajo de técnicas de aprendizaje y memorización.
+          <br>
+          <strong>Canal:</strong> 
+          <a href="https://www.youtube.com/channel/UC_Y07JkA8Y6HYqFpShxQJlw" target="_blank">
+            YouTube - UnderTango Music Club
+          </a>
+        </p>
+      </div>
 
-      footer {
-        font-size: 0.8em;
-      }
+      <!-- [LCL] La Crítica Literaria -->
+      <div class="info-block">
+        <h4>[LCL] La Crítica Literaria</h4>
+        <p><em>01/2016 - Presente | La Biblioteca de Babel</em></p>
+        <p>
+          Un canal de Youtube de análisis de obras literarias.
+          <br>
+          <strong>Enlace:</strong> 
+          <a href="https://www.youtube.com/channel/UC6raO_iN8S2IeutiDqIShQ" target="_blank">
+            YouTube - La Crítica Literaria
+          </a>
+        </p>
+      </div>
 
-      a {
-        color: #1e90ff;
-        text-decoration: none;
-      }
+      <!-- [3in] 3 minutos con la realidad -->
+      <div class="info-block">
+        <h4>[3in] - 3 minutos con la realidad</h4>
+        <p><em>01/2016 - Presente</em></p>
+        <p>
+          Un espacio de análisis e indagación filosófica.
+          <br>
+          <strong>Canal:</strong>
+          <a href="https://www.youtube.com/channel/UCh-Z3sPD0OFmkif1B6tiaDA" target="_blank">
+            3 minutos con la realidad
+          </a>
+        </p>
+      </div>
 
-      a:hover {
-        text-decoration: underline;
-      }
-    </style>
-  </head>
-  <body>
-    <header>
-      <h1>Pablo Guillermo Cieslik</h1>
-      <p>Project Manager | Founder of Ø UnderTango Club | Art &amp; Tech Innovator</p>
-    </header>
+      <!-- Director Artístico - V+T -->
+      <div class="info-block">
+        <h4>Director Artístico - V+T</h4>
+        <p><em>01/2016 - 12/2018</em></p>
+        <ul>
+          <li>Diseño y dirección artística de proyectos escénicos</li>
+          <li>Selección de elenco y supervisión de guiones</li>
+        </ul>
+      </div>
 
-    <main>
+      <!-- Director y guionista - Es lo que es -->
+      <div class="info-block">
+        <h4>Director y Guionista - Es lo que es</h4>
+        <p><em>08/2012 - 12/2016</em></p>
+        <ul>
+          <li>Creación de guiones originales para producciones culturales</li>
+          <li>Dirección de equipo en rodajes y puestas en escena</li>
+        </ul>
+      </div>
+
+      <!-- Columnista - Radio Cataratas -->
+      <div class="info-block">
+        <h4>Columnista - Radio Cataratas</h4>
+        <p><em>03/2012 - 12/2015 | Puerto Iguazú - Misiones</em></p>
+        <p>Redactor de la columna cultural <em>"Suero Antiofídico"</em>.</p>
+      </div>
+
+      <!-- Corrector literario -->
+      <div class="info-block">
+        <h4>Corrector literario - Diario "El Nuevo Iguazú"</h4>
+        <p><em>12/2011 - 10/2012 | Puerto Iguazú - Misiones</em></p>
+      </div>
+
+      <!-- EDUCACIÓN -->
+      <h3 class="section-title">Educación</h3>
+      <div class="info-block">
+        <h4>Producción y Gestión de Eventos, Gestión de las artes escénicas y audiovisuales</h4>
+        <p><em>Universidad Nacional de Córdoba | 03/2005 - 12/2014</em></p>
+      </div>
+      <div class="info-block">
+        <h4>Robótica, Tecnología/Técnico de robótica</h4>
+        <p><em>Universidad de la Marina Mercante | 07/2023 - 01/2024</em></p>
+      </div>
+      <div class="info-block">
+        <h4>Formado en Humanidades</h4>
+        <p><em>Universidad Nacional de Córdoba | 01/2005 - 12/2014</em></p>
+      </div>
+    </div> <!-- Fin columna izquierda -->
+
+    <!-- COLUMNA DERECHA -->
+    <div class="right-column">
+
       <!-- Resumen -->
-      <div class="section">
-        <h2>Resumen</h2>
-        <div class="info">
-          <p>
-            Productor y emprendedor en la intersección de arte, tecnología y finanzas descentralizadas.
-            Fundador de Ø UnderTango Club, un proyecto que fusiona el tango con tecnología de vanguardia,
-            creando experiencias culturales en la triple frontera de Argentina, Brasil y Paraguay.
-            Mi misión es explorar nuevos formatos y medios, combinando tradición con innovación.
-            En constante desarrollo de aplicaciones, blockchain y proyectos creativos.
-            Apasionado por la colaboración, la filosofía y el aprendizaje continuo.
-          </p>
-        </div>
+      <h3 class="section-title">Resumen</h3>
+      <div class="info-block">
+        <p>
+          Productor y emprendedor en la intersección de arte, tecnología y finanzas descentralizadas. 
+          Fundador de Ø UnderTango Club, un proyecto que fusiona el tango con tecnología de vanguardia, 
+          creando experiencias culturales en la triple frontera de Argentina, Brasil y Paraguay. 
+          Mi misión es explorar nuevos formatos y medios, combinando tradición con innovación. 
+          En constante desarrollo de aplicaciones, blockchain y proyectos creativos. 
+          Apasionado por la colaboración, la filosofía y el aprendizaje continuo.
+        </p>
       </div>
 
-      <!-- Experiencia -->
-      <div class="section">
-        <h2>Experiencia</h2>
-        <div class="info">
-
-          <!-- Founder -->
-          <div class="info-item">
-            <h3>Founder - UnderTango Ø Shows</h3>
-            <p><em>01/2014 - Presente, Puerto Iguazú, Misiones (Argentina)</em></p>
-            <p>
-              UnderTango Ø fusiona la tradición del tango con tecnología moderna, creando experiencias
-              únicas de tango electrónico, con alcance y expansión global.
-              <br />
-              <strong>web:</strong> <a href="https://undertangoclub.com" target="_blank">https://undertangoclub.com</a>
-            </p>
-            <ul>
-              <li>Define visión y misión alineadas con tendencias actuales</li>
-              <li>Desarrolla estrategias a largo plazo para crecimiento empresarial</li>
-              <li>Dirige producciones de tango electrónico, supervisando creatividad</li>
-              <li>Integra blockchain y NFT para certificar contenidos artísticos</li>
-              <li>Lidera equipo multidisciplinario y gestiona relaciones con socios</li>
-              <li>Lanzó exitosamente espectáculo <em>“Tanguedia Nº2”</em> con reconocimiento global</li>
-            </ul>
+      <!-- Idiomas -->
+      <h3 class="section-title">Idiomas</h3>
+      <div class="languages">
+        <div class="language-level">
+          <span>Portugués:</span> <strong>Nativo</strong>
+          <div class="circles portugues">
+            <div class="circle active"></div>
+            <div class="circle active"></div>
+            <div class="circle active"></div>
+            <div class="circle active"></div>
+            <div class="circle active"></div>
           </div>
-
-          <!-- Gerente -->
-          <div class="info-item">
-            <h3>Gerente - Fondo de Inversión Ø UnderTango</h3>
-            <p><em>12/2012 - 03/2013, Puerto Iguazú, Misiones (Argentina)</em></p>
-            <ul>
-              <li>Creación y gestión de fondo de inversión especializado en proyectos culturales</li>
-              <li>Coordinación con inversores y socios estratégicos</li>
-              <li>Análisis financiero y planificación de riesgos</li>
-            </ul>
-          </div>
-
-          <!-- Director General -->
-          <div class="info-item">
-            <h3>Director General - Moda Ø UnderTango</h3>
-            <p><em>11/2024 - Presente, Puerto Iguazú - Misiones (Argentina)</em></p>
-            <p>
-              Línea de indumentaria que combina tradición y modernidad para satisfacer las necesidades de
-              los amantes del tango, ofreciendo prendas elegantes, cómodas y funcionales, ideales tanto para
-              la pista de baile como para la vida cotidiana.
-              <br />
-              <strong>IG:</strong> <a href="https://www.instagram.com/modaundertango" target="_blank">instagram.com/modaundertango</a>
-            </p>
-          </div>
-
-          <!-- Productor -->
-          <div class="info-item">
-            <h3>Productor - Ø UnderTango Music Club</h3>
-            <p><em>01/2016 - Presente</em></p>
-            <p>
-              <strong>“El ágora del aprendizaje” [ag]</strong><br />
-              Un espacio para el trabajo de técnicas de aprendizaje y memorización.
-              <br />
-              <strong>Canal:</strong>
-              <a href="https://www.youtube.com/channel/UC_Y07JkA8Y6HYqFpShxQJlw" target="_blank">YouTube - UnderTango Music Club</a>
-            </p>
-          </div>
-
-          <!-- LCL - La Crítica Literaria -->
-          <div class="info-item">
-            <h3>[LCL] La Crítica Literaria</h3>
-            <p><em>01/2016 - Presente, La Biblioteca de Babel</em></p>
-            <p>
-              Un canal de YouTube de análisis de obras literarias.
-              <br />
-              <strong>Enlace:</strong>
-              <a href="https://www.youtube.com/channel/UC6raO_iN8S2IeutiDqIShQ" target="_blank">YouTube - La Crítica Literaria</a>
-            </p>
-          </div>
-
-          <!-- [3in] -->
-          <div class="info-item">
-            <h3>[3in] - 3 minutos con la realidad</h3>
-            <p><em>01/2016 - Presente</em></p>
-            <p>
-              Un espacio de análisis e indagación filosófica.
-              <br />
-              <strong>Canal:</strong>
-              <a href="https://www.youtube.com/channel/UCh-Z3sPD0OFmkif1B6tiaDA" target="_blank"
-                >3 minutos con la realidad</a
-              >
-            </p>
-          </div>
-
-          <!-- Director Artístico V+T -->
-          <div class="info-item">
-            <h3>Director Artístico - V+T</h3>
-            <p><em>01/2016 - 12/2018</em></p>
-            <ul>
-              <li>Diseño y dirección artística de proyectos escénicos</li>
-              <li>Selección de elenco y supervisión de guiones</li>
-            </ul>
-          </div>
-
-          <!-- Director y Guionista -->
-          <div class="info-item">
-            <h3>Director y Guionista - Es lo que es</h3>
-            <p><em>08/2012 - 12/2016</em></p>
-            <ul>
-              <li>Creación de guiones originales para producciones culturales</li>
-              <li>Dirección de equipo en rodajes y puestas en escena</li>
-            </ul>
-          </div>
-
-          <!-- Columnista -->
-          <div class="info-item">
-            <h3>Columnista - Radio Cataratas</h3>
-            <p><em>03/2012 - 12/2015, Puerto Iguazú - Misiones</em></p>
-            <p>
-              Redactor de la columna cultural <em>"Suero Antiofídico"</em>.
-            </p>
-          </div>
-
-          <!-- Corrector literario -->
-          <div class="info-item">
-            <h3>Corrector literario - Diario "El Nuevo Iguazú"</h3>
-            <p><em>12/2011 - 10/2012, Puerto Iguazú - Misiones</em></p>
-          </div>
-
         </div>
-      </div>
-
-      <!-- Educación -->
-      <div class="section">
-        <h2>Educación</h2>
-        <div class="info">
-          <div class="info-item">
-            <h3>Producción y Gestión de Eventos, Gestión de las artes escénicas y audiovisuales</h3>
-            <p><em>Universidad Nacional de Córdoba | 03/2005 - 12/2014</em></p>
+        <div class="language-level">
+          <span>Inglés:</span> <strong>Avanzado</strong>
+          <div class="circles ingles">
+            <div class="circle active"></div>
+            <div class="circle active"></div>
+            <div class="circle active"></div>
+            <div class="circle active"></div>
+            <div class="circle"></div>
           </div>
-          <div class="info-item">
-            <h3>Robótica, Tecnología/Técnico de robótica</h3>
-            <p><em>Universidad de la Marina Mercante | 07/2023 - 01/2024</em></p>
+        </div>
+        <div class="language-level">
+          <span>Alemán:</span> <strong>Intermedio</strong>
+          <div class="circles aleman">
+            <div class="circle active"></div>
+            <div class="circle active"></div>
+            <div class="circle active"></div>
+            <div class="circle"></div>
+            <div class="circle"></div>
           </div>
-          <div class="info-item">
-            <h3>Formado en Humanidades</h3>
-            <p><em>Universidad Nacional de Córdoba | 01/2005 - 12/2014</em></p>
+        </div>
+        <div class="language-level">
+          <span>Chino:</span> <strong>Base</strong>
+          <div class="circles chino">
+            <div class="circle active"></div>
+            <div class="circle"></div>
+            <div class="circle"></div>
+            <div class="circle"></div>
+            <div class="circle"></div>
           </div>
         </div>
       </div>
 
       <!-- Certificaciones -->
-      <div class="section">
-        <h2>Certificaciones</h2>
-        <div class="info">
-          <div class="info-item">
-            <ul>
-              <li>Fluidez de Duolingo en alemán: Intermedio (Estimado) - Duolingo</li>
-              <li>New User Tutorial - Processing Foundation</li>
-              <li>"The hour of code" certificate - Code.org</li>
-              <li>Unity Essentials Pathway - Unity Technologies</li>
-              <li>Curso de Guión de Series y Largometrajes - S.A. Cine (Sergio Acosta)</li>
-              <li>Learn JavaScript Course - Codecademy</li>
-              <li>Red 1 Pdc Arg Programa - Egg Cooperation</li>
-              <li>Chino Básico Conversacional</li>
-              <li>Circulación de música en vivo por el mundo - INAMU (Instituto Nacional de la Música)</li>
-            </ul>
-          </div>
-        </div>
+      <h3 class="section-title">Certificaciones</h3>
+      <div class="info-block">
+        <ul>
+          <li>Fluidez de Duolingo en alemán: Intermedio (Estimado) - Duolingo</li>
+          <li>New User Tutorial - Processing Foundation</li>
+          <li>"The hour of code" certificate - Code.org</li>
+          <li>Unity Essentials Pathway - Unity Technologies</li>
+          <li>Curso de Guión de Series y Largometrajes - S.A. Cine (Sergio Acosta)</li>
+          <li>Learn JavaScript Course - Codecademy</li>
+          <li>Red 1 Pdc Arg Programa - Egg Cooperation</li>
+          <li>Chino Básico Conversacional</li>
+          <li>Circulación de música en vivo por el mundo - INAMU</li>
+        </ul>
       </div>
 
       <!-- Premios -->
-      <div class="section">
-        <h2>Premios</h2>
-        <div class="info">
-          <div class="info-item">
-            <ul>
-              <li>Fomento a la Música Argentina</li>
-              <li>Fomento a las Industrias Culturales – Proyecto ganador – Show de Tango Electrónico</li>
-              <li>
-                Concurso B-Artes – Obra Ganadora en la Categoría Video –
-                <em>"Dos inteligencias artificiales hablan entre sí"</em>
-              </li>
-              <li>
-                Convocatoria VIDEO + ARTE 20 – Video-Danza Ganadora →
-                <em>"Danza Telepática"</em>
-              </li>
-            </ul>
-          </div>
-        </div>
+      <h3 class="section-title">Premios</h3>
+      <div class="info-block">
+        <ul>
+          <li>Fomento a la Música Argentina</li>
+          <li>Fomento a las Industrias Culturales – Proyecto ganador – Show de Tango Electrónico</li>
+          <li>
+            Concurso B-Artes – Obra Ganadora en la Categoría Video –
+            <span class="highlight">"Dos inteligencias artificiales hablan entre sí"</span>
+          </li>
+          <li>
+            Convocatoria VIDEO + ARTE 20 – Video-Danza Ganadora →
+            <span class="highlight">"Danza Telepática"</span>
+          </li>
+        </ul>
       </div>
 
       <!-- Publicaciones -->
-      <div class="section">
-        <h2>Publicaciones</h2>
-        <div class="info">
-          <div class="info-item">
-            <h3>1n1 – Libro Ilustrado</h3>
-            <p>
-              <strong>Enlace:</strong>
-              <a href="https://ko-fi.com/undertangoclub/shop" target="_blank"
-                >ko-fi.com/undertangoclub/shop</a
-              ><br/>
-              <em>06/2023</em><br/>
-              También disponible en: 
-              <a href="https://pablocieslik.wixsite.com/undertango" target="_blank"
-                >pablocieslik.wixsite.com/undertango</a>
-            </p>
-          </div>
-          <div class="info-item">
-            <h3>Novela "Volviendo a casa"</h3>
-            <p>
-              Novela regionalista ambientada en la triple frontera.<br/>
-              <strong>Editorial:</strong> Tinta Libre ediciones<br/>
-              <em>06/2012</em><br/>
-              <strong>Enlace:</strong>
-              <a href="https://www.tintalibre.com.ar/book/45/Volviendo_a_casa" target="_blank">
-                tintalibre.com.ar/book/45/Volviendo_a_casa
-              </a>
-            </p>
-          </div>
-        </div>
+      <h3 class="section-title">Publicaciones</h3>
+      <div class="info-block">
+        <h4>1n1 – Libro Ilustrado</h4>
+        <p>
+          <strong>Enlace:</strong>
+          <a href="https://ko-fi.com/undertangoclub/shop" target="_blank">ko-fi.com/undertangoclub/shop</a>
+          <br>
+          <em>06/2023</em><br>
+          También disponible en:
+          <a href="https://pablocieslik.wixsite.com/undertango" target="_blank">
+            pablocieslik.wixsite.com/undertango
+          </a>
+        </p>
+      </div>
+      <div class="info-block">
+        <h4>Novela "Volviendo a casa"</h4>
+        <p>
+          Novela regionalista ambientada en la triple frontera.<br>
+          <strong>Editorial:</strong> Tinta Libre ediciones<br>
+          <em>06/2012</em><br>
+          <strong>Enlace:</strong>
+          <a href="https://www.tintalibre.com.ar/book/45/Volviendo_a_casa" target="_blank">
+            tintalibre.com.ar/book/45/Volviendo_a_casa
+          </a>
+        </p>
       </div>
 
       <!-- Proyectos -->
-      <div class="section">
-        <h2>Proyectos</h2>
-        <div class="info">
-          <div class="info-item">
-            <h3>1n1-111777ØØ</h3>
-            <p><em>06/2023 - 08/2023</em></p>
-            <p>
-              <strong>Link:</strong>
-              <a
-                href="https://drive.google.com/file/d/18Uv7w_52otEnm6C5dn4AMYNFc_qwWTMo/view?usp=sharing"
-                target="_blank"
-                >Proyecto</a
-              >
-              <br />
-              ¿Cuál fue un resultado exótico de tu trabajo?
-              <br />
-              (por ejemplo, recaudé $3,000 para la caridad)
-            </p>
-          </div>
-        </div>
+      <h3 class="section-title">Proyectos</h3>
+      <div class="info-block">
+        <h4>1n1-111777ØØ</h4>
+        <p><em>06/2023 - 08/2023</em></p>
+        <p>
+          <strong>Link:</strong>
+          <a
+            href="https://drive.google.com/file/d/18Uv7w_52otEnm6C5dn4AMYNFc_qwWTMo/view?usp=sharing"
+            target="_blank"
+          >
+            drive.google.com
+          </a>
+          <br/>
+          ¿Cuál fue un resultado exótico de tu trabajo?
+          <br/>
+          (por ejemplo, recaudé $3,000 para la caridad)
+        </p>
       </div>
+    </div> <!-- Fin columna derecha -->
+  </div> <!-- Fin container -->
 
-      <!-- Idiomas -->
-      <div class="section">
-        <h2>Idiomas</h2>
-        <div class="info">
-          <div class="info-item">
-            <ul>
-              <li>Portugués: Nativo</li>
-              <li>Inglés: Avanzado</li>
-              <li>Alemán: Intermedio</li>
-              <li>Chino: Base</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <!-- Contacto -->
-      <div class="section">
-        <h2>Contacto</h2>
-        <div class="info">
-          <div class="info-item">
-            <p>
-              <strong>Teléfono:</strong> +54 3757 618270
-            </p>
-            <p>
-              <strong>Email:</strong>
-              <a href="mailto:pablocieslik@gmail.com">pablocieslik@gmail.com</a>
-            </p>
-            <p>
-              <strong>LinkedIn:</strong>
-              <a href="https://www.linkedin.com/in/pablo-cieslik/" target="_blank"
-                >linkedin.com/in/pablo-cieslik</a
-              >
-            </p>
-            <p>Argentina</p>
-          </div>
-        </div>
-      </div>
-    </main>
-
-    <footer>
-      <p>&copy; 2025 Pablo Guillermo Cieslik. Todos los derechos reservados.</p>
-    </footer>
-  </body>
+  <footer>
+    <p>&copy; 2025 Pablo Guillermo Cieslik. Todos los derechos reservados.</p>
+  </footer>
+</body>
 </html>
