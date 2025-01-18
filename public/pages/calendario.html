@@ -253,30 +253,12 @@
 
   <body>
     <div class="container">
-      <!-- Mes: Enero -->
       <div class="month">
         <div class="month-header">
           <h2>Enero 2025</h2>
         </div>
         <!-- Semana comienza en lunes -->
-        <div class="calendar-grid calendar-grid-ene">
-          <div class="weekday">Lun</div>
-          <div class="weekday">Mar</div>
-          <div class="weekday">Mié</div>
-          <div class="weekday">Jue</div>
-          <div class="weekday">Vie</div>
-          <div class="weekday">Sáb</div>
-          <div class="weekday">Dom</div>
-        </div>
-      </div>
-
-      <!-- Mes: Febrero (NUEVO) -->
-      <div class="month">
-        <div class="month-header">
-          <h2>Febrero 2025</h2>
-        </div>
-        <!-- Semana comienza en lunes -->
-        <div class="calendar-grid calendar-grid-feb">
+        <div class="calendar-grid">
           <div class="weekday">Lun</div>
           <div class="weekday">Mar</div>
           <div class="weekday">Mié</div>
@@ -457,9 +439,7 @@
        * Muestra los eventos en el calendario
        */
       function displayEvents(records) {
-        // Recolectamos los días de ambos meses:
-        const eneDays = document.querySelectorAll(".calendar-grid-ene .day");
-        const febDays = document.querySelectorAll(".calendar-grid-feb .day");
+        const days = document.querySelectorAll(".day");
 
         records.forEach((record) => {
           const { fecha, hora, lugar, interprete } = record.fields;
@@ -473,24 +453,15 @@
 
           const [year, month, day] = fecha.split("-").map(Number);
 
-          // Identificamos si corresponde a enero (0) o febrero (1):
-          let dayElements = null;
-          if (month === 1) {
-            // enero
-            dayElements = eneDays;
-          } else if (month === 2) {
-            // febrero
-            dayElements = febDays;
-          } else {
-            // Si llegaran otros meses, los ignoramos
-            return;
-          }
-
-          const dayElement = Array.from(dayElements).find((dayEl) => {
+          const dayElement = Array.from(days).find((dayEl) => {
             const dayNumber = parseInt(
               dayEl.querySelector(".day-number")?.textContent
             );
-            return dayNumber === day;
+            const monthHeader = dayEl
+              .closest(".month")
+              ?.querySelector(".month-header h2")?.textContent;
+            const calendarMonth = monthHeader.includes("Enero") ? 0 : 1;
+            return dayNumber === day && calendarMonth === month - 1;
           });
 
           if (!dayElement) {
@@ -769,12 +740,7 @@
           .closest(".month")
           ?.querySelector(".month-header h2")?.textContent;
         const year = 2025;
-        let month = 0;
-        if (monthHeader.includes("Enero")) {
-          month = 0; // enero
-        } else if (monthHeader.includes("Febrero")) {
-          month = 1; // febrero
-        }
+        const month = monthHeader.includes("Enero") ? 0 : 1;
         const dateObj = new Date(year, month, parseInt(dayNumber));
         const isoDate = dateObj.toISOString().split("T")[0];
 
@@ -1032,15 +998,8 @@
        * Inicializa el calendario
        */
       document.addEventListener("DOMContentLoaded", () => {
-        // 1) Calendario de Enero
-        const eneCalendarGrid = document.querySelector(".calendar-grid-ene");
-        createCalendarDays(eneCalendarGrid, 2025, 0);
-
-        // 2) Calendario de Febrero (NUEVO)
-        const febCalendarGrid = document.querySelector(".calendar-grid-feb");
-        createCalendarDays(febCalendarGrid, 2025, 1);
-
-        // Cargamos eventos (se mostrarán en ambos meses)
+        const calendarGrid = document.querySelector(".calendar-grid");
+        createCalendarDays(calendarGrid, 2025, 0);
         loadEvents();
 
         // Botón de edición
