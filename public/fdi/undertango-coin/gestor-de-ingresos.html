@@ -2,7 +2,7 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Gestor Financiero - Undertango</title>
     <style>
       body {
@@ -244,6 +244,9 @@
       const BASE_ID = "appPGVN4sDJ0aTrSb";
       const TABLE_NAME = "fdi1";
 
+      // Definimos qué orígenes se consideran "Clientes" para aplicar el 4%
+      const CLIENTES = ["Cruceros", "Casa Malbec", "Melia", "DAM", "Otros"];
+
       const DISTRIBUCION_INGRESOS = {
         Cruceros: {
           "Caja Undertango": 0.1,
@@ -367,7 +370,6 @@
               // Si las fechas son iguales, ordenamos por ID (más reciente primero)
               return b.id.localeCompare(a.id);
             }
-            
             return dateComparison;
           });
       
@@ -438,22 +440,29 @@
           alert("Por favor, completa todos los campos correctamente.");
           return;
         }
-      
+
+        // Verificar si el origen está en CLIENTES (para aplicar el 4% de impuestos)
+        const aplicaImpuestos = CLIENTES.includes(origen);
+        let montoDespuesImpuestos = montoInicial;
+
         try {
-          // Aplicar deducción de impuestos del 4%
-          const impuestos = parseFloat((montoInicial * 0.04).toFixed(2));
-          const montoDespuesImpuestos = parseFloat((montoInicial - impuestos).toFixed(2));
-      
-          // Registrar la deducción de impuestos como un registro negativo
-          await createRecord({
-            Fecha: fecha,
-            Origen: origen,
-            Destino: "Impuestos",
-            Detalle: "Deducción de impuestos",
-            Monto: -impuestos
-          });
+          if (aplicaImpuestos) {
+            // Aplicar deducción de impuestos del 4%
+            const impuestos = parseFloat((montoInicial * 0.04).toFixed(2));
+            montoDespuesImpuestos = parseFloat((montoInicial - impuestos).toFixed(2));
+            
+            // Registrar la deducción de impuestos como un registro negativo
+            await createRecord({
+              Fecha: fecha,
+              Origen: origen,
+              Destino: "Impuestos",
+              Detalle: "Deducción de impuestos",
+              Monto: -impuestos
+            });
+          }
       
           if (origen === "Otros") {
+            // Si el origen es "Otros" de Clientes, se asume no hay distribución automática
             await createRecord({
               Fecha: fecha,
               Origen: origen,
@@ -463,6 +472,7 @@
               [destino]: montoDespuesImpuestos,
             });
           } else if (esCaja(origen)) {
+            // Si el origen es una caja (de la empresa), verificar saldo y registrar negativo
             const saldoCaja = parseFloat(
               document.getElementById(CAJAS[origen]).textContent.replace("$", "")
             );
@@ -479,12 +489,13 @@
               [origen]: -montoDespuesImpuestos,
             });
           } else {
+            // Caso en que el origen es un cliente con distribución (Cruceros, Casa Malbec o Melia)
             await createRecord({
               Fecha: fecha,
               Origen: origen,
               Destino: destino,
               Detalle: detalle,
-              Monto: montoDespuesImpuestos,
+              Monto: montoDespuesImpuestos
             });
       
             if (DISTRIBUCION_INGRESOS[origen]) {
