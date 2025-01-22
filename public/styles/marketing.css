@@ -1,0 +1,115 @@
+body {
+  font-family: "Arial", sans-serif;
+  background-color: #1a0f0a;
+  color: #d4a574;
+  margin: 0;
+  padding: 10px;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  display: block;
+  gap: 15px;
+}
+
+.month {
+  width: 100%;
+  background-color: rgba(41, 27, 23, 0.9);
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.month-header {
+  margin-bottom: 15px;
+  padding: 10px;
+  background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
+    url("https://hebbkx1anhila5yf.public.blob.vercel-storage.com/11-2024-9vRUE8b2vSmqweM2I7CJw1H9gdAt6k.png");
+  background-size: cover;
+  background-position: center;
+  border-radius: 8px;
+}
+
+.month-header h2 {
+  color: #ffd700;
+  margin: 0;
+  font-size: 1.8rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  text-align: center;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.weekday {
+  text-align: center;
+  padding: 6px;
+  font-weight: bold;
+  color: #ffd700;
+  font-size: 1rem;
+}
+
+.day {
+  background-color: rgba(62, 39, 35, 0.5);
+  border: 1px solid #4a2f2a;
+  padding: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+}
+
+.day:hover {
+  background-color: rgba(82, 49, 45, 0.7);
+}
+
+.day-number {
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 4px;
+  font-size: 1rem;
+}
+
+.event {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 5px;
+  font-size: 0.8rem;
+  background-color: rgba(41, 27, 23, 0.9);
+  border-radius: 4px;
+  padding: 4px;
+  color: #ffd700;
+  cursor: pointer;
+}
+
+.event div {
+  padding: 2px 4px;
+  border-radius: 3px;
+  text-align: center;
+}
+
+.event .numero-tarea {
+  background-color: #5a382f;
+}
+
+.event .tarea {
+  background-color: #71443b;
+}
+
+.add-event {
+  background-color: rgba(82, 49, 45, 0.7);
+  text-align: center;
+  padding: 4px;
+  border-radius: 4px;
+  color: #ffd700;
+  cursor: pointer;
+}

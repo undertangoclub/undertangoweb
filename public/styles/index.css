@@ -1,0 +1,162 @@
+@import url("https://fonts.googleapis.com/css2?family=Poiret+One&display=swap");
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  background-color: #1a1a1a;
+  font-family: "Poiret One", cursive;
+}
+
+/* Contenedor principal */
+.container {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Texto de bienvenida */
+.welcome-text,
+.sub-text {
+  position: absolute;
+  transform: translateX(-50%);
+  color: white;
+  opacity: 0;
+  transition: opacity 1s ease;
+  z-index: 10;
+  font-weight: bold;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 0.5em;
+  border-radius: 5px;
+  text-shadow: 3px 3px 12px rgba(0, 0, 0, 1);
+  will-change: opacity;
+}
+
+.welcome-text {
+  top: 25%;
+  left: 50%;
+  font-size: 6vmin;
+}
+
+.sub-text {
+  bottom: 25%;
+  left: 50%;
+  font-size: 4vmin;
+}
+
+/* Centro de las bolas danzantes */
+.center {
+  position: relative;
+  width: 30vmin;
+  height: 30vmin;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: transparent;
+}
+
+.center img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Estilos para las bolas */
+.circle {
+  position: absolute;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 2s ease;
+  overflow: hidden;
+}
+
+.circle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.circle img:hover {
+  transform: scale(1.05);
+}
+
+.circle a {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.circle,
+.circle * {
+  cursor: pointer;
+  user-select: none; /* Use 'pointer' if you prefer a hand icon */
+}
+
+/* Grid layout for quick-navigation */
+.quick-navigation {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 20px;
+  margin: 50px auto;
+  max-width: 1200px;
+  padding: 0 20px;
+}
+
+.quick-navigation .column {
+  min-width: 0;
+  padding: 20px;
+}
+
+.quick-navigation .column h2 {
+  text-align: center;
+  margin-bottom: 15px;
+  font-size: 1.5em;
+  color: #fff;
+}
+
+.quick-navigation .column ul {
+  list-style: none;
+  padding: 0;
+}
+
+.quick-navigation .column ul li {
+  margin: 10px 0;
+}
+
+.quick-navigation .column ul li a {
+  text-decoration: none;
+  color: #00aaff;
+  font-size: 1em;
+  transition: color 0.3s;
+}
+
+.quick-navigation .column ul li a:hover {
+  color: #ffaa00;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .quick-navigation {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .quick-navigation {
+    grid-template-columns: 1fr;
+  }
+}

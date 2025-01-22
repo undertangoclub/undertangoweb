@@ -1,0 +1,87 @@
+@import url("https://fonts.googleapis.com/css2?family=Poiret+One&display=swap");
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+body {
+  font-family: "Poiret One", cursive;
+  background-color: #1a1a1a;
+  color: white;
+}
+
+header,
+footer {
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 1em;
+  text-align: center;
+}
+
+h1,
+h2,
+h3 {
+  text-shadow: 3px 3px 12px rgba(0, 0, 0, 1);
+  margin: 0;
+}
+
+nav {
+  margin-top: 15px; /* Added margin to move the nav button down */
+}
+
+nav a {
+  color: white;
+  text-decoration: none;
+  padding: 0.5em 1em;
+  border-radius: 5px;
+  background-color: rgba(255, 255, 255, 0.1);
+  transition: background-color 0.3s ease;
+}
+
+nav a:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2em;
+  overflow-y: auto;
+}
+
+section {
+  width: 100%;
+  max-width: 800px;
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+li {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 1em;
+  margin-bottom: 1em;
+  transition: transform 0.3s ease;
+}
+
+li:hover {
+  transform: scale(1.02);
+}
+
+.highlight {
+  border: 2px solid #00c8ff;
+  box-shadow: 0 0 10px #00c8ff;
+}
+
+footer {
+  font-size: 0.8em;
+}

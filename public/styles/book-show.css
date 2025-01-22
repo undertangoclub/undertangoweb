@@ -1,0 +1,181 @@
+@import url("https://fonts.googleapis.com/css2?family=Poiret+One&display=swap");
+
+body {
+  font-family: "Poiret One", cursive;
+  background-color: #1a1a1a;
+  color: white;
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+}
+
+p {
+  font-size: 18px;
+}
+
+header,
+footer {
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 1em;
+  text-align: center;
+}
+
+nav a {
+  color: white;
+  text-decoration: none;
+  padding: 0.5em 1em;
+  border-radius: 5px;
+  background-color: rgba(255, 255, 255, 0.1);
+  transition: background-color 0.3s ease;
+}
+
+nav a:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+main {
+  padding: 2em;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.intro,
+.catalog {
+  margin-bottom: 2em;
+}
+
+.catalog-items {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1em;
+}
+
+.catalog-item {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 1em;
+}
+
+form {
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 2em;
+  border-radius: 10px;
+}
+
+label {
+  display: block;
+  margin-top: 1em;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 0.5em;
+  margin-top: 0.5em;
+  border: none;
+  border-radius: 5px;
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.custom-select {
+  position: relative;
+  width: 100%;
+  margin-top: 0.5em;
+}
+
+.select-selected {
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 0.5em;
+  border-radius: 5px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.select-selected:after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  border: 6px solid transparent;
+  border-color: white transparent transparent transparent;
+  transform: translateY(-50%);
+}
+
+.select-selected.select-arrow-active:after {
+  border-color: transparent transparent white transparent;
+  top: 55%;
+}
+
+.select-items {
+  position: absolute;
+  background-color: #2a2a2a;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 99;
+  border-radius: 5px;
+  max-height: 200px;
+  overflow-y: auto;
+  display: none;
+}
+
+.select-items div {
+  padding: 0.5em;
+  cursor: pointer;
+  color: white;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.select-items div:hover {
+  background-color: #4a4a4a;
+  color: white;
+}
+
+.select-items.show {
+  display: block;
+}
+
+button {
+  display: block;
+  width: 100%;
+  padding: 1em;
+  margin-top: 2em;
+  border: none;
+  border-radius: 5px;
+  background-color: #00c8ff;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #0099cc;
+}
+
+#message {
+  margin-top: 1em;
+  padding: 1em;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.success {
+  background-color: rgba(0, 255, 0, 0.2);
+}
+
+.error {
+  background-color: rgba(255, 0, 0, 0.2);
+}
+
+@media (max-width: 600px) {
+  .catalog-items {
+    grid-template-columns: 1fr;
+  }
+}
