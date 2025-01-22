@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calendario de Marketing</title>
+    <link rel="stylesheet" href="../styles/marketing.css">
+  </head>
+  <body>
+    <div class="container">
+      <div class="month">
+        <div class="month-header">
+          <h2>Enero 2025</h2>
+        </div>
+        <div class="calendar-grid">
+          <div class="weekday">Lun</div>
+          <div class="weekday">Mar</div>
+          <div class="weekday">Mié</div>
+          <div class="weekday">Jue</div>
+          <div class="weekday">Vie</div>
+          <div class="weekday">Sáb</div>
+          <div class="weekday">Dom</div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const AIRTABLE_TOKEN =
+        "patuKKtlyfqvVNCpc.25468d0bda6badcfd90c84a03a681fc462c0b66b57b964eddb0449b24134a45e";
+      const BASE_ID = "appPGVN4sDJ0aTrSb";
+      const TABLE_NAME = "calendario-marketing";
+
+      function createCalendarDays(calendarGrid, year, month) {
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+
+        let startingDay = firstDay.getDay() - 1; // Ajustar para que inicie en lunes
+        if (startingDay < 0) startingDay = 6;
+
+        for (let i = 0; i < startingDay; i++) {
+          const emptyDay = document.createElement("div");
+          emptyDay.className = "day";
+          calendarGrid.appendChild(emptyDay);
+        }
+
+        for (let day = 1; day <= lastDay.getDate(); day++) {
+          const dayElement = document.createElement("div");
+          dayElement.className = "day";
+
+          const dayNumber = document.createElement("div");
+          dayNumber.className = "day-number";
+          dayNumber.textContent = day;
+
+          const addTaskBlock = document.createElement("div");
+          addTaskBlock.className = "add-event";
+          addTaskBlock.textContent = "+ Agregar tarea";
+          addTaskBlock.addEventListener("click", () =>
+            promptNewTask(day, month, year)
+          );
+
+          dayElement.appendChild(dayNumber);
+          dayElement.appendChild(addTaskBlock);
+          calendarGrid.appendChild(dayElement);
+        }
+      }
+
+      async function loadTasks() {
+        try {
+          const response = await fetch(
+            `https://api.airtable.com/v0/${BASE_ID}/${TABLE_NAME}?sort%5B0%5D%5Bfield%5D=fecha`,
+            {
+              headers: {
+                Authorization: `Bearer ${AIRTABLE_TOKEN}`,
+              },
+            }
+          );
+          const data = await response.json();
+          displayTasks(data.records);
+        } catch (error) {
+          console.error("Error al cargar tareas:", error);
+        }
+      }
+
+      function displayTasks(records) {
+        const days = document.querySelectorAll(".day");
+        records.forEach(({ fields }) => {
+          const { fecha, tarea, "número de tarea": numeroTarea } = fields;
+          if (!fecha) return;
+
+          const [year, month, day] = fecha.split("-").map(Number);
+          const dayElement = Array.from(days).find(
+            (d) => parseInt(d.querySelector(".day-number")?.textContent) === day
+          );
+
+          if (!dayElement) return;
+
+          const taskElement = document.createElement("div");
+          taskElement.className = "event";
+
+          const numeroElement = document.createElement("div");
+          numeroElement.className = "numero-tarea";
+          numeroElement.textContent = numeroTarea;
+
+          const tareaElement = document.createElement("div");
+          tareaElement.className = "tarea";
+          tareaElement.textContent = tarea;
+
+          taskElement.appendChild(numeroElement);
+          taskElement.appendChild(tareaElement);
+
+          taskElement.addEventListener("click", () =>
+            editTask(fecha, numeroTarea, tarea)
+          );
+
+          dayElement.appendChild(taskElement);
+        });
+      }
+
+      async function promptNewTask(day, month, year) {
+        const fecha = `${year}-${String(month + 1).padStart(2, "0")}-${String(
+          day
+        ).padStart(2, "0")}`;
+        const numeroTarea = prompt("Ingrese el número de tarea:");
+        const tarea = prompt("Ingrese la descripción de la tarea:");
+
+        if (!numeroTarea || !tarea) {
+          alert("Todos los campos son obligatorios.");
+          return;
+        }
+
+        const fields = { fecha, "número de tarea": numeroTarea, tarea };
+        await saveToAirtable(null, fields);
+        alert("Tarea guardada correctamente.");
+        location.reload();
+      }
+
+      async function editTask(fecha, numeroTarea, tarea) {
+        const newNumeroTarea = prompt("Editar número de tarea:", numeroTarea);
+        const newTarea = prompt("Editar descripción de la tarea:", tarea);
+
+        if (!newNumeroTarea || !newTarea) {
+          alert("Todos los campos son obligatorios.");
+          return;
+        }
+
+        const fields = {
+          fecha,
+          "número de tarea": newNumeroTarea,
+          tarea: newTarea,
+        };
+        await saveToAirtable(null, fields);
+        alert("Tarea actualizada correctamente.");
+        location.reload();
+      }
+
+      async function saveToAirtable(recordId, fields) {
+        const url = recordId
+          ? `https://api.airtable.com/v0/${BASE_ID}/${TABLE_NAME}/${recordId}`
+          : `https://api.airtable.com/v0/${BASE_ID}/${TABLE_NAME}`;
+
+        const method = recordId ? "PATCH" : "POST";
+
+        try {
+          const response = await fetch(url, {
+            method,
+            headers: {
+              Authorization: `Bearer ${AIRTABLE_TOKEN}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ fields }),
+          });
+
+          if (!response.ok) {
+            throw new Error("Error al guardar en Airtable");
+          }
+        } catch (error) {
+          console.error("Error al guardar en Airtable:", error);
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const calendarGrid = document.querySelector(".calendar-grid");
+        createCalendarDays(calendarGrid, 2025, 0);
+        loadTasks();
+      });
+    </script>
+  </body>
+</html>
