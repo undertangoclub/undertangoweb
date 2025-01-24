@@ -323,6 +323,18 @@ function crearBotonesHora() {
   let horaSeleccionada = "08";
   let minSeleccionado = "00";
 
+  // Agregar la opción "00" primero
+  const btn00 = document.createElement("button");
+  btn00.type = "button";
+  btn00.textContent = "00";
+  btn00.style.padding = "5px 8px";
+  btn00.style.marginBottom = "5px";
+  btn00.addEventListener("click", () => {
+    horaSeleccionada = "00";
+    actualizarEstilosBotones(horasDiv, btn00);
+  });
+  horasDiv.appendChild(btn00);
+
   for (let h = 8; h <= 23; h++) {
     const btn = document.createElement("button");
     btn.type = "button";
