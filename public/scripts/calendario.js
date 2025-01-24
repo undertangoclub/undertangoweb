@@ -12,34 +12,27 @@ const monthNames = [
 
 let currentMonth = 0;
 
-/**
- * Crea los recuadros de días del calendario
- */
 function createCalendarDays(calendarGrid, year, month) {
-  calendarGrid.innerHTML = '';
-  
+  calendarGrid.innerHTML = ''; // Limpia el contenido previo
+
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
 
   let startingDay = firstDay.getDay();
-  startingDay = (startingDay + 6) % 7;
+  startingDay = (startingDay + 6) % 7; // Ajuste para que el domingo sea el último
 
+  // Días vacíos al inicio del mes
   for (let i = 0; i < startingDay; i++) {
     const emptyDay = document.createElement("div");
-    emptyDay.className = "day";
+    emptyDay.className = "day empty";
     calendarGrid.appendChild(emptyDay);
   }
 
+  // Días del mes
   for (let day = 1; day <= lastDay.getDate(); day++) {
     const dayElement = document.createElement("div");
     dayElement.className = "day";
     dayElement.dataset.date = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-
-    const weekdayIndex = (startingDay + (day - 1)) % 7;
-    const weekdayLabel = document.createElement("div");
-    weekdayLabel.className = "day-week-label";
-    weekdayLabel.textContent = weekMap[weekdayIndex];
-    dayElement.appendChild(weekdayLabel);
 
     const dayNumber = document.createElement("div");
     dayNumber.className = "day-number";
@@ -55,6 +48,7 @@ function createCalendarDays(calendarGrid, year, month) {
     calendarGrid.appendChild(dayElement);
   }
 }
+
 
 function setMonth(monthIndex) {
   currentMonth = monthIndex;
