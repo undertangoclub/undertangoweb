@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Calendario de Tango</title>
     <link rel="stylesheet" href="../styles/calendario.css">
+    <link rel="stylesheet" href="../styles/week.css">
   </head>
 
   <body>
@@ -30,7 +31,20 @@
         <div class="month-header">
           <h2 id="month-title">Enero 2025</h2>
         </div>
+        
+        <!-- Días de la semana -->
+        <div class="week-header">
+          <div class="week-day">Lunes</div>
+          <div class="week-day">Martes</div>
+          <div class="week-day">Miércoles</div>
+          <div class="week-day">Jueves</div>
+          <div class="week-day">Viernes</div>
+          <div class="week-day">Sábado</div>
+          <div class="week-day">Domingo</div>
+        </div>
+        
         <div class="calendar-grid" id="calendar-grid">
+          <!-- Aquí irán los días del mes generados dinámicamente por JS -->
         </div>
       </div>
     </div>
