@@ -81,12 +81,21 @@ body {
   gap: 4px;
 }
 
-.weekday {
+/* Contenedor de los días de la semana */
+.week-header {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  background-color:rgba(82, 49, 45, 0.7);
   text-align: center;
-  padding: 6px;
   font-weight: bold;
-  color: #ffd700;
+  padding: 10px 0;
+}
+
+/* Estilo para cada día de la semana */
+.week-day {
   font-size: 1rem;
+  color: #ffd700;
 }
 
 /* Contenedor para cada día */
@@ -248,16 +257,19 @@ body {
 }
 
 @media (max-width: 600px) {
+  .week-day {
+    display: none;
+  }
+
   .calendar-grid {
     display: block;
   }
+
   .day {
     margin-bottom: 10px;
   }
+
   .day-week-label {
     display: block;
-  }
-  .weekday {
-    display: none;
   }
 }
