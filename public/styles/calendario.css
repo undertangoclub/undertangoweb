@@ -1,0 +1,275 @@
+body {
+  font-family: "Arial", sans-serif;
+  background-color: #1a0f0a;
+  color: #d4a574;
+  margin: 0;
+  padding: 10px;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  display: block;
+  gap: 15px;
+}
+
+.months-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+#months-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  gap: 10px;
+}
+
+#months-list li {
+  flex: 1 0 auto;
+  max-width: 90px;
+  padding: 10px 15px;
+  background-color: rgba(62, 39, 35, 0.5);
+  border: 1px solid #4a2f2a;
+  color: #ffd700;
+  font-size: 0.9rem;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 5px;
+  text-align: center;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+#months-list li:hover {
+  background-color: rgba(82, 49, 45, 0.7);
+  transform: scale(1.05);
+}
+
+#months-list li.active {
+  background-color: rgba(82, 49, 45, 0.9);
+  color: white;
+}
+
+@media (max-width: 768px) {
+  #months-list {
+    gap: 5px;
+  }
+  #months-list li {
+    flex: 1 1 25%;
+    font-size: 0.8rem;
+    padding: 8px 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  #months-list li {
+    flex: 1 1 40%;
+    font-size: 0.75rem;
+    padding: 6px 8px;
+  }
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+/* Contenedor de los días de la semana */
+.week-header {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  background-color:rgba(82, 49, 45, 0.7);
+  text-align: center;
+  font-weight: bold;
+  padding: 10px 0;
+}
+
+/* Estilo para cada día de la semana */
+.week-day {
+  font-size: 1rem;
+  color: #ffd700;
+}
+
+/* Contenedor para cada día */
+.day {
+  background-color: rgba(62, 39, 35, 0.5);
+  border: 1px solid #4a2f2a;
+  padding: 6px;
+  transition: background-color 0.3s;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+  position: relative;
+}
+
+.day:hover {
+  background-color: rgba(82, 49, 45, 0.7);
+}
+
+.day-number {
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 4px;
+  font-size: 1rem;
+}
+
+.day-week-label {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffd700;
+  font-weight: bold;
+  border-radius: 4px;
+  padding: 2px 4px;
+  font-size: 0.8rem;
+  display: none;
+}
+
+.event {
+  display: grid;
+  grid-template-columns: 7ch auto 7ch;
+  gap: 3px;
+  font-size: 0.8rem;
+  background-color: rgba(41, 27, 23, 0.9);
+  border-radius: 6px;
+  padding: 4px;
+  align-items: center;
+  cursor: pointer;
+}
+
+.hora {
+  background-color: #5a382f;
+  color: #ffd700;
+  font-weight: bold;
+  text-align: center;
+  padding: 2px;
+  border-radius: 3px;
+}
+
+.lugar {
+  background-color: #71443b;
+  color: #ffffff;
+  text-align: center;
+  padding: 2px;
+  border-radius: 3px;
+}
+
+.interprete {
+  background-color: #8a5548;
+  color: #ffd700;
+  text-align: center;
+  padding: 2px;
+  border-radius: 3px;
+}
+
+.add-event {
+  color: #ffd700;
+  font-size: 0.8rem;
+  text-align: center;
+  text-decoration: underline;
+  line-height: normal;
+  margin: 2px 0;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background: #2c2c2c;
+  padding: 20px;
+  border-radius: 8px;
+  width: 300px;
+  max-width: 90%;
+}
+
+.modal-content h3 {
+  color: #fff;
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+.modal-content label {
+  display: block;
+  color: #fff;
+  margin: 5px 0 2px;
+}
+
+.modal-content select,
+.modal-content input[type="color"] {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 5px;
+  border-radius: 4px;
+  border: 1px solid #555;
+  background: #444;
+  color: #fff;
+}
+
+.modal-content button {
+  margin-right: 10px;
+  padding: 5px 10px;
+}
+
+.color-picker-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.color-picker-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.color-picker-row label {
+  margin: 0;
+}
+
+.color-picker {
+  width: 30px;
+  height: 30px;
+  border: none;
+  background: transparent;
+}
+
+@media (max-width: 600px) {
+  .week-day {
+    display: none;
+  }
+
+  .calendar-grid {
+    display: block;
+  }
+
+  .day {
+    margin-bottom: 10px;
+  }
+
+  .day-week-label {
+    display: block;
+  }
+}
