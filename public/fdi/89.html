@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>UnderTango Board - Editar Tareas + Link Corto</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: #f1f1f1;
+      overflow: hidden;
+    }
+    #board {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background-color: #ffffff;
+      overflow: hidden;
+    }
+    .division-card {
+      position: absolute;
+      width: 220px;
+      min-height: 110px;
+      background: #e3f0ff; 
+      border: 2px solid #9fcaff; 
+      border-radius: 8px;
+      padding: 10px;
+      box-shadow: 2px 2px 6px rgba(0,0,0,0.2);
+      cursor: move; 
+      margin: 0;
+    }
+    .division-header {
+      font-weight: bold;
+      color: #1f3996; 
+      margin-bottom: 6px;
+      font-size: 1em;
+    }
+    .division-task-list {
+      font-size: 0.9em;
+      color: #333;
+      margin-top: 0;
+      padding-left: 1em; /* sangría bullets */
+    }
+    .division-task-list li {
+      margin-bottom: 4px;
+      cursor: pointer; /* para indicar que se puede editar */
+    }
+    .division-task-list li:hover {
+      background: #cde2ff; /* leve resalte al pasar el mouse */
+    }
+    .add-task-btn {
+      margin-top: 6px;
+      padding: 2px 6px;
+      font-size: 0.8em;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="board"></div>
+
+  <script>
+    /************************************************************
+     * 1. Configuración de Airtable
+     ************************************************************/
+    const AIRTABLE_TOKEN = "patuKKtlyfqvVNCpc.25468d0bda6badcfd90c84a03a681fc462c0b66b57b964eddb0449b24134a45e";  // Reemplaza con tu token
+    const BASE_ID = "appPGVN4sDJ0aTrSb";
+    const TABLE_NAME = "89";
+    const AIRTABLE_ENDPOINT = `https://api.airtable.com/v0/${BASE_ID}/${TABLE_NAME}`;
+
+    /************************************************************
+     * 2. Cargar todos los registros y agrupar por Division
+     ************************************************************/
+    async function loadAndGroupRecords() {
+      const resp = await fetch(AIRTABLE_ENDPOINT, {
+        headers: { Authorization: `Bearer ${AIRTABLE_TOKEN}` }
+      });
+      const data = await resp.json();
+      if (!data.records) {
+        console.error("No records found o error!");
+        return {};
+      }
+
+      // Agrupamos en un objeto: { "80": [rec1, rec2...], "81": [...], ... }
+      const grouped = {};
+      for (const record of data.records) {
+        const fields = record.fields;
+        const div = fields.Division;  // p.ej. "80"
+        if (!div) continue;           // ignora si no tiene division
+        if (!grouped[div]) grouped[div] = [];
+        grouped[div].push(record);
+      }
+      return grouped;
+    }
+
+    /************************************************************
+     * 3. Crear Tarjetas por cada “Division”
+     ************************************************************/
+    function createCardsFromGroups(grouped) {
+      // Limpiamos el board antes de re-pintar
+      const board = document.getElementById("board");
+      board.innerHTML = "";
+
+      for (const divisionValue in grouped) {
+        const records = grouped[divisionValue];
+
+        // Buscar un “registro principal” para posición (X,Y).
+        // Regla: si su Name empieza con la division ("80", etc.), es principal.
+        let mainRecord = null;
+        for (const r of records) {
+          const name = r.fields.Name || "";
+          if (name.startsWith(divisionValue)) {
+            mainRecord = r;
+            break;
+          }
+        }
+        // Si no hay uno “principal”, tomamos el primero
+        if (!mainRecord && records.length > 0) {
+          mainRecord = records[0];
+        }
+        if (!mainRecord) continue;
+
+        const x = mainRecord.fields.PositionX || 100;
+        const y = mainRecord.fields.PositionY || 100;
+        const mainName = mainRecord.fields.Name || `División ${divisionValue}`;
+
+        // Filtrar sólo registros que tengan un “Task”
+        const taskRecords = records.filter(r => r.fields.Task);
+
+        // Crear la tarjeta DOM
+        const card = document.createElement("div");
+        card.className = "division-card";
+        card.style.left = x + "px";
+        card.style.top = y + "px";
+
+        // Título
+        let html = `<div class="division-header">${mainName}</div>`;
+
+        // Lista de tareas
+        if (taskRecords.length > 0) {
+          html += `<ul class="division-task-list"></ul>`;
+        } else {
+          html += `<div style="font-size:0.85em; color:#666;">(Sin tareas)</div>`;
+        }
+        // Botón +Agregar Tarea
+        html += `<button class="add-task-btn">+ Agregar Tarea</button>`;
+
+        card.innerHTML = html;
+        board.appendChild(card);
+
+        // Drag & drop
+        enableCardDrag(card, mainRecord.id);
+
+        // Insertar las tareas en la <ul>
+        const ul = card.querySelector(".division-task-list");
+        if (ul) {
+          for (const tRec of taskRecords) {
+            const li = document.createElement("li");
+            // Almacenar en un data attribute para saber qué record editamos
+            li.dataset.recordId = tRec.id;
+            // Mostrar link acortado
+            const shortHtml = autoShortenLinks(tRec.fields.Task);
+            li.innerHTML = shortHtml;
+            // Al hacer clic => Editar
+            li.addEventListener("click", (evt) => {
+              evt.stopPropagation(); // para no activar drag
+              editTask(tRec.id, tRec.fields.Task);
+            });
+            ul.appendChild(li);
+          }
+        }
+
+        // Evento para el botón +Agregar Tarea
+        const addBtn = card.querySelector(".add-task-btn");
+        addBtn.addEventListener("click", () => {
+          addNewTask(divisionValue);
+        });
+      }
+    }
+
+    /************************************************************
+     * 4. autoShortenLinks => Convierte cualquier URL a <a>enlace</a>
+     ************************************************************/
+    function autoShortenLinks(text) {
+      const urlRegex = /(https?:\/\/[^\s]+)/g;
+      return text.replace(urlRegex, `<a href="$1" target="_blank">enlace</a>`);
+    }
+
+    /************************************************************
+     * 5. Agregar Nueva Tarea (POST)
+     ************************************************************/
+    async function addNewTask(divisionValue) {
+      const taskText = prompt("¿Cuál es la nueva tarea?");
+      if (taskText === null) return; // user canceló
+
+      // Creamos un nuevo registro con esa Division y Task
+      const createPayload = {
+        records: [
+          {
+            fields: {
+              Division: divisionValue,
+              Task: taskText
+            }
+          }
+        ]
+      };
+
+      try {
+        const resp = await fetch(AIRTABLE_ENDPOINT, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${AIRTABLE_TOKEN}`
+          },
+          body: JSON.stringify(createPayload)
+        });
+        if (!resp.ok) {
+          throw new Error("Error al crear nueva tarea en Airtable.");
+        }
+        await reloadView();
+      } catch (err) {
+        console.error("addNewTask error:", err);
+      }
+    }
+
+    /************************************************************
+     * 6. Editar Tarea (PATCH)
+     ************************************************************/
+    async function editTask(recordId, oldText) {
+      const newText = prompt("Editar Tarea:", oldText);
+      if (newText === null) return; // user canceló
+
+      // Hacemos PATCH
+      const payload = {
+        records: [
+          {
+            id: recordId,
+            fields: {
+              Task: newText
+            }
+          }
+        ]
+      };
+      try {
+        const resp = await fetch(AIRTABLE_ENDPOINT, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${AIRTABLE_TOKEN}`
+          },
+          body: JSON.stringify(payload)
+        });
+        if (!resp.ok) {
+          throw new Error("Error al actualizar tarea en Airtable.");
+        }
+        await reloadView();
+      } catch (err) {
+        console.error("editTask error:", err);
+      }
+    }
+
+    // Recarga la vista (vuelve a hacer GET y agrupar)
+    async function reloadView() {
+      const grouped = await loadAndGroupRecords();
+      createCardsFromGroups(grouped);
+    }
+
+    /************************************************************
+     * 7. Drag & Drop => Actualiza la posición del “mainRecord”
+     ************************************************************/
+    function enableCardDrag(cardElement, recordId) {
+      let offsetX = 0;
+      let offsetY = 0;
+      let isDragging = false;
+
+      cardElement.addEventListener("mousedown", (e) => {
+        isDragging = true;
+        offsetX = e.clientX - cardElement.offsetLeft;
+        offsetY = e.clientY - cardElement.offsetTop;
+      });
+
+      document.addEventListener("mousemove", (e) => {
+        if (!isDragging) return;
+        const newX = e.clientX - offsetX;
+        const newY = e.clientY - offsetY;
+        cardElement.style.left = newX + "px";
+        cardElement.style.top = newY + "px";
+      });
+
+      document.addEventListener("mouseup", async () => {
+        if (!isDragging) return;
+        isDragging = false;
+        const finalX = parseInt(cardElement.style.left, 10);
+        const finalY = parseInt(cardElement.style.top, 10);
+        await updatePositionInAirtable(recordId, finalX, finalY);
+      });
+    }
+
+    async function updatePositionInAirtable(recordId, x, y) {
+      try {
+        const payload = {
+          records: [
+            {
+              id: recordId,
+              fields: {
+                PositionX: x,
+                PositionY: y
+              }
+            }
+          ]
+        };
+        const resp = await fetch(AIRTABLE_ENDPOINT, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${AIRTABLE_TOKEN}`
+          },
+          body: JSON.stringify(payload)
+        });
+        if (!resp.ok) {
+          throw new Error("Error al actualizar posición en Airtable.");
+        }
+      } catch (err) {
+        console.error("updatePositionInAirtable error:", err);
+      }
+    }
+
+    /************************************************************
+     * 8. INIT
+     ************************************************************/
+    (async function init() {
+      const groupedByDivision = await loadAndGroupRecords();
+      createCardsFromGroups(groupedByDivision);
+    })();
+  </script>
+</body>
+</html>
