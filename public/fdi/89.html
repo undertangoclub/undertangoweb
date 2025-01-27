@@ -1,52 +1,59 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>UnderTango Board - Editar Tareas + Link Corto</title>
+  <meta charset="UTF-8">
+  <title>Flecha en la Mitad</title>
   <style>
     body {
       margin: 0;
       font-family: sans-serif;
-      background: #f1f1f1;
+      user-select: none;
       overflow: hidden;
+      background: #f1f1f1;
     }
     #board {
       position: relative;
       width: 100vw;
       height: 100vh;
-      background-color: #ffffff;
-      overflow: hidden;
+      background: #ffffff;
+    }
+    /* Permite hacer clic en líneas y texto */
+    #lines-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%; 
+      height: 100%;
     }
     .division-card {
       position: absolute;
       width: 220px;
       min-height: 110px;
-      background: #e3f0ff; 
-      border: 2px solid #9fcaff; 
+      background: #e3f0ff;
+      border: 2px solid #9fcaff;
       border-radius: 8px;
       padding: 10px;
       box-shadow: 2px 2px 6px rgba(0,0,0,0.2);
-      cursor: move; 
-      margin: 0;
+      cursor: move;
     }
     .division-header {
       font-weight: bold;
-      color: #1f3996; 
+      color: #1f3996;
       margin-bottom: 6px;
       font-size: 1em;
     }
     .division-task-list {
       font-size: 0.9em;
-      color: #333;
       margin-top: 0;
-      padding-left: 1em; /* sangría bullets */
+      padding-left: 1em;
+      color: #333;
     }
     .division-task-list li {
       margin-bottom: 4px;
-      cursor: pointer; /* para indicar que se puede editar */
+      cursor: pointer;
     }
     .division-task-list li:hover {
-      background: #cde2ff; /* leve resalte al pasar el mouse */
+      background: #cde2ff;
     }
     .add-task-btn {
       margin-top: 6px;
@@ -54,67 +61,87 @@
       font-size: 0.8em;
       cursor: pointer;
     }
+    #add-line-btn {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 9999;
+      padding: 6px 12px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
-  <div id="board"></div>
+  <div id="board">
+    <button id="add-line-btn">Agregar Flecha</button>
+    <svg id="lines-layer" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
 
   <script>
-    /************************************************************
-     * 1. Configuración de Airtable
-     ************************************************************/
-    const AIRTABLE_TOKEN = "patuKKtlyfqvVNCpc.25468d0bda6badcfd90c84a03a681fc462c0b66b57b964eddb0449b24134a45e";  // Reemplaza con tu token
+    /**************************************************************
+     *  CONFIG BÁSICA
+     **************************************************************/
+    const AIRTABLE_TOKEN = "patuKKtlyfqvVNCpc.25468d0bda6badcfd90c84a03a681fc462c0b66b57b964eddb0449b24134a45e";  
     const BASE_ID = "appPGVN4sDJ0aTrSb";
-    const TABLE_NAME = "89";
-    const AIRTABLE_ENDPOINT = `https://api.airtable.com/v0/${BASE_ID}/${TABLE_NAME}`;
+    const TABLE_DIVISIONS = "89";
+    const TABLE_FLECHAS = "Flechas";
 
-    /************************************************************
-     * 2. Cargar todos los registros y agrupar por Division
-     ************************************************************/
+    const DIVISIONS_ENDPOINT = `https://api.airtable.com/v0/${BASE_ID}/${TABLE_DIVISIONS}`;
+    const FLECHAS_ENDPOINT   = `https://api.airtable.com/v0/${BASE_ID}/${TABLE_FLECHAS}`;
+
+    let isCreatingLine = false;
+    let lineStartEl = null;
+    let linesLayer = null;
+    // Estructura: lines[] = [{ arrowRecordId, fromId, toId, label, lineEl, textEl }]
+    let lines = [];
+
+    /**************************************************************
+     * 1. Cargar Tarjetas
+     **************************************************************/
     async function loadAndGroupRecords() {
-      const resp = await fetch(AIRTABLE_ENDPOINT, {
+      const resp = await fetch(DIVISIONS_ENDPOINT, {
         headers: { Authorization: `Bearer ${AIRTABLE_TOKEN}` }
       });
       const data = await resp.json();
       if (!data.records) {
-        console.error("No records found o error!");
+        console.error("No hay registros en tabla Divisiones");
         return {};
       }
-
-      // Agrupamos en un objeto: { "80": [rec1, rec2...], "81": [...], ... }
+      // Agrupamos por la columna "Division"
       const grouped = {};
       for (const record of data.records) {
-        const fields = record.fields;
-        const div = fields.Division;  // p.ej. "80"
-        if (!div) continue;           // ignora si no tiene division
+        const div = record.fields.Division;
+        if (!div) continue;
         if (!grouped[div]) grouped[div] = [];
         grouped[div].push(record);
       }
       return grouped;
     }
 
-    /************************************************************
-     * 3. Crear Tarjetas por cada “Division”
-     ************************************************************/
     function createCardsFromGroups(grouped) {
-      // Limpiamos el board antes de re-pintar
       const board = document.getElementById("board");
-      board.innerHTML = "";
+      // Limpiamos y reinsertamos la capa <svg>
+      board.innerHTML = `
+        <button id="add-line-btn">Agregar Flecha</button>
+        <svg id="lines-layer" xmlns="http://www.w3.org/2000/svg"></svg>
+      `;
+      linesLayer = document.getElementById("lines-layer");
+
+      // Botón "Agregar Flecha"
+      const addLineBtn = document.getElementById("add-line-btn");
+      addLineBtn.addEventListener("click", handleAddLineClick);
 
       for (const divisionValue in grouped) {
         const records = grouped[divisionValue];
-
-        // Buscar un “registro principal” para posición (X,Y).
-        // Regla: si su Name empieza con la division ("80", etc.), es principal.
+        // Buscar un "principal" para x/y
         let mainRecord = null;
         for (const r of records) {
-          const name = r.fields.Name || "";
-          if (name.startsWith(divisionValue)) {
+          const nm = r.fields.Name || "";
+          if (nm.startsWith(divisionValue)) {
             mainRecord = r;
             break;
           }
         }
-        // Si no hay uno “principal”, tomamos el primero
         if (!mainRecord && records.length > 0) {
           mainRecord = records[0];
         }
@@ -122,55 +149,43 @@
 
         const x = mainRecord.fields.PositionX || 100;
         const y = mainRecord.fields.PositionY || 100;
-        const mainName = mainRecord.fields.Name || `División ${divisionValue}`;
-
-        // Filtrar sólo registros que tengan un “Task”
+        const mainName = mainRecord.fields.Name || `Div ${divisionValue}`;
         const taskRecords = records.filter(r => r.fields.Task);
 
-        // Crear la tarjeta DOM
         const card = document.createElement("div");
         card.className = "division-card";
         card.style.left = x + "px";
         card.style.top = y + "px";
+        card.dataset.mainRecordId = mainRecord.id;
 
-        // Título
         let html = `<div class="division-header">${mainName}</div>`;
-
-        // Lista de tareas
         if (taskRecords.length > 0) {
           html += `<ul class="division-task-list"></ul>`;
         } else {
           html += `<div style="font-size:0.85em; color:#666;">(Sin tareas)</div>`;
         }
-        // Botón +Agregar Tarea
         html += `<button class="add-task-btn">+ Agregar Tarea</button>`;
-
         card.innerHTML = html;
         board.appendChild(card);
 
         // Drag & drop
         enableCardDrag(card, mainRecord.id);
 
-        // Insertar las tareas en la <ul>
+        // Insertar tasks
         const ul = card.querySelector(".division-task-list");
         if (ul) {
           for (const tRec of taskRecords) {
             const li = document.createElement("li");
-            // Almacenar en un data attribute para saber qué record editamos
             li.dataset.recordId = tRec.id;
-            // Mostrar link acortado
-            const shortHtml = autoShortenLinks(tRec.fields.Task);
-            li.innerHTML = shortHtml;
-            // Al hacer clic => Editar
-            li.addEventListener("click", (evt) => {
-              evt.stopPropagation(); // para no activar drag
+            li.innerHTML = autoShortenLinks(tRec.fields.Task);
+            li.addEventListener("click", evt => {
+              evt.stopPropagation();
               editTask(tRec.id, tRec.fields.Task);
             });
             ul.appendChild(li);
           }
         }
-
-        // Evento para el botón +Agregar Tarea
+        // Botón de agregar tarea
         const addBtn = card.querySelector(".add-task-btn");
         addBtn.addEventListener("click", () => {
           addNewTask(divisionValue);
@@ -178,23 +193,15 @@
       }
     }
 
-    /************************************************************
-     * 4. autoShortenLinks => Convierte cualquier URL a <a>enlace</a>
-     ************************************************************/
     function autoShortenLinks(text) {
       const urlRegex = /(https?:\/\/[^\s]+)/g;
       return text.replace(urlRegex, `<a href="$1" target="_blank">enlace</a>`);
     }
 
-    /************************************************************
-     * 5. Agregar Nueva Tarea (POST)
-     ************************************************************/
     async function addNewTask(divisionValue) {
-      const taskText = prompt("¿Cuál es la nueva tarea?");
-      if (taskText === null) return; // user canceló
-
-      // Creamos un nuevo registro con esa Division y Task
-      const createPayload = {
+      const taskText = prompt("¿Nueva tarea?");
+      if (!taskText) return;
+      const payload = {
         records: [
           {
             fields: {
@@ -204,133 +211,332 @@
           }
         ]
       };
-
-      try {
-        const resp = await fetch(AIRTABLE_ENDPOINT, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${AIRTABLE_TOKEN}`
-          },
-          body: JSON.stringify(createPayload)
-        });
-        if (!resp.ok) {
-          throw new Error("Error al crear nueva tarea en Airtable.");
-        }
-        await reloadView();
-      } catch (err) {
-        console.error("addNewTask error:", err);
-      }
+      const resp = await fetch(DIVISIONS_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${AIRTABLE_TOKEN}`
+        },
+        body: JSON.stringify(payload)
+      });
+      if (!resp.ok) throw new Error("Error al crear tarea");
+      await reloadView();
     }
 
-    /************************************************************
-     * 6. Editar Tarea (PATCH)
-     ************************************************************/
     async function editTask(recordId, oldText) {
       const newText = prompt("Editar Tarea:", oldText);
-      if (newText === null) return; // user canceló
-
-      // Hacemos PATCH
+      if (newText === null) return;
       const payload = {
         records: [
           {
             id: recordId,
-            fields: {
-              Task: newText
-            }
+            fields: { Task: newText }
           }
         ]
       };
-      try {
-        const resp = await fetch(AIRTABLE_ENDPOINT, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${AIRTABLE_TOKEN}`
-          },
-          body: JSON.stringify(payload)
-        });
-        if (!resp.ok) {
-          throw new Error("Error al actualizar tarea en Airtable.");
-        }
-        await reloadView();
-      } catch (err) {
-        console.error("editTask error:", err);
-      }
+      const resp = await fetch(DIVISIONS_ENDPOINT, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${AIRTABLE_TOKEN}`
+        },
+        body: JSON.stringify(payload)
+      });
+      if (!resp.ok) throw new Error("Error al editar tarea");
+      await reloadView();
     }
 
-    // Recarga la vista (vuelve a hacer GET y agrupar)
-    async function reloadView() {
-      const grouped = await loadAndGroupRecords();
-      createCardsFromGroups(grouped);
-    }
-
-    /************************************************************
-     * 7. Drag & Drop => Actualiza la posición del “mainRecord”
-     ************************************************************/
-    function enableCardDrag(cardElement, recordId) {
-      let offsetX = 0;
-      let offsetY = 0;
+    function enableCardDrag(cardEl, recordId) {
+      let offsetX = 0, offsetY = 0;
       let isDragging = false;
 
-      cardElement.addEventListener("mousedown", (e) => {
+      cardEl.addEventListener("mousedown", e => {
+        if (isCreatingLine) return;
         isDragging = true;
-        offsetX = e.clientX - cardElement.offsetLeft;
-        offsetY = e.clientY - cardElement.offsetTop;
+        offsetX = e.clientX - cardEl.offsetLeft;
+        offsetY = e.clientY - cardEl.offsetTop;
       });
 
-      document.addEventListener("mousemove", (e) => {
+      document.addEventListener("mousemove", e => {
         if (!isDragging) return;
         const newX = e.clientX - offsetX;
         const newY = e.clientY - offsetY;
-        cardElement.style.left = newX + "px";
-        cardElement.style.top = newY + "px";
+        cardEl.style.left = newX + "px";
+        cardEl.style.top = newY + "px";
+        reDrawAllLines();
       });
 
       document.addEventListener("mouseup", async () => {
         if (!isDragging) return;
         isDragging = false;
-        const finalX = parseInt(cardElement.style.left, 10);
-        const finalY = parseInt(cardElement.style.top, 10);
-        await updatePositionInAirtable(recordId, finalX, finalY);
+        const finalX = parseInt(cardEl.style.left, 10);
+        const finalY = parseInt(cardEl.style.top, 10);
+        await patchPosition(recordId, finalX, finalY);
+        reDrawAllLines();
       });
     }
 
-    async function updatePositionInAirtable(recordId, x, y) {
-      try {
-        const payload = {
-          records: [
-            {
-              id: recordId,
-              fields: {
-                PositionX: x,
-                PositionY: y
-              }
-            }
-          ]
-        };
-        const resp = await fetch(AIRTABLE_ENDPOINT, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${AIRTABLE_TOKEN}`
-          },
-          body: JSON.stringify(payload)
+    async function patchPosition(recordId, x, y) {
+      const payload = {
+        records: [
+          {
+            id: recordId,
+            fields: { PositionX: x, PositionY: y }
+          }
+        ]
+      };
+      const resp = await fetch(DIVISIONS_ENDPOINT, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${AIRTABLE_TOKEN}`
+        },
+        body: JSON.stringify(payload)
+      });
+      if (!resp.ok) throw new Error("Error al actualizar posición");
+    }
+
+    async function reloadView() {
+      const grouped = await loadAndGroupRecords();
+      createCardsFromGroups(grouped);
+      await loadFlechasAndDraw();
+    }
+
+    /**************************************************************
+     * 2. Flechas (con marker-mid en la mitad)
+     **************************************************************/
+    async function loadFlechasAndDraw() {
+      linesLayer.innerHTML = "";
+      ensureArrowMarker();
+      lines = [];
+
+      const resp = await fetch(FLECHAS_ENDPOINT, {
+        headers: { Authorization: `Bearer ${AIRTABLE_TOKEN}` }
+      });
+      const data = await resp.json();
+      if (!data.records) return;
+
+      for (const rec of data.records) {
+        const arrowRecordId = rec.id;
+        const f = rec.fields;
+        const fromId = f.FromRecordId;
+        const toId   = f.ToRecordId;
+        const label  = f.Label || "";
+
+        // Creamos <line>
+        const lineEl = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        lineEl.setAttribute("stroke", "#2c2c2c");
+        lineEl.setAttribute("stroke-width", "2.5");
+        lineEl.setAttribute("fill", "none");
+        lineEl.setAttribute("marker-mid", "url(#arrowheadMid)");
+
+        lineEl.style.pointerEvents = "visiblePainted";
+        lineEl.style.cursor = "pointer";
+
+        // Creamos <text>
+        const textEl = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        textEl.setAttribute("fill", "#333");
+        textEl.setAttribute("font-size", "12");
+        textEl.style.paintOrder = "stroke";
+        textEl.style.stroke = "#fff";
+        textEl.style.strokeWidth = "3px";
+        textEl.style.pointerEvents = "visiblePainted";
+        textEl.style.cursor = "pointer";
+        textEl.textContent = label;
+
+        linesLayer.appendChild(lineEl);
+        linesLayer.appendChild(textEl);
+
+        // Clic en la línea => eliminar
+        lineEl.addEventListener("click", e => {
+          e.stopPropagation();
+          if (confirm("¿Eliminar esta flecha?")) {
+            deleteFlecha(arrowRecordId);
+          }
         });
-        if (!resp.ok) {
-          throw new Error("Error al actualizar posición en Airtable.");
-        }
-      } catch (err) {
-        console.error("updatePositionInAirtable error:", err);
+
+        // Clic en el texto => editar
+        textEl.addEventListener("click", e => {
+          e.stopPropagation();
+          const newLabel = prompt("Editar texto flecha:", label);
+          if (newLabel !== null) {
+            patchFlechaLabel(arrowRecordId, newLabel);
+          }
+        });
+
+        lines.push({ arrowRecordId, fromId, toId, label, lineEl, textEl });
+      }
+
+      reDrawAllLines();
+    }
+
+    function reDrawAllLines() {
+      for (const arrow of lines) {
+        const fromCard = findCardByMainRecordId(arrow.fromId);
+        const toCard   = findCardByMainRecordId(arrow.toId);
+        if (!fromCard || !toCard) continue;
+
+        const start = getCenterOfCard(fromCard);
+        const end   = getCenterOfCard(toCard);
+
+        // Asignar las coordenadas a <line>
+        arrow.lineEl.setAttribute("x1", start.x);
+        arrow.lineEl.setAttribute("y1", start.y);
+        arrow.lineEl.setAttribute("x2", end.x);
+        arrow.lineEl.setAttribute("y2", end.y);
+
+        // Texto en la mitad
+        const midX = (start.x + end.x) / 2;
+        const midY = (start.y + end.y) / 2;
+        arrow.textEl.setAttribute("x", midX);
+        arrow.textEl.setAttribute("y", midY - 8);
+        arrow.textEl.textContent = arrow.label;
       }
     }
 
-    /************************************************************
-     * 8. INIT
-     ************************************************************/
+    /**************************************************************
+     * 3. Utilidades
+     **************************************************************/
+    function findCardByMainRecordId(rid) {
+      return document.querySelector(`.division-card[data-main-record-id="${rid}"]`);
+    }
+    function getCenterOfCard(card) {
+      const rect = card.getBoundingClientRect();
+      const boardRect = document.getElementById("board").getBoundingClientRect();
+      return {
+        x: rect.left + (rect.width / 2) - boardRect.left,
+        y: rect.top + (rect.height / 2) - boardRect.top
+      };
+    }
+
+    function ensureArrowMarker() {
+      // Definimos un "marker-mid"
+      if (!document.getElementById("arrowheadMid")) {
+        const defsEl = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+
+        const midMarker = document.createElementNS("http://www.w3.org/2000/svg", "marker");
+        midMarker.id = "arrowheadMid";
+        midMarker.setAttribute("viewBox", "0 0 10 10");
+        midMarker.setAttribute("refX", "5"); // Ubica la punta en el punto medio
+        midMarker.setAttribute("refY", "5");
+        midMarker.setAttribute("markerWidth", "6");
+        midMarker.setAttribute("markerHeight", "6");
+        midMarker.setAttribute("orient", "auto");
+
+        const pathMid = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        pathMid.setAttribute("d", "M 0 0 L 10 5 L 0 10 z");
+        pathMid.setAttribute("fill", "#2c2c2c");
+
+        midMarker.appendChild(pathMid);
+        defsEl.appendChild(midMarker);
+
+        document.getElementById("lines-layer").appendChild(defsEl);
+      }
+    }
+
+    // Crear flecha en Airtable
+    async function createFlechaInAirtable(fromId, toId, label) {
+      const payload = {
+        records: [
+          {
+            fields: {
+              FromRecordId: fromId,
+              ToRecordId: toId,
+              Label: label
+            }
+          }
+        ]
+      };
+      const resp = await fetch(FLECHAS_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${AIRTABLE_TOKEN}`
+        },
+        body: JSON.stringify(payload)
+      });
+      if (!resp.ok) throw new Error("Error al crear flecha");
+      await loadFlechasAndDraw();
+    }
+
+    // Editar flecha
+    async function patchFlechaLabel(arrowRecordId, newLabel) {
+      const payload = {
+        records: [
+          {
+            id: arrowRecordId,
+            fields: { Label: newLabel }
+          }
+        ]
+      };
+      const resp = await fetch(FLECHAS_ENDPOINT, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${AIRTABLE_TOKEN}`
+        },
+        body: JSON.stringify(payload)
+      });
+      if (!resp.ok) throw new Error("Error al actualizar flecha");
+      await loadFlechasAndDraw();
+    }
+
+    // Eliminar flecha
+    async function deleteFlecha(arrowRecordId) {
+      const url = `${FLECHAS_ENDPOINT}?records[]=${arrowRecordId}`;
+      const resp = await fetch(url, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${AIRTABLE_TOKEN}` }
+      });
+      if (!resp.ok) throw new Error("Error al eliminar flecha");
+      await loadFlechasAndDraw();
+    }
+
+    /**************************************************************
+     * 4. MODO CREAR FLECHA
+     **************************************************************/
+    function handleAddLineClick() {
+      isCreatingLine = !isCreatingLine;
+      lineStartEl = null;
+      alert(
+        isCreatingLine
+          ? "Haz clic en la Tarjeta Origen, luego en la Tarjeta Destino"
+          : "Modo flecha desactivado"
+      );
+    }
+
+    document.addEventListener("click", e => {
+      if (!isCreatingLine) return;
+      const cardEl = e.target.closest(".division-card");
+      if (!cardEl) return;
+      if (!lineStartEl) {
+        // Primer clic => Origen
+        lineStartEl = cardEl;
+        lineStartEl.style.outline = "2px dashed red";
+      } else {
+        // Segundo clic => Destino
+        const lineEndEl = cardEl;
+        if (lineEndEl === lineStartEl) {
+          alert("No se puede dibujar flecha a la misma tarjeta.");
+          lineStartEl.style.outline = "";
+          lineStartEl = null;
+          return;
+        }
+        const label = prompt("Texto sobre la flecha (opcional):") || "";
+        createFlechaInAirtable(lineStartEl.dataset.mainRecordId, lineEndEl.dataset.mainRecordId, label);
+        lineStartEl.style.outline = "";
+        lineStartEl = null;
+        isCreatingLine = false;
+      }
+    });
+
+    /**************************************************************
+     * 5. INIT
+     **************************************************************/
     (async function init() {
-      const groupedByDivision = await loadAndGroupRecords();
-      createCardsFromGroups(groupedByDivision);
+      const grouped = await loadAndGroupRecords();
+      createCardsFromGroups(grouped);
+      await loadFlechasAndDraw();
     })();
   </script>
 </body>
