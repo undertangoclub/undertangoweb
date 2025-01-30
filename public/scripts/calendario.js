@@ -1,25 +1,36 @@
 // Constantes y configuración inicial
-const AIRTABLE_TOKEN = "patuKKtlyfqvVNCpc.25468d0bda6badcfd90c84a03a681fc462c0b66b57b964eddb0449b24134a45e";
+const AIRTABLE_TOKEN =
+  "patuKKtlyfqvVNCpc.25468d0bda6badcfd90c84a03a681fc462c0b66b57b964eddb0449b24134a45e";
 const BASE_ID = "appPGVN4sDJ0aTrSb";
 const TABLE_NAME = "calendario";
 
-let editMode = false;
+let editMode = true;
 const weekMap = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 const monthNames = [
-  "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", 
-  "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+  "Enero",
+  "Febrero",
+  "Marzo",
+  "Abril",
+  "Mayo",
+  "Junio",
+  "Julio",
+  "Agosto",
+  "Septiembre",
+  "Octubre",
+  "Noviembre",
+  "Diciembre",
 ];
 
 let currentMonth = 0;
 
 function createCalendarDays(calendarGrid, year, month) {
-  calendarGrid.innerHTML = ''; // Limpia el contenido previo
+  calendarGrid.innerHTML = ""; // Limpia el contenido previo
 
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
 
   let startingDay = firstDay.getDay();
-  startingDay = (startingDay + 6) % 7; // Ajuste para que el domingo sea el último
+  startingDay = (startingDay + 6) % 7;
 
   // Días vacíos al inicio del mes
   for (let i = 0; i < startingDay; i++) {
@@ -32,7 +43,10 @@ function createCalendarDays(calendarGrid, year, month) {
   for (let day = 1; day <= lastDay.getDate(); day++) {
     const dayElement = document.createElement("div");
     dayElement.className = "day";
-    dayElement.dataset.date = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    dayElement.dataset.date = `${year}-${String(month + 1).padStart(
+      2,
+      "0"
+    )}-${String(day).padStart(2, "0")}`;
 
     const dayNumber = document.createElement("div");
     dayNumber.className = "day-number";
@@ -48,7 +62,6 @@ function createCalendarDays(calendarGrid, year, month) {
     calendarGrid.appendChild(dayElement);
   }
 }
-
 
 function setMonth(monthIndex) {
   currentMonth = monthIndex;
@@ -66,10 +79,12 @@ async function loadEvents(year, month) {
   try {
     let allRecords = [];
     let offset = null;
-    
+
     do {
-      const url = `https://api.airtable.com/v0/${BASE_ID}/${TABLE_NAME}?sort%5B0%5D%5Bfield%5D=fecha&sort%5B1%5D%5Bfield%5D=hora${offset ? '&offset=' + offset : ''}`;
-      
+      const url = `https://api.airtable.com/v0/${BASE_ID}/${TABLE_NAME}?sort%5B0%5D%5Bfield%5D=fecha&sort%5B1%5D%5Bfield%5D=hora${
+        offset ? "&offset=" + offset : ""
+      }`;
+
       const response = await fetch(url, {
         headers: {
           Authorization: `Bearer ${AIRTABLE_TOKEN}`,
@@ -77,17 +92,18 @@ async function loadEvents(year, month) {
         },
       });
 
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.ok)
+        throw new Error(`HTTP error! status: ${response.status}`);
 
       const data = await response.json();
       allRecords = [...allRecords, ...data.records];
       offset = data.offset;
     } while (offset);
 
-    const monthStr = String(month + 1).padStart(2, '0');
+    const monthStr = String(month + 1).padStart(2, "0");
     const monthPattern = `${year}-${monthStr}`;
-    
-    const filteredRecords = allRecords.filter(record => 
+
+    const filteredRecords = allRecords.filter((record) =>
       record.fields.fecha.startsWith(monthPattern)
     );
 
@@ -96,9 +112,7 @@ async function loadEvents(year, month) {
     console.error("Error cargando eventos:", error);
   }
 }
-/**
- * Muestra los eventos en el calendario
- */
+
 function displayEvents(records) {
   records.forEach((record) => {
     const { fecha, hora, lugar, interprete } = record.fields;
@@ -115,7 +129,11 @@ function displayEvents(records) {
 
     const eventElement = document.createElement("div");
     eventElement.className = "event";
+    eventElement.style.display = "flex";
+    eventElement.style.alignItems = "center";
+    eventElement.style.gap = "1px";
 
+    // Crear elementos para hora, lugar e intérprete
     const horaElement = document.createElement("div");
     horaElement.className = "hora";
     horaElement.textContent = hora;
@@ -132,18 +150,57 @@ function displayEvents(records) {
       interpreteElement.textContent = interprete || "Sin intérprete";
     }
 
+    // Crear botón de eliminar
+    const deleteButton = document.createElement("button");
+    deleteButton.className = "delete-event";
+    deleteButton.innerHTML = "❌";
+    deleteButton.style.display = editMode ? "block" : "none";
+    deleteButton.style.background = "none";
+    deleteButton.style.border = "none";
+    deleteButton.style.cursor = "pointer";
+    deleteButton.style.padding = "2px";
+    deleteButton.style.fontSize = "12px";
+
+    deleteButton.addEventListener("click", async (e) => {
+      e.stopPropagation(); // Evita que se active la edición al eliminar
+
+      if (confirm("¿Estás seguro de que deseas eliminar este evento?")) {
+        try {
+          await deleteFromAirtable(record.id);
+          eventElement.remove();
+        } catch (error) {
+          alert("Error al eliminar el evento. Por favor, intenta nuevamente.");
+        }
+      }
+    });
+
+    // Crear botón de modificar
+    const editButton = document.createElement("button");
+    editButton.className = "edit-event";
+    editButton.innerHTML = "✏️";
+    editButton.style.display = editMode ? "block" : "none";
+    editButton.style.background = "none";
+    editButton.style.border = "none";
+    editButton.style.cursor = "pointer";
+    editButton.style.padding = "2px";
+    editButton.style.fontSize = "12px";
+
+    editButton.addEventListener("click", (e) => {
+      e.stopPropagation(); // Evita que se active la edición al hacer clic en el botón
+      editEvent(record.id, { fecha, hora, lugar, interprete });
+    });
+
+    // Agregar todos los elementos al contenedor del evento
     eventElement.appendChild(horaElement);
     eventElement.appendChild(lugarElement);
     eventElement.appendChild(interpreteElement);
+    eventElement.appendChild(deleteButton);
+    eventElement.appendChild(editButton);
 
+    // Aplicar estilos personalizados
     aplicarEstilos(eventElement, horaElement, lugarElement, interpreteElement);
 
-    if (editMode) {
-      eventElement.addEventListener("click", () => {
-        editEvent(record.id, { fecha, hora, lugar, interprete });
-      });
-    }
-
+    // Insertar el evento en el día correspondiente
     const addBlock = dayElement.querySelector(".add-event");
     if (addBlock) {
       dayElement.insertBefore(eventElement, addBlock);
@@ -152,7 +209,104 @@ function displayEvents(records) {
     }
   });
 }
+async function editEvent(recordId, eventData) {
+  const { fecha, hora, lugar, interprete } = eventData;
 
+  const lugares = await obtenerOpcionesLugares();
+  const interpretes = await obtenerOpcionesInterpretes();
+
+  const overlay = document.createElement("div");
+  overlay.className = "modal-overlay";
+
+  const modal = document.createElement("div");
+  modal.className = "modal-content";
+
+  modal.innerHTML = `
+      <h3>Editar Evento</h3>
+      <label for="lugar-select">Lugar:</label>
+      <select id="lugar-select" size="5"></select>
+      <label for="interprete-select">Intérprete(s):</label>
+      <select id="interprete-select" multiple size="5"></select>
+      <div class="modal-buttons">
+          <button id="guardar-btn">Guardar Cambios</button>
+          <button id="cancelar-btn">Cancelar</button>
+      </div>
+  `;
+
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+
+  // Pasar la hora actual del evento
+  const { container: horaContainer, getHoraFinal } = crearBotonesHora(hora);
+  const lugarLabel = modal.querySelector('label[for="lugar-select"]');
+  modal.insertBefore(horaContainer, lugarLabel);
+  const lugarSelect = modal.querySelector("#lugar-select");
+  const interpreteSelect = modal.querySelector("#interprete-select");
+
+  // Poblar opciones de lugar
+  lugares.forEach((l) => {
+    const option = document.createElement("option");
+    option.value = l;
+    option.textContent = l;
+    if (l === lugar) option.selected = true; // Seleccionar el lugar actual
+    lugarSelect.appendChild(option);
+  });
+
+  // Poblar opciones de intérpretes
+  interpretes.forEach((i) => {
+    const option = document.createElement("option");
+    option.value = i;
+    option.textContent = i;
+    if (interprete.includes(i)) option.selected = true; // Seleccionar intérpretes actuales
+    interpreteSelect.appendChild(option);
+  });
+
+  const guardarBtn = modal.querySelector("#guardar-btn");
+  const cancelarBtn = modal.querySelector("#cancelar-btn");
+
+  guardarBtn.addEventListener("click", async () => {
+    try {
+      const hora = getHoraFinal();
+      const lugarValue = lugarSelect.value;
+      if (!lugarValue) {
+        alert("Debe seleccionar un lugar.");
+        return;
+      }
+
+      const interpretesSeleccionados = Array.from(
+        interpreteSelect.selectedOptions
+      ).map((opt) => opt.value);
+
+      if (!interpretesSeleccionados.length) {
+        alert("Debe seleccionar al menos un intérprete.");
+        return;
+      }
+
+      const fields = {
+        fecha,
+        hora,
+        lugar: lugarValue,
+        interprete: interpretesSeleccionados,
+      };
+
+      const resultado = await saveToAirtable(recordId, fields);
+
+      if (resultado) {
+        console.log("Evento actualizado exitosamente:", resultado);
+        document.body.removeChild(overlay);
+        // Recargar el mes actual después de guardar
+        await setMonth(currentMonth);
+      }
+    } catch (error) {
+      console.error("Error al actualizar el evento:", error);
+      alert("Error al actualizar el evento. Por favor, intenta nuevamente.");
+    }
+  });
+
+  cancelarBtn.addEventListener("click", () => {
+    document.body.removeChild(overlay);
+  });
+}
 /**
  * Aplica estilos de color según lugar, intérprete y hora
  */
@@ -225,11 +379,6 @@ function aplicarEstilos(eventElement, horaEl, lugarEl, interpreteEl) {
   }
 }
 
-
-
-/**
- * Obtiene la lista de lugares desde Airtable
- */
 async function obtenerOpcionesLugares() {
   try {
     const response = await fetch(
@@ -260,9 +409,6 @@ async function obtenerOpcionesLugares() {
   }
 }
 
-/**
- * Obtiene la lista de intérpretes desde Airtable
- */
 async function obtenerOpcionesInterpretes() {
   try {
     const response = await fetch(
@@ -297,10 +443,7 @@ async function obtenerOpcionesInterpretes() {
   }
 }
 
-/**
- * Crea botones para la hora
- */
-function crearBotonesHora() {
+function crearBotonesHora(horaInicial = "08:00") {
   const container = document.createElement("div");
 
   const title = document.createElement("h4");
@@ -314,20 +457,10 @@ function crearBotonesHora() {
   horasDiv.style.flexWrap = "wrap";
   horasDiv.style.gap = "4px";
 
-  let horaSeleccionada = "08";
-  let minSeleccionado = "00";
-
-  // Agregar la opción "00" primero
-  const btn00 = document.createElement("button");
-  btn00.type = "button";
-  btn00.textContent = "00";
-  btn00.style.padding = "5px 8px";
-  btn00.style.marginBottom = "5px";
-  btn00.addEventListener("click", () => {
-    horaSeleccionada = "00";
-    actualizarEstilosBotones(horasDiv, btn00);
-  });
-  horasDiv.appendChild(btn00);
+  // Inicializar con la hora proporcionada
+  const [horaInicialStr, minInicialStr] = horaInicial.split(":");
+  let horaSeleccionada = horaInicialStr || "08";
+  let minSeleccionado = minInicialStr || "00";
 
   for (let h = 8; h <= 23; h++) {
     const btn = document.createElement("button");
@@ -335,6 +468,15 @@ function crearBotonesHora() {
     btn.textContent = h.toString().padStart(2, "0");
     btn.style.padding = "5px 8px";
     btn.style.marginBottom = "5px";
+
+    // Seleccionar el botón correspondiente a la hora inicial
+    if (h.toString().padStart(2, "0") === horaSeleccionada) {
+      btn.style.backgroundColor = "yellow";
+      btn.style.color = "#000";
+    } else {
+      btn.style.backgroundColor = "#444";
+      btn.style.color = "#fff";
+    }
 
     btn.addEventListener("click", () => {
       horaSeleccionada = h.toString().padStart(2, "0");
@@ -357,6 +499,16 @@ function crearBotonesHora() {
     btn.textContent = m;
     btn.style.padding = "5px 8px";
     btn.style.marginBottom = "5px";
+
+    // Seleccionar el botón correspondiente a los minutos iniciales
+    if (m === minSeleccionado) {
+      btn.style.backgroundColor = "yellow";
+      btn.style.color = "#000";
+    } else {
+      btn.style.backgroundColor = "#444";
+      btn.style.color = "#fff";
+    }
+
     btn.addEventListener("click", () => {
       minSeleccionado = m;
       actualizarEstilosBotones(minsDiv, btn);
@@ -381,22 +533,14 @@ function crearBotonesHora() {
   return { container, getHoraFinal };
 }
 
-/**
- * Modal para crear un nuevo evento
- */
-// ... (mantener las constantes y funciones anteriores hasta promptNewEvent)
-
-/**
- * Modal para crear un nuevo evento
- */
 async function promptNewEvent(dayElement) {
   const fecha = dayElement.dataset.date;
   if (!fecha) {
-      console.error('No se encontró fecha en el elemento del día');
-      return;
+    console.error("No se encontró fecha en el elemento del día");
+    return;
   }
 
-  console.log('Creando evento para fecha:', fecha); // Debug
+  console.log("Creando evento para fecha:", fecha); // Debug
 
   const lugares = await obtenerOpcionesLugares();
   const interpretes = await obtenerOpcionesInterpretes();
@@ -431,143 +575,194 @@ async function promptNewEvent(dayElement) {
 
   // Poblar opciones de lugar
   lugares.forEach((l) => {
-      const option = document.createElement("option");
-      option.value = l;
-      option.textContent = l;
-      lugarSelect.appendChild(option);
+    const option = document.createElement("option");
+    option.value = l;
+    option.textContent = l;
+    lugarSelect.appendChild(option);
   });
 
   // Poblar opciones de intérpretes
   interpretes.forEach((i) => {
-      const option = document.createElement("option");
-      option.value = i;
-      option.textContent = i;
-      interpreteSelect.appendChild(option);
+    const option = document.createElement("option");
+    option.value = i;
+    option.textContent = i;
+    interpreteSelect.appendChild(option);
   });
 
   const guardarBtn = modal.querySelector("#guardar-btn");
   const cancelarBtn = modal.querySelector("#cancelar-btn");
 
   guardarBtn.addEventListener("click", async () => {
-      try {
-          const hora = getHoraFinal();
-          const lugarValue = lugarSelect.value;
-          if (!lugarValue) {
-              alert("Debe seleccionar un lugar.");
-              return;
-          }
-
-          const interpretesSeleccionados = Array.from(
-              interpreteSelect.selectedOptions
-          ).map((opt) => opt.value);
-
-          if (!interpretesSeleccionados.length) {
-              alert("Debe seleccionar al menos un intérprete.");
-              return;
-          }
-
-          console.log('Guardando evento con datos:', { // Debug
-              fecha,
-              hora,
-              lugar: lugarValue,
-              interprete: interpretesSeleccionados
-          });
-
-          const fields = {
-              fecha,
-              hora,
-              lugar: lugarValue,
-              interprete: interpretesSeleccionados,
-          };
-
-          const resultado = await saveToAirtable(null, fields);
-          
-          if (resultado) {
-              console.log('Evento guardado exitosamente:', resultado); // Debug
-              document.body.removeChild(overlay);
-              // Recargar el mes actual después de guardar
-              await setMonth(currentMonth);
-          }
-      } catch (error) {
-          console.error('Error al guardar el evento:', error);
-          alert('Error al guardar el evento. Por favor, intenta nuevamente.');
+    try {
+      const hora = getHoraFinal();
+      const lugarValue = lugarSelect.value;
+      if (!lugarValue) {
+        alert("Debe seleccionar un lugar.");
+        return;
       }
+
+      const interpretesSeleccionados = Array.from(
+        interpreteSelect.selectedOptions
+      ).map((opt) => opt.value);
+
+      if (!interpretesSeleccionados.length) {
+        alert("Debe seleccionar al menos un intérprete.");
+        return;
+      }
+
+      console.log("Guardando evento con datos:", {
+        // Debug
+        fecha,
+        hora,
+        lugar: lugarValue,
+        interprete: interpretesSeleccionados,
+      });
+
+      const fields = {
+        fecha,
+        hora,
+        lugar: lugarValue,
+        interprete: interpretesSeleccionados,
+      };
+
+      const resultado = await saveToAirtable(null, fields);
+
+      if (resultado) {
+        console.log("Evento guardado exitosamente:", resultado); // Debug
+        document.body.removeChild(overlay);
+        // Recargar el mes actual después de guardar
+        await setMonth(currentMonth);
+      }
+    } catch (error) {
+      console.error("Error al guardar el evento:", error);
+      alert("Error al guardar el evento. Por favor, intenta nuevamente.");
+    }
   });
 
   cancelarBtn.addEventListener("click", () => {
-      document.body.removeChild(overlay);
+    document.body.removeChild(overlay);
   });
 }
 
-/**
-* Guarda en Airtable
-*/
+async function deleteFromAirtable(recordId) {
+  const url = `https://api.airtable.com/v0/${BASE_ID}/${TABLE_NAME}/${recordId}`;
+  
+  try {
+    console.log('Eliminando registro:', recordId);
+    
+    const response = await fetch(url, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${AIRTABLE_TOKEN}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      const errorDetails = await response.json();
+      throw new Error(`Error al eliminar: ${response.status} - ${errorDetails.error?.message || 'Error desconocido'}`);
+    }
+
+    const data = await response.json();
+    console.log('Evento eliminado exitosamente:', data);
+    return data;
+  } catch (error) {
+    console.error('Error en deleteFromAirtable:', error);
+    throw error;
+  }
+}
+
+
 async function saveToAirtable(recordId, fields) {
   const url = recordId
-      ? `https://api.airtable.com/v0/${BASE_ID}/${TABLE_NAME}/${recordId}`
-      : `https://api.airtable.com/v0/${BASE_ID}/${TABLE_NAME}`;
+    ? `https://api.airtable.com/v0/${BASE_ID}/${TABLE_NAME}/${recordId}`
+    : `https://api.airtable.com/v0/${BASE_ID}/${TABLE_NAME}`;
 
   const method = recordId ? "PATCH" : "POST";
   const body = { fields };
 
   try {
-      console.log('Enviando solicitud a Airtable:', { // Debug
-          url,
-          method,
-          body: JSON.stringify(body)
-      });
+    console.log("Enviando solicitud a Airtable:", {
+      // Debug
+      url,
+      method,
+      body: JSON.stringify(body),
+    });
 
-      const response = await fetch(url, {
-          method,
-          headers: {
-              'Authorization': `Bearer ${AIRTABLE_TOKEN}`,
-              'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(body)
-      });
+    const response = await fetch(url, {
+      method,
+      headers: {
+        Authorization: `Bearer ${AIRTABLE_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
 
-      if (!response.ok) {
-          const errorDetails = await response.json();
-          console.error('Error en la respuesta de Airtable:', errorDetails);
-          throw new Error(`Error en la solicitud a Airtable: ${response.status} - ${errorDetails.error?.message || 'Error desconocido'}`);
-      }
+    if (!response.ok) {
+      const errorDetails = await response.json();
+      console.error("Error en la respuesta de Airtable:", errorDetails);
+      throw new Error(
+        `Error en la solicitud a Airtable: ${response.status} - ${
+          errorDetails.error?.message || "Error desconocido"
+        }`
+      );
+    }
 
-      const data = await response.json();
-      console.log('Respuesta exitosa de Airtable:', data);
-      return data;
+    const data = await response.json();
+    console.log("Respuesta exitosa de Airtable:", data);
+    return data;
   } catch (error) {
-      console.error('Error en saveToAirtable:', error);
-      throw error;
+    console.error("Error en saveToAirtable:", error);
+    throw error;
   }
 }
-
 
 /*Inicializa el calendario y navegacion de meses*/
 document.addEventListener("DOMContentLoaded", () => {
   const monthsList = document.getElementById("months-list");
   const monthItems = monthsList.querySelectorAll("li");
-  
+
   monthItems.forEach((item) => {
     item.replaceWith(item.cloneNode(true));
   });
 
   document.querySelectorAll("#months-list li").forEach((item, index) => {
     item.addEventListener("click", () => {
-      document.querySelectorAll("#months-list li").forEach(li => li.classList.remove("active"));
+      document
+        .querySelectorAll("#months-list li")
+        .forEach((li) => li.classList.remove("active"));
       item.classList.add("active");
       setMonth(index);
     });
   });
 
   setMonth(0);
-  document.querySelector("#months-list li[data-month='0']").classList.add("active");
+  document
+    .querySelector("#months-list li[data-month='0']")
+    .classList.add("active");
 
   const editBtn = document.querySelector("#edit-btn");
   if (editBtn) {
     editBtn.addEventListener("click", () => {
       editMode = !editMode;
       editBtn.textContent = `Editar (${editMode ? "ON" : "OFF"})`;
+
+      // Mostrar u ocultar todos los botones de eliminar
+      document.querySelectorAll(".delete-event").forEach((button) => {
+        button.style.display = editMode ? "block" : "none";
+      });
     });
     editBtn.textContent = "Editar (OFF)";
   }
 });
+
+const style = document.createElement("style");
+style.textContent = `
+  .event {
+    position: relative;
+  }
+  .delete-event:hover {
+    transform: scale(1.2);
+  }
+`;
+document.head.appendChild(style);
