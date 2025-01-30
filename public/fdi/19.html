@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Mis Proyectos Personales</title>
   <style>
+    /* Estilos básicos */
     body {
       margin: 0;
       font-family: sans-serif;
@@ -85,23 +86,31 @@
     #add-line-btn {
       left: 130px;
     }
+
+    /* Nuevo estilo para el título editable */
+    .project-title {
+      cursor: pointer;
+      padding: 2px 4px;
+      border-radius: 4px;
+    }
+    .project-title:hover {
+      background: #e0e9f7;
+    }
   </style>
 </head>
 <body>
   <div id="board">
-    <button id="new-card-btn">Nueva Tarjeta</button>
-    <button id="add-line-btn">Agregar Flecha</button>
-    <svg id="lines-layer" xmlns="http://www.w3.org/2000/svg"></svg>
+    <!-- Se inyectará dinámicamente el botón "Nueva Tarjeta", "Agregar Flecha" y el <svg> -->
   </div>
 
   <script>
     /**************************************************************
      *  CONFIG BÁSICA
      **************************************************************/
-     const AIRTABLE_TOKEN =
-     "patuKKtlyfqvVNCpc.25468d0bda6badcfd90c84a03a681fc462c0b66b57b964eddb0449b24134a45e";
-   const BASE_ID = "appPGVN4sDJ0aTrSb";
-// <-- Reemplaza con el ID de tu base
+    const AIRTABLE_TOKEN =
+      "patuKKtlyfqvVNCpc.25468d0bda6badcfd90c84a03a681fc462c0b66b57b964eddb0449b24134a45e";
+    const BASE_ID = "appPGVN4sDJ0aTrSb";
+    // <-- Reemplaza con el ID de tu base según sea necesario
 
     // Nombres de las tablas
     const TABLE_PROJECTS = "19";             // Ajusta si es exactamente "19"
@@ -119,7 +128,7 @@
     let lines = [];
 
     /**************************************************************
-     * 1. Cargar registros y crear tarjetas
+     * 1. Cargar registros y agrupar por "Project"
      **************************************************************/
     async function loadAndGroupRecords() {
       const resp = await fetch(PROJECTS_ENDPOINT, {
@@ -135,21 +144,26 @@
       const grouped = {};
       for (const record of data.records) {
         const project = record.fields.Project;
-        if (!project) continue; 
+        if (!project) continue;
         if (!grouped[project]) grouped[project] = [];
         grouped[project].push(record);
       }
       return grouped;
     }
 
+    /**************************************************************
+     * 2. Crear tarjetas a partir de los grupos
+     *    (incluye edición de título de proyecto)
+     **************************************************************/
     function createCardsFromGroups(grouped) {
       const board = document.getElementById("board");
-      // Limpiamos y reinsertamos la capa <svg>
+      // Limpiamos e insertamos el contenido básico del board:
       board.innerHTML = `
         <button id="new-card-btn">Nueva Tarjeta</button>
         <button id="add-line-btn">Agregar Flecha</button>
         <svg id="lines-layer" xmlns="http://www.w3.org/2000/svg"></svg>
       `;
+
       linesLayer = document.getElementById("lines-layer");
 
       // Botones
@@ -159,11 +173,11 @@
       const addLineBtn = document.getElementById("add-line-btn");
       addLineBtn.addEventListener("click", handleAddLineClick);
 
-      // Crear tarjetas
+      // Recorrer cada grupo (cada proyecto)
       for (const projectValue in grouped) {
         const records = grouped[projectValue];
 
-        // Buscar un "principal" para x/y
+        // Buscar un registro "principal" para x/y y nombre
         let mainRecord = null;
         for (const r of records) {
           if (r.fields.Name && r.fields.Name.indexOf(projectValue) === 0) {
@@ -179,9 +193,10 @@
         const x = mainRecord.fields.PositionX || 100;
         const y = mainRecord.fields.PositionY || 100;
         const mainName = mainRecord.fields.Name || `Proyecto ${projectValue}`;
-        // Tareas / ítems
+        // Filtramos los registros que contengan Task
         const taskRecords = records.filter(r => r.fields.Task);
 
+        // Creamos la tarjeta
         const card = document.createElement("div");
         card.className = "project-card";
         card.style.left = x + "px";
@@ -189,9 +204,11 @@
         card.dataset.mainRecordId = mainRecord.id;
         card.dataset.projectValue = projectValue;
 
+        // Contenido HTML de la tarjeta (cabecera y lista de tareas)
         let html = `
           <div class="project-header">
-            <span>${mainName}</span>
+            <!-- Título editable -->
+            <span class="project-title" title="Clic para editar">${mainName}</span>
             <button class="delete-project-btn" title="Eliminar todo el proyecto">X</button>
           </div>
         `;
@@ -203,12 +220,24 @@
         }
         html += `<button class="add-task-btn">+ Agregar Ítem</button>`;
         card.innerHTML = html;
+
+        // Insertamos en el board
         board.appendChild(card);
 
-        // Drag & drop
+        // Evento para editar el título (clic en .project-title)
+        const titleSpan = card.querySelector(".project-title");
+        titleSpan.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          const newTitle = prompt("Editar título del proyecto:", mainName);
+          if (newTitle !== null && newTitle !== mainName) {
+            await updateProjectTitle(mainRecord.id, newTitle, projectValue);
+          }
+        });
+
+        // Habilitar drag & drop de la tarjeta
         enableCardDrag(card, mainRecord.id);
 
-        // Insertar ítems
+        // Configurar lista de tareas
         const ul = card.querySelector(".project-task-list");
         if (ul) {
           for (const tRec of taskRecords) {
@@ -222,6 +251,7 @@
             ul.appendChild(li);
           }
         }
+
         // Botón de agregar ítem
         const addBtn = card.querySelector(".add-task-btn");
         addBtn.addEventListener("click", () => {
@@ -239,19 +269,52 @@
       }
     }
 
-    function autoShortenLinks(text) {
-      if (!text) return "";
-      const urlRegex = /(https?:\/\/[^\s]+)/g;
-      return text.replace(urlRegex, `<a href="$1" target="_blank">enlace</a>`);
+    /**************************************************************
+     * 2.B. Funciones auxiliares para la edición del título
+     **************************************************************/
+    async function updateProjectTitle(recordId, newTitle, projectValue) {
+      try {
+        const payload = {
+          records: [
+            {
+              id: recordId,
+              fields: {
+                Name: newTitle,
+                Project: projectValue // mantenemos el valor original de Project
+              }
+            }
+          ]
+        };
+
+        const resp = await fetch(PROJECTS_ENDPOINT, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${AIRTABLE_TOKEN}`
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!resp.ok) {
+          const error = await resp.json();
+          throw new Error(error.error?.message || "Error al actualizar título");
+        }
+
+        // Recargamos la vista
+        await reloadView();
+      } catch (error) {
+        console.error("Error al actualizar título:", error);
+        alert("Error al actualizar título: " + error.message);
+      }
     }
 
     /**************************************************************
-     * 2. Crear / editar / eliminar PROYECTO y TAREAS
+     * 3. Crear / editar / eliminar PROYECTO y TAREAS
      **************************************************************/
     async function handleNewCardClick() {
       const projectName = prompt("Nombre del nuevo proyecto:");
       if (!projectName) return;
-      // Creamos un registro principal con Name = projectName y Project = projectName
+      // Creamos un registro principal con Name=projectName y Project=projectName
       const payload = {
         records: [
           {
@@ -288,8 +351,6 @@
             fields: {
               Project: projectValue,
               Task: taskText
-              // Notar que no ponemos Name para este registro, 
-              // pues será un ítem y no la 'cabeza' del proyecto
             }
           }
         ]
@@ -333,7 +394,7 @@
     // + Eliminar flechas asociadas
     async function deleteEntireProject(projectValue) {
       try {
-        // 1) Obtener todos los records de la tabla '19' que tengan Project=projectValue
+        // 1) Obtener todos los records de la tabla "19" que tengan Project=projectValue
         let projectRecordIds = [];
         {
           const queryUrl = PROJECTS_ENDPOINT + `?filterByFormula=${encodeURIComponent(`{Project}='${projectValue}'`)}`;
@@ -346,19 +407,9 @@
           }
         }
 
-        // 2) Obtener todos los records de 'flechas de 19' cuyo FromRecordId o ToRecordId esté en projectRecordIds
+        // 2) Obtener todos los records de "flechas de 19" cuyo FromRecordId o ToRecordId coincida
         let flechaIdsToDelete = [];
         if (projectRecordIds.length > 0) {
-          // Para simplificar, haremos 2 queries:
-          const orClauses = projectRecordIds.map(id => `OR({FromRecordId}='${id}', {ToRecordId}='${id}')`).join(",");
-          // NOTA: en Airtable no se puede hacer "or(X,Y)" secuencial sin algo de cuidado,
-          // podríamos usar "OR( {FromRecordId}='xxx', {FromRecordId}='yyy', ... )", etc.
-
-          // Limitación: filterByFormula con OR/AND masivo. Para no complicar, eliminaremos en 2 pasos:
-          // - Buscar flechas con FromRecordId en la lista
-          // - Buscar flechas con ToRecordId en la lista
-          // y unimos IDs.
-
           // A) Flechas con FromRecordId en la lista
           for (const oneId of projectRecordIds) {
             const queryUrlF = FLECHAS_ENDPOINT + `?filterByFormula=${encodeURIComponent(`{FromRecordId}='${oneId}'`)}`;
@@ -368,7 +419,6 @@
               flechaIdsToDelete.push(...dF.records.map(r => r.id));
             }
           }
-
           // B) Flechas con ToRecordId en la lista
           for (const oneId of projectRecordIds) {
             const queryUrlT = FLECHAS_ENDPOINT + `?filterByFormula=${encodeURIComponent(`{ToRecordId}='${oneId}'`)}`;
@@ -378,14 +428,12 @@
               flechaIdsToDelete.push(...dT.records.map(r => r.id));
             }
           }
-
           // Quitar duplicados
           flechaIdsToDelete = [...new Set(flechaIdsToDelete)];
         }
 
-        // 3) Eliminar las flechas encontradas
+        // 3) Eliminar flechas encontradas
         if (flechaIdsToDelete.length > 0) {
-          // DELETE /records[]=id1&records[]=id2
           const params = flechaIdsToDelete.map(id => `records[]=${id}`).join("&");
           const url = `${FLECHAS_ENDPOINT}?${params}`;
           const respDelF = await fetch(url, {
@@ -397,7 +445,6 @@
 
         // 4) Eliminar los records del proyecto
         if (projectRecordIds.length > 0) {
-          // Igual que arriba
           const params = projectRecordIds.map(id => `records[]=${id}`).join("&");
           const url = `${PROJECTS_ENDPOINT}?${params}`;
           const respDelP = await fetch(url, {
@@ -416,15 +463,22 @@
       }
     }
 
+    function autoShortenLinks(text) {
+      if (!text) return "";
+      const urlRegex = /(https?:\/\/[^\s]+)/g;
+      // Remplazamos cualquier enlace por <a href="...">enlace</a>
+      return text.replace(urlRegex, `<a href="$1" target="_blank">enlace</a>`);
+    }
+
     /**************************************************************
-     * 3. Drag & drop de las tarjetas
+     * 4. Drag & drop de las tarjetas
      **************************************************************/
     function enableCardDrag(cardEl, recordId) {
       let offsetX = 0, offsetY = 0;
       let isDragging = false;
 
       cardEl.addEventListener("mousedown", e => {
-        // Si estamos en modo "crear flecha", no movemos
+        // Si estamos en modo "crear flecha", no movemos la tarjeta
         if (isCreatingLine) return;
         isDragging = true;
         offsetX = e.clientX - cardEl.offsetLeft;
@@ -477,7 +531,7 @@
     }
 
     /**************************************************************
-     * 4. Flechas
+     * 5. Flechas
      **************************************************************/
     async function loadFlechasAndDraw() {
       linesLayer.innerHTML = "";
@@ -520,7 +574,7 @@
         linesLayer.appendChild(lineEl);
         linesLayer.appendChild(textEl);
 
-        // Clic en la línea => eliminar
+        // Clic en la línea => eliminar flecha
         lineEl.addEventListener("click", e => {
           e.stopPropagation();
           if (confirm("¿Eliminar esta flecha?")) {
@@ -528,7 +582,7 @@
           }
         });
 
-        // Clic en el texto => editar
+        // Clic en el texto => editar texto de flecha
         textEl.addEventListener("click", e => {
           e.stopPropagation();
           const newLabel = prompt("Editar texto de la flecha:", label);
@@ -537,6 +591,7 @@
           }
         });
 
+        // Guardamos referencia
         lines.push({ arrowRecordId, fromId, toId, label, lineEl, textEl });
       }
 
@@ -566,7 +621,7 @@
     }
 
     /**************************************************************
-     * 5. Funciones auxiliares para flechas
+     * 6. Auxiliares flechas
      **************************************************************/
     function findCardByMainRecordId(rid) {
       return document.querySelector(`.project-card[data-main-record-id="${rid}"]`);
@@ -579,7 +634,6 @@
         y: rect.top + (rect.height / 2) - boardRect.top
       };
     }
-
     function ensureArrowMarker() {
       if (!document.getElementById("arrowheadMid")) {
         const defsEl = document.createElementNS("http://www.w3.org/2000/svg", "defs");
@@ -660,7 +714,7 @@
     }
 
     /**************************************************************
-     * 6. Modo CREAR FLECHA
+     * 7. Modo CREAR FLECHA
      **************************************************************/
     function handleAddLineClick() {
       isCreatingLine = !isCreatingLine;
@@ -702,7 +756,7 @@
     });
 
     /**************************************************************
-     * 7. INIT
+     * 8. INIT: cargar y mostrar
      **************************************************************/
     (async function init() {
       const grouped = await loadAndGroupRecords();
