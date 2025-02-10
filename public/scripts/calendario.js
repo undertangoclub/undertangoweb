@@ -48,15 +48,28 @@ function createCalendarDays(calendarGrid, year, month) {
       "0"
     )}-${String(day).padStart(2, "0")}`;
 
+    // Obtener el día de la semana (0: Domingo, 1: Lunes, etc.)
+    const dayOfWeek = new Date(year, month, day).getDay();
+    const dayName = weekMap[dayOfWeek];
+
+    // Crear el label del día de la semana
+    const dayWeekLabel = document.createElement("div");
+    dayWeekLabel.className = "day-week-label";
+    dayWeekLabel.textContent = dayName;
+
+    // Crear el número del día
     const dayNumber = document.createElement("div");
     dayNumber.className = "day-number";
     dayNumber.textContent = day;
 
+    // Crear el bloque para agregar eventos
     const addEventBlock = document.createElement("div");
     addEventBlock.className = "event add-event";
     addEventBlock.textContent = "+ Agregar evento";
     addEventBlock.addEventListener("click", () => promptNewEvent(dayElement));
 
+    // Agregar elementos al día
+    dayElement.appendChild(dayWeekLabel);
     dayElement.appendChild(dayNumber);
     dayElement.appendChild(addEventBlock);
     calendarGrid.appendChild(dayElement);
@@ -742,7 +755,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  setMonth(0);
+  setMonth(1);
   document
     .querySelector("#months-list li[data-month='0']")
     .classList.add("active");
