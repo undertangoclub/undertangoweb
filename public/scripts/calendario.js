@@ -334,6 +334,12 @@ function aplicarEstilos(eventElement, horaEl, lugarEl, interpreteEl) {
   } else if (lugarTexto === "reunión marketing") {
     lugarEl.style.backgroundColor = "violet";
     lugarEl.style.color = "black";
+  } else if (lugarTexto === "melia-especial") {
+    lugarEl.style.backgroundColor = "violet";
+    lugarEl.style.color = "black";
+  } else if (lugarTexto === "clases") {
+    lugarEl.style.backgroundColor = "green";
+    lugarEl.style.color = "black";
   }
 
   // INTÉRPRETE
